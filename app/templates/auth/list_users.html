@@ -1,0 +1,84 @@
+
+{% extends 'layout.html' %}
+{% from 'helpers/_forms.html' import render_field %}
+{% block estilos %}
+
+{% endblock%}
+{% block container %}
+
+<main>
+{% if current_user.nivel == "corimon" or current_user.nivel=="administrador" %}
+<section class="mt-4 row d-flex justify-content-center">
+<div class="mt-4 row d-flex justify-content-center ">
+<a href="{{ url_for('.registroUsuario')}}" class="boton col-4 mx-3" style="text-align: center; font-weight: 500;">Registrar usuario <i class="bi bi-person-bounding-box"></i></i> </a>
+</div>
+</section>
+{% endif %}
+
+<div class="container mt-4 table-responsive" style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); padding: 20px 20px 20px 20px; border-radius: 7px;">  
+    <table id="example" class="display cell-border" style="width:100%">
+        <thead>
+            <tr>
+                <th>RIF</th>
+                <th>Usuario</th>
+                <th>Correo Electronico</th>
+                <th>Zona</th>
+                <th>Nivel</th>
+                <th>Codigo</th>
+                <th>Detalles</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+           
+            <tr class="celda text-center" onclick="location.href='{{ url_for('.usuario', rif=user.rif)}}'"; style="cursor:pointer;" data-toggle="tooltip" data-placement="top" title="Click para mas detalles">
+                
+                <td>{{user.rif}}</td>
+                <td>{{user.username}}</td>
+                <td>{{user.email}}</td>
+                <td>{{user.zona }}</td>
+                <td>{{user.nivel}}</td>
+                <td>{{user.codigo}}</td>
+                <td class="td-container">
+                    <a href="{{ url_for('.usuario', rif=user.rif)}}" class="btn detalles" style="border:2px solid rgb(10, 10, 10);">
+                        Detalles
+                    </a>                   
+                </td>
+            </tr>
+        
+            {% endfor %}
+        </tbody>
+
+        <tfoot>
+            <tr>
+                <th>RIF</th>
+                <th>Usuario</th>
+                <th>Correo Electronico</th>
+                <th>Zona</th>
+                <th>Nivel</th>
+                <th>Codigo</th>
+                <th>Detalles</th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+</main>
+
+{% endblock %}
+
+{% block js%}
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>  
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script> 
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>  
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>  
+<script src="https://cdn.datatables.net/1.10.22/js/dataTables.bulma.min.js"></script> 
+<script>  
+  $(document).ready(function () {
+    $('#example').DataTable();
+});
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
+
+{% endblock %}

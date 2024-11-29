@@ -1,0 +1,4 @@
+env/
+wsgi.py
+respaldos/
+test_connect
