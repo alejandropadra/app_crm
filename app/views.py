@@ -3,11 +3,11 @@ from flask import render_template, request, flash, redirect, url_for, abort
 from werkzeug.utils import secure_filename
 from flask import jsonify
 from flask_login import login_user,logout_user,login_required, current_user
-from .forms import LoginForm, RegisterForm, RegistroPagoForm,EditForm,PerfilForm,ContactForm, Retenciones
+#from .forms import LoginForm, RegisterForm, RegistroPagoForm,EditForm,PerfilForm,ContactForm, Retenciones
 from .models import User, Cobranza
 from . import login_manager
 from .consts import *
-from .email import welcome_mail, pago_crm_mail, pago_mail, comprobante_mail, comprobante_crm_mail, pago_iva_mail,pago_iva_crm_mail
+#from .email import welcome_mail, pago_crm_mail, pago_mail, comprobante_mail, comprobante_crm_mail, pago_iva_mail,pago_iva_crm_mail
 from flask import session
 from datetime import datetime
 #from .promo import participantes
@@ -25,13 +25,23 @@ import os
 local_adj = 'app\\static\\adj\\{}'
 server_adj = 'app/static/adj/{}'
 
-user_fuente = U_FUENTE
-contra_fuente = C_FUENTE
-ip_fuente = URL_FUENTE
+#user_fuente = U_FUENTE
+#contra_fuente = C_FUENTE
+#ip_fuente = URL_FUENTE
 
 #sdfsdf
 page = Blueprint('page', __name__)
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
+@page.route("/")
+def index():
+
+    return render_template("/Dasboaard.html",titulo = "Inicio")
+
+
+"""
 @login_manager.user_loader
 def load_user(rif):
     return User.get_by_rif(rif)
@@ -157,11 +167,8 @@ def usuario(rif):
         mensaje = USER_EDIT
         flash(mensaje)
     return render_template("auth/edit_user.html",titulo="Info usuario", form=edit_form)
+"""
 
-@page.route("/")
-def index():
-
-    return render_template("/landing/index.html",titulo = "Inicio")
 
 
 

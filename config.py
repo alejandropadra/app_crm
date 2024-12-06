@@ -1,4 +1,4 @@
-server = 'mysql://user:pass@localhost/nombre_db'
+server = 'mysql://Di:DiIoT4.0@localhost/app_MGR'
 
 class Config:
     SECRET_KEY = 'codigo_secreto'

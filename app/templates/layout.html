@@ -1,367 +1,94 @@
-{% extends 'bootstrap/base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My App{% endblock %}</title>
+    <!--Estilos Tailwind -->
+    <link href="{{ url_for('static', filename='css/output.css') }}" rel="stylesheet">
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/estilos.css') }}">
+    <!----===== Iconscout CSS ===== -->
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+    <!--Iconos de Google Fonts-->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp" rel="stylesheet" />
+</head>
+<body>
+    <div class=" grid grid-cols-[16rem_auto]">
 
-{% block title %}
-{{titulo}}
-{% endblock %}
+      <aside class=" min-h-screen bg-[#5193be] p-[16px] flex flex-col items-center" style=" box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;">
+        <div>
+          <h1 class=" text-2xl font-bold text-white "> Logo</h1>
+        </div>
 
-{% block metas %}
-<meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-{% endblock %}
+        <ul class="nav-links list-none p-5">
+          <li><a href="#" class="p-5 flex gap-2 text-lg text-white font-semibold">
+              <i class="uil uil-estate"></i>
+              <span class="link-name">Dahsboard</span>
+          </a></li>
+          <li><a href="#" class="p-5 flex gap-2 text-lg text-white font-semibold" >
+              <i class="uil uil-files-landscapes"></i>
+              <span class="link-name">Content</span>
+          </a></li>
+          <li><a href="#" class="p-5 flex gap-2 text-lg text-white font-semibold">
+              <i class="uil uil-chart"></i>
+              <span class="link-name">Analytics</span>
+          </a></li>
+          <li><a href="#" class="p-5 flex gap-2 text-lg text-white font-semibold">
+              <i class="uil uil-thumbs-up"></i>
+              <span class="link-name">Like</span>
+          </a></li>
+          <li><a href="#" class="p-5 flex gap-2 text-lg text-white font-semibold">
+              <i class="uil uil-comments"></i>
+              <span class="link-name">Comment</span>
+          </a></li>
 
-{% block styles %}
-<!-- Bootstrap -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker3.standalone.min.css">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-<link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
+      </ul>
+      </aside>
+      <div class=" bg-white">
+        <nav class=" h-16 flex items-center px-6" style=" box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;">
+            
+          <ul class=" flex list-none items-center justify-between w-full"  >
+            <li><a href="">algo</a></li>
 
-<!-- Estilos personalizados -->
-<link rel="stylesheet" href="{{ url_for('static', filename = 'css/estilos.css') }}">
-
-<!-- Estilos de DataTables -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
-
-<!-- Iconos Bootstrap -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-
-<!-- Fontawesome -->
-<script src="https://kit.fontawesome.com/8a2f042b38.js" crossorigin="anonymous"></script>
-
-<!-- Favicon -->
-<link rel='icon' type='image/png' href="{{ url_for('static', filename = 'img/figura_corimonn.png') }}">
-{% block estilos %}
-
-{% endblock%}
-
-
-{% endblock %}
-{% block body %}
-{% block navbar %}
-<header>
-  <nav>
-      
-      <div class="logo d-flex align-items-center">
-          <a href="/"><img src="{{ url_for('static', filename = 'img/CRP.png') }}" alt="#"></a>
-
-
-      </div>
-      
-      <div class="contenedor_elementos d-none  d-none d-xl-block ">
-        {% if donde!="modulo" %}
-          <ul >
-            <li class="mx-4"><a class="{% if titulo == 'Dashboard' %} active {% endif %}"  href="{{ url_for('.dashboard')}}">Resumen</a></li>
-            <li class="mx-4 down position-relative"><a class="{% if titulo == 'reporte pago' %} active {% endif %}">Pagos</a>
-              <div class="dropdown-cont">
-                <div class="dropdown">
-                  <ul class="list-unstyled mb-0 ">
-                      <li class=""><a class="{% if titulo == 'reporte pago' %} active {% endif %}"  href="{{ url_for('.cobranza')}}">Registrar Pago</a>
-                      <li class=""><a  class="{% if titulo == 'Pedidos' %} active {% endif %}" href="{{ url_for('.cobranza_iva')}}" >Registrar Pago Iva</a></li>
-                    </li>
-                    <li class=""><a class="{% if titulo == 'Lista Cobranzas' %} active {% endif %}"  href="{{ url_for('.lista_cobranza')}}">Documentos Pendientes</a></li>
-                    <li class=""><a  class="{% if titulo == 'Pedidos' %} active {% endif %}" href="{{ url_for('.pagos_cobranza')}}" >Pagos Realizados</a></li>
-                    <li class=""><a  class="{% if titulo == 'Pedidos' %} active {% endif %}" href="{{ url_for('.historial')}}" >Historial</a></li>
-
-                  </ul>
-                </div>
-
-                
-              </div>
-            </li>
-
-
-
-            <li class="mx-4 down position-relative"><a class="{% if titulo == 'reporte pago' %} active {% endif %}" >Comprobantes de retención</a>
-              <div class="dropdown-cont">
-                <div class="dropdown">
-                  <ul class="list-unstyled mb-0 ">
-                    <li class=""><a href="{{ url_for('.retenciones')}}" class="{% if titulo == 'Pedidos' %} active {% endif %}" >Registrar</a></li>
-                    <li class=""><a href="{{ url_for('.certificados_pendientes')}}"  class="{% if titulo == 'Pedidos' %} active {% endif %}" >Facturas Pendientes</a></li>
-                    <li class=""><a href="{{ url_for('.ret_enviadas')}}"  class="{% if titulo == 'Pedidos' %} active {% endif %}" >Comprobantes Enviados</a></li>
-                  </ul>
-                </div>
-
-                
-              </div>
-            </li>
-            <li class="">
-              <a href="{{ url_for('.modulos')}} ">
-                <i class="fa fa-list-ul"></i>
-              </a>
-            </li>
+            <li> <a href=""> <span class="material-symbols-sharp">
+              account_circle
+              </span></a></li>
           </ul>
-          {% endif %}
-      </div>
-        
-      <div class="elementos_interac m-0 ">
-
-          {% if current_user.is_authenticated %}
-          <div class="user d-flex m-0">
-            {{current_user.username}} <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
-              <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
-              <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
-            </svg>
-            <i class="bi bi-caret-down-fill"></i>
-          
-          </div>
-          {% else %}
-          <ul class="">
-            <li class="active mx-1"><a href="/login" class="boton"> Inicio de Sesión </a></li> 
-        </ul>
-        {% endif %}  
-      </div>
-      <div class="sub-menu-wrap ">
-          <div class="sub-menu ">
-              <div class="user-info " >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="mx-3 mb-2" width="30" height="30" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
-                      <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
-                      <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
-                    </svg>
-                    
-                  <h3 class="fs-5">{{current_user.username}}</h3>
-              </div>
-              <hr>
-              {% if current_user.nivel != "cliente"%}
-              <a href="{{ url_for('.usuarios')}}" class="sub-menu-link">
-                  <i class="bi bi-pencil-square"></i>
-                  <p>Gestión de usuario</p>
-                  <span>></span>
-              </a>
-              {% endif %}
-              <a href="{{ url_for('.perfil')}}" class="sub-menu-link">
-                  <i class="bi bi-gear"></i>
-                  <p>Perfil</p>
-                  <span>></span>
-              </a>
-              <a href="" class="sub-menu-link">
-                  <i class="bi bi-question-circle"></i>
-                  <p>Ayuda</p>
-                  <span>></span>
-              </a>
-              <a href="{{ url_for('.logout')}}" class="sub-menu-link">
-                  <i class="bi bi-door-open"></i>
-                  <p>Cerrar sesión</p>
-                  <span>></span>
-              </a>
-          </div>
-      </div>
-  </nav>
-</header>
 
 
+        </nav>
 
-<div class="a">
-
-</div>
-
-{% endblock %}
-
-
-{% block content %}
-
-<div class="container">
-
-    <h1 class=" mt-4">{%if titulo == "Registrar Pago" or titulo =="Lista Cobranzas"%} Pagos / {{titulo}} {%else%} {{titulo}}  {%endif%}</h1>
-    <div class="row position-relative">
-  
-      <div class="col-md-12 col-md-offset-1 flash position-absolute z-2">
-        {% with messages = get_flashed_messages(with_categories=True) %}
-      {% if messages %}
-        <div class="alert-container d-flex justify-content-center" >
-          {% for category, message in messages %}
-            {% if category == 'error' %}
-              <div class="alert mensaje_flash  alert-dismissible " role="alert">
-                <div class="error__icon">
-                  <svg
-                    fill="none"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    width="24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="m13 13h-2v-6h2zm0 4h-2v-2h2zm-1-15c-1.3132 0-2.61358.25866-3.82683.7612-1.21326.50255-2.31565 1.23915-3.24424 2.16773-1.87536 1.87537-2.92893 4.41891-2.92893 7.07107 0 2.6522 1.05357 5.1957 2.92893 7.0711.92859.9286 2.03098 1.6651 3.24424 2.1677 1.21325.5025 2.51363.7612 3.82683.7612 2.6522 0 5.1957-1.0536 7.0711-2.9289 1.8753-1.8754 2.9289-4.4189 2.9289-7.0711 0-1.3132-.2587-2.61358-.7612-3.82683-.5026-1.21326-1.2391-2.31565-2.1677-3.24424-.9286-.92858-2.031-1.66518-3.2443-2.16773-1.2132-.50254-2.5136-.7612-3.8268-.7612z"
-                      fill="#393a37"
-                    ></path>
-                  </svg>
-                </div>
-                <div class="error-tittle"> {{ message }} </div>
-                <div class="error__close">
-                <button type="button" class="btn-close p-1" data-bs-dismiss="alert" aria-label="Close"></button></div>
-              </div>
-            {% else %}
-            <div class="alert mensaje_flash  alert-dismissible succes " role="alert">
-              <div class="error__icon">
-                <i class="bi bi-check-circle-fill" style="color: #fff" > </i>
-              </div>
-              <div class="error-tittle"> {{ message }} </div>
-              <div class="error__close">
-              <button type="button" class="btn-close p-1" data-bs-dismiss="alert" aria-label="Close"></button></div>
-            </div>
-            {% endif %}
-          {% endfor %}
+        <div class="p-5">
+          {% block content %}
+          {% endblock %}
         </div>
-      {% endif %}
-    {% endwith %}
       </div>
-      {% block container %}
-      
-      {% endblock %}
+
+
+
+
+
+
+
+
+
+
+
     </div>
-  </div>
-
-{% block main %}
-      
-{% endblock %}
 
 
-{% endblock %}
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 
-<div class="activador d-xl-none ">
-  <div class="flecha-up" id="flecha-up">
-    <i class="bi bi-arrow-up-circle "></i>
-    <i class="bi bi-arrow-down-circle d-none "></i>
-  </div>
-
-
-  <div class="contenedor-elementos-responsive" style="flex: 1 0 auto;">
-
-    <ul>
-      <li class="responsive-li"> <!--Tiene un flex-direction: Column, por si acaso -->
-        <div class="d-flex justify-content-between align-items-center w-100 px-3">  
-          <a  href="{{ url_for('.dashboard')}}" class="sub-titulo responsive-a w-100 "> <i class="bi bi-buildings mx-1"></i>Resumen</a>
-          
-        </div>
-      </li> 
-
-      <li class="responsive-li con-contenido"> <!--Tiene un flex-direction: Column, por si acaso -->
-        <div class="d-flex justify-content-between align-items-center w-100 px-3">  
-          <a  href="#" class="sub-titulo responsive-a w-100 "> <i class="bi bi-buildings mx-1"></i>Pagos</a>
-          <i class="fa-solid fa-chevron-down mx-3"></i>
-        </div>
-          
-        <!--Otra columna-->
-        <div class="dropdown-in-responsive">
-          <ul class="list-unstyled mb-0 ">
-              <li class=""><a class="{% if titulo == 'reporte pago' %} active {% endif %}"  href="{{ url_for('.cobranza')}}">Registrar Pago</a></li>
-              <li class=""><a  class="{% if titulo == 'Pedidos' %} active {% endif %}" href="{{ url_for('.cobranza_iva')}}" >Registrar Pago Iva</a></li>            
-            <li class=""><a class="{% if titulo == 'Lista Cobranzas' %} active {% endif %}"  href="{{ url_for('.lista_cobranza')}}">Documentos Pendientes</a></li>
-            <li class=""><a class="{% if titulo == 'Lista Cobranzas' %} active {% endif %}"  href="{{ url_for('.pagos_cobranza')}}">Pagos Realizados</a></li>
-            <li class=""><a  class="{% if titulo == 'Pedidos' %} active {% endif %}" href="{{ url_for('.historial')}}" >Historial</a></li>
-
-          </ul>
-        </div>
-        </li> 
-
-
-        <li class="responsive-li con-contenidodos"> <!--Tiene un flex-direction: Column, por si acaso -->
-        <div class="d-flex justify-content-between align-items-center w-100 px-3">  
-          <a  href="#" class="sub-titulo responsive-a w-100 "> <i class="bi bi-buildings mx-1"></i>Comprobantes de retención</a>
-          <i class="fa-solid fa-chevron-down mx-3"></i>
-        </div>
-          
-        <!--Otra columna-->
-        <div class="dropdown-in-responsive">
-          <ul class="list-unstyled mb-0 ">
-            <li class=""><a href="{{ url_for('.retenciones')}}" class="{% if titulo == 'Pedidos' %} active {% endif %}" >Registrar</a></li>
-            <li class=""><a href="{{ url_for('.certificados_pendientes')}}"  class="{% if titulo == 'Pedidos' %} active {% endif %}" >Facturas Pendientes</a></li>
-            <li class=""><a href="{{ url_for('.ret_enviadas')}}"  class="{% if titulo == 'Pedidos' %} active {% endif %}" >Comprobantes Enviados</a></li>
-          </ul>
-        </div>
-        </li> 
-
-
-        <li class="responsive-li"> <!--Tiene un flex-direction: Column, por si acaso -->
-        <div class="d-flex justify-content-between align-items-center w-100 px-3">  
-          <a  href="{{ url_for('.cobranza')}}" class="sub-titulo responsive-a w-100 "> <i class="fa-solid fa-table-columns mx-1"></i>Modulos</a>          
-        </div>
-      </li> 
-    </ul>
-
-    <div class="footer_resp" style="flex-shrink: 0; position: fixed;">
-      <ul>
-        <li class="d-flex align-items-center "><i class="bi bi-question-circle algo"></i><a href=""> Ayuda</a></li>
-        <li class="d-flex align-items-center "><i class="bi bi-building algo"></i><a href=""> filiales</a></li>
-        <li class="d-flex align-items-center "><i class="bi bi-linkedin algo"></i><a href=""> Linkedin</a></li>
-    </ul>
-    </div>
-</div>
-
-</div>
-
-
-
- 
-<footer>
-  <div class="footer-content" >
-    <div class="row d-flex justify-content-center w-100">
-      
-        <div class="contacto col-xl col-lg col-sm-12 " style="margin-top: -10px; ">
-          <div class="row mt-0" style="display: flex; flex-direction: column;">
-
-
-            <p class="col fs-12"> <strong>Para obtener soporte, contáctenos al correo: </strong> soporteb2b@corimon.com</p>
-          </div>
-        </div>
-    </div>
-  </div>
-
-  <div class="d-flex justify-content-center w-100 footer-bottom mx-2 w-100">
-    <p>copyright &copy;2023 Corimon Pinturas, C.A. RIF. J-00029572-7 | Powered by Digitalización Industrial</p>
-</div>
-
-</footer>
+    {% block js%}
+      <!--AQUÍ SE AGREGA LOS JS DE CADA PAGINA-->
+    {% endblock %}
+</body>
+</html>
 
 
 
 
-{% block scripts %}
-<!-- Primero, incluye jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" integrity="sha512-pumBsjNRGGqkPzKHndZMaAG+bir374sORyzM3uulLV14lN5LyykqNk8eEeUlUkB3U0M4FApyaHraT65ihJhDpQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-<!-- Luego, incluye los scripts de DataTables -->
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.colVis.min.js"></script>
-
-<!-- Incluye los scripts de Bootstrap -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
-
-<!-- Incluye tus propios scripts -->
-<script src="{{ url_for('static', filename='js/app2.js') }}"></script>
-
-<script>
-  $(document).ready(function() {
-    $('.user').on('click', function() {
-        $('.sub-menu-wrap').toggleClass('active');
-    });
-
-    $('.activador_de_nav').on('click', function() {
-        $('.responsive_nav').addClass('active');
-    });
-
-    $('.desactivador_de_nav').on('click', function() {
-        $('.responsive_nav').removeClass('active');
-    });
-});
-</script>
 
 
-{% block js%}
 
-{% endblock %}
-{% endblock %}
-{% endblock %}
