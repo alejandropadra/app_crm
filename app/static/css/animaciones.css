@@ -1,0 +1,198 @@
+.opado {
+    opacity: 0;
+    transition: opacity 0.6s ease-out;
+
+}
+
+
+.animate-fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInMove 0.6s ease-out forwards;
+}
+
+@keyframes fadeInMove {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+.animate-slide-left {
+    opacity: 0;
+    transform: translateX(-30px);
+    animation: slideInLeft 0.6s ease-out forwards;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.animate-zoom-in {
+    opacity: 0;
+    transform: scale(0.8);
+    animation: zoomIn 0.5s ease-out forwards;
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
+
+.animate-fade-in-up {
+    opacity: 0;
+    transform: translateY(-20px);
+    animation: fadeInMoveUP 0.6s ease-out forwards;
+    will-change: opacity, transform;
+}
+
+@keyframes fadeInMoveUP {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+.animate-fade-in-down {
+    opacity: 0;
+    transform: translateY(+20px); 
+    animation: fadeInMovedown 0.6s ease-out forwards;
+}
+
+
+@keyframes fadeInMovedown {
+    from {
+        opacity: 0;
+        transform: translateY(+20px); 
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0); 
+    }
+}
+
+
+
+.animate-fade-out-right {
+    animation: fadeOutRight 0.5s ease-out forwards;
+}
+
+@keyframes fadeOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(300px);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Animaciones para el modal */
+@keyframes unfoldIn {
+    0% {
+        transform: scaleY(0.005) scaleX(0);
+    }
+    50% {
+        transform: scaleY(0.005) scaleX(1);
+    }
+    100% {
+        transform: scaleY(1) scaleX(1);
+    }
+}
+
+@keyframes unfoldOut {
+    0% {
+        transform: scaleY(1) scaleX(1);
+    }
+    50% {
+        transform: scaleY(0.005) scaleX(1);
+    }
+    100% {
+        transform: scaleY(0.005) scaleX(0);
+    }
+}
+
+@keyframes zoomIn {
+    0% {
+        transform: scale(0);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes zoomOut {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(0);
+    }
+}
+
+/* Mostrar el modal cuando se activa */
+#modal-container.one {
+    display: block;
+    transform: scaleY(0.01) scaleX(0);
+    animation: unfoldIn 1s cubic-bezier(0.165, 0.840, 0.440, 1.000) forwards;
+}
+
+#modal-container.one .modal-background .modal {
+    transform: scale(0);
+    animation: zoomIn 0.5s 0.8s cubic-bezier(0.165, 0.840, 0.440, 1.000) forwards;
+}
+
+/* Ocultar con animación */
+#modal-container.one.out {
+    transform: scale(1);
+    animation: unfoldOut 1s 0.3s cubic-bezier(0.165, 0.840, 0.440, 1.000) forwards;
+}
+
+#modal-container.one.out .modal-background .modal {
+    animation: zoomOut 0.5s cubic-bezier(0.165, 0.840, 0.440, 1.000) forwards;
+}
+
+
+

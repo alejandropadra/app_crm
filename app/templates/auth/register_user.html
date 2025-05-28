@@ -1,230 +1,190 @@
-
 {% extends 'layout.html' %}
 {% from 'helpers/_forms.html' import render_field %}
-{% block container %}
 
-<main>
-    <section class="d-flex justify-content-center my-4">
-
-      <div class="contenedor_form">
-          <form class="form" method = "POST">
-            <div class="titulo">Registro de usuario</div>
-           
-           <!--↓↓ iNPUT DE RIF ↓↓-->
-
-           <div class="primer_input row">
-            <div class="input-container col-1">
-                {{ render_field(form.rif, class ="entrada rif", id="person") }}
-                <label for="person" class="label">Usuario</label>
-                <div class="underline"></div>
-              </div>
-           
-            <div class="input-container col" style="margin-right: 13px;" >
-            {{ render_field(form.n_rif, class ="entrada", id="usuario" ) }}
-            <div class="underline" style="margin-left: 10px; max-width: 100.9vh; " ></div>
-            </div>
-           </div>
-
-           <!--Nombre de USUARIO-->
-           <div class="input-container">
-            {{ render_field(form.username, class ="entrada", id="username"  ) }}
-            <label for="username" class="label">Nombre de usuario</label>
-            <div class="underline"></div>
-          </div>
-
-          <!--PASSWORD-->
-          <div class="input-container">
-            {{ render_field(form.password, class ="entrada", id="password" ) }}
-            <label for="password" class="label">Contraseña</label>
-            <div class="underline"></div>
-          </div>
-
-          <!--PASSWORD-->
-          <div class="input-container">
-            {{ render_field(form.confirm_password , class ="entrada", id="confirmar" ) }}
-            <label for="password" class="label">Confirmar Contraseña</label>
-            <div class="underline"></div>
-          </div>
-         
-            
-          <!--EMAIL-->
-          <div class="input-container">
-            {{ render_field(form.email, class ="entrada", id="email" ) }}
-            <label for="email" class="label">Ingrese el Email</label>
-            <div class="underline"></div>
-          </div>
-          
-          <!--EMAIL-->
-          <div class="input-container">
-            {{ render_field(form.zona, class ="entrada", id="zona" ) }}
-            <label for="zona" class="label">Ingrese la zona del usuario</label>
-            <div class="underline"></div>
-          </div>
-
-          <!--NIVEL-->
-          <div class="input-container">
-            {{ render_field(form.nivel, class ="entrada", id="nivel" ) }}
-            <label for="zona" class="label">Ingrese la zona del usuario</label>
-            <div class="underline"></div>
-          </div>
-
-          <!--Codigo SAP-->
-          <div class="input-container">
-            {{ render_field(form.codigo, class ="entrada", id="codigo" ) }}
-            <label for="codigo" class="label">Ingrese el codigo del usuario</label>
-            <div class="underline"></div>
-          </div>
-
-          <!--VENDEDOR-->
-          <div class="input-container">
-            {{ render_field(form.vendedor, class ="entrada", id="seller" ) }}
-            <label for="vendedor" class="label">Ingrese el vendedor del usuario</label>
-            <div class="underline"></div>
-          </div>
-
-            <!--↓↓ iNPUT DE EMPRESA ↓↓-->
-           
-
-            <div class=" mb-2 w-100 d-flex justify-content-center" style="margin-top: 25px;">
-              <input type ="hidden" name = "csrf_token" value ="{{csrf_token()}}"/>
-              <button class="submit" onclick="location.reload();" > <span>Enviar</span>
-              </button>
-            </div>
-          </form>
-      </div>
-      
+{% block body %}
+<meta name="csrf-token" content="{{ csrf_token() }}">
 
 
-</section>
-</main>
-<!--
-    <main>
-        <section class="mt-0 mb-5" >
-            <div class="d-flex justify-content-center">
-            </div>
-            <div class="container w-50">
-                <div class="row">
-  
-                    <div class="col-md-12 col-md-offset-1">
-                      
+<div class=" flex justify-center w-full ">
+
+    <div class=" w-full opado shadow-custom h-auto rounded-3xl py-7 px-11 flex flex-col gap-5 relative" style="background-color: rgba(255, 255, 255, 0.87);" >
+        <h2>Registrar Usuario</h2>
+        <form action="" method="post" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class=" flex flex-col gap-3">
+
+                <div class="grid grid-cols-5 gap-5 px-2">
+                    <div class=" flex flex-col lg:col-span-1 col-span-3 ">
+                        <label class="text-xs font-semibold text-gray-500" for="ficha">Ficha </label>
+                        {{ render_field(form.n_ficha, class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all",  id="ficha") }}
                     </div>
-                
 
-                  </div>
-                <div class="titulo mt-2 d-flex justify-content-center">
-                    <h2 class="text-dark my-2">Registro de usuario</h2>
+                    <button id="buscarSAP" class=" lg:col-span-1 col-span-2 justify-center text-center mt-3 cursor-pointer text-zinc-200 flex gap-2 items-center bg-valor-azul px-4 py-2 rounded-lg font-medium text-sm hover:bg-azul-dark transition-all ease-in duration-200">
+                        Buscar
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                        </svg>
+                    </button>
                 </div>
-                <hr>
-                <form method="POST"  class="w-100">
-                      
-                        <div class="d-flex justify-content-center">
-                        <h5 class="mx-5">Usuario</h5>
+
+                <div class=" grid lg:grid-cols-4 2xl:grid-cols-6" >
+
+                    <div class="col-span-1 flex items-center flex-col">
+                        <div class=" w-[70%] lg:w-[90%]  aspect-square ">
+                            <img src="{{ url_for('static', filename='img/notfoundUser.png') }}" 
+                                class="w-full h-full bg-gray-200 object-cover rounded-full" 
+                                alt="User Image"
+                                id="imagenEmpleado">
                         </div>
-                        <div class="containerr">
-                            <div class="row align-items-center ">
-                                <div class="col-auto">
-                                    <div class="input-group-text">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="26" fill="currentColor" class="bi bi-person-check-fill" viewBox="0 0 16 16">
-                                            <path fill-rule="evenodd" d="M15.854 5.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L12.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
-                                            <path d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-                                        </svg>
-                                    </div>
-                                </div>
-                                <div class="col-1 pb-4 ">
-                                    {{ render_field(form.rif, class ="form-select") }}
-                                </div>
-                                <div class="col pb-4">
-                                    {{ render_field(form.n_rif, class ="form-control",placeholder="Por favor, ingrese el RIF" ) }}
-                                </div>
+                        {{ render_field(form.documento_texto, class="hidden", id="documentoTexto") }}
+                        <div id="divfile" class="hidden">
+                            <h5>Cargar Imagen por favor</h5>
+                            {{ render_field(form.documento, class=" w-full max-w-full text-gray-700 p-1 bg-[--body-color] rounded-lg border border-gray-300 focus:outline-none  file:border-0 file:bg-blue-600  file:text-white file:px-4 file:py-2 file:rounded-lg file:cursor-pointer file:hover:bg-blue-700 transition-all", id="file-input") }}
+                        </div>
+
+                    </div>
+
+                    <div class="lg:col-span-3 2xl:col-span-5">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                            <div class=" flex flex-col">
+                                <label class="text-xs font-semibold text-gray-500" for="card_number">Nombre</label>
+                                {{ render_field(form.nombre, class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all",   id="nombre") }}
+                            </div>
+                            <div class=" flex flex-col">
+                                <label class="text-xs font-semibold text-gray-500" for="card_number">Apellido</label>
+                                {{ render_field(form.apellido, class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all",   id="apellido") }}
+                            </div>
+
+
+                            <div class="flex flex-col">
+                                <label class="text-xs font-semibold text-gray-500" for="card_number">Nivel Corporativo </label>
+                                    {{ render_field(form.nivel_corp, class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all text-md", id="nivel") }}
+                            </div> 
+
+                            <div class="flex flex-col ">
+                                <label class="text-xs font-semibold text-gray-500" for="card_number">filial </label>
+                                    {{ render_field(form.filial, class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all text-md", id="filial") }}
+                            </div> 
+
+
+
+                            <div class=" flex flex-col col-span-1">
+                                <label class="text-xs font-semibold text-gray-500" for="card_number">Cargo </label>
+                                {{ render_field(form.cargo, class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all",  id="cargo") }}
+                            </div>
+                            <div class=" flex flex-col col-span-1">
+                                <label class="text-xs font-semibold text-gray-500" for="card_number">Departamento </label>
+                                {{ render_field(form.departamento, class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all",  id="dpto") }}
+                            </div>
+                            <div class=" flex flex-col col-span-1">
+                                <label class="text-xs font-semibold text-gray-500" for="card_number">Supervisor </label>
+                                {{ render_field(form.supervisor, class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all",  id="supervisor") }}
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-xs font-semibold text-gray-500" for="card_number">Nivel de Usuario </label>
+                                    {{ render_field(form.nivel, class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all text-md", id="nivel") }}
+                            </div> 
+                            <div class=" flex flex-col col-span-1">
+                                <label class="text-xs font-semibold text-gray-500" for="card_number">Correo Electrónico </label>
+                                {{ render_field(form.email, class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all",  id="correo") }}
+                            </div>
+                            <div class=" flex flex-col col-span-1">
+                                <label class="text-xs font-semibold text-gray-500" for="card_number">Telefono</label>
+                                {{ render_field(form.telefono, class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all",  id="telefono") }}
+                            </div>
+                            <div class=" flex flex-col ">
+                                <label class="text-xs font-semibold text-gray-500" for="card_number">Contraseña</label>
+                                {{ render_field(form.password, class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all",  id="password") }}
+                            </div>
+
+                            
+                            <div class=" flex flex-col ">
+                                <label class="text-xs font-semibold text-gray-500" for="card_number">Contraseña</label>
+                                <input type="password" name="" class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all" id="passwordConfirmar">
+                            </div>
+                            <div class=" flex flex-col">
+                                {{ render_field(form.apellido, class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all", readonly=readonly,  id="username", hidden="hidden") }}
                             </div>
                         </div>
 
-                 
-                        <div class="d-flex justify-content-center mt-3 mb-0">
-                            <h5 class="mx-5">Identificacion</h5>
-                            </div>
-                            <div class="input-group mt-2 mb-4">
-                                <div class="input-group-text">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-vcard" viewBox="0 0 16 16">
-                                        <path d="M5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm4-2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5ZM9 8a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4A.5.5 0 0 1 9 8Zm1 2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5Z"/>
-                                        <path d="M2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H2ZM1 4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H8.96c.026-.163.04-.33.04-.5C9 10.567 7.21 9 5 9c-2.086 0-3.8 1.398-3.984 3.181A1.006 1.006 0 0 1 1 12V4Z"/>
-                                      </svg>
-                                </div>
-                                {{ render_field(form.username, class ="form-control", placeholder="Ingrese Empresa"  ) }}
-                            </div>
+
+                    </div>
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+                <div class="grid grid-cols-3 gap-3">
+
+
+
+
+
+
+
+                </div>
+
+                <!-- 
+                <div class=" shadow-lg mt-4 border border-gray-400 rounded-2xl p-8 text-center text-lg  ">
+                    <span class="text-black text-2xl font-medium"> Foto del usuario</span>
+                    <p class="mt-2 text-sm text-gray-600">Carga una foto tipo carnet</p>
+                    <label for="file-input" class="mt-8 bg-white relative flex flex-col gap-2 items-center justify-center p-4 rounded-xl border-2 border-dashed border-blue-300 text-gray-700 cursor-pointer hover:bg-blue-50 hover:border-gray-600 transition-all">
+                        <span class="text-gray-700 text-lg font-bold">Arrastra los archivos aquí </span>
+                        o
+                        {{ render_field(form.documento, class="w-full max-w-full text-gray-700 p-1 bg-[--body-color] rounded-lg border border-gray-300 focus:outline-none  file:border-0 file:bg-blue-600  file:text-white file:px-4 file:py-2 file:rounded-lg file:cursor-pointer file:hover:bg-blue-700 transition-all", id="file-input") }}
+                        
+                    </label>
+                    <ul id="image-list" class="mt-4 space-y-2 overflow-y-auto max-h-[90px]">
+                        
+                    </ul>
+                </div>-->
+
+            </div>
+
+
 
                 
-                        <div class="d-flex justify-content-center mt-3 mb-0">
-                        <h5 class="mx-5">Contraseña</h5>
-                        </div>
-                        <div class="input-group mt-2 mb-4">
-                            <div class="input-group-text">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-lock2" viewBox="0 0 16 16">
-                                    <path d="M8 5a1 1 0 0 1 1 1v1H7V6a1 1 0 0 1 1-1zm2 2.076V6a2 2 0 1 0-4 0v1.076c-.54.166-1 .597-1 1.224v2.4c0 .816.781 1.3 1.5 1.3h3c.719 0 1.5-.484 1.5-1.3V8.3c0-.627-.46-1.058-1-1.224z"/>
-                                    <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
-                                  </svg>
-                            </div>
-                            {{ render_field(form.password, class ="form-control", placeholder="Ingrese la Contraseña" ) }}
-                        </div>
-                        <div class="d-flex justify-content-center mt-3 mb-0">
-                            <h5 class="mx-5">Contraseña</h5>
-                            </div>
-                            <div class="input-group mt-2 mb-4">
-                                <div class="input-group-text">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-lock2" viewBox="0 0 16 16">
-                                        <path d="M8 5a1 1 0 0 1 1 1v1H7V6a1 1 0 0 1 1-1zm2 2.076V6a2 2 0 1 0-4 0v1.076c-.54.166-1 .597-1 1.224v2.4c0 .816.781 1.3 1.5 1.3h3c.719 0 1.5-.484 1.5-1.3V8.3c0-.627-.46-1.058-1-1.224z"/>
-                                        <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
-                                      </svg>
-                                </div>
-                                {{ render_field(form.confirm_password , class ="form-control", placeholder="Ingrese la Contraseña" ) }}
-                            </div> 
-                  
-                        <div class="d-flex justify-content-center mt-3 mb-0">
-                            <h5 class="mx-5">Email</h5>
-                            </div>
-                            <div class="input-group mt-2 mb-4">
-                                <div class="input-group-text">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope-at" viewBox="0 0 16 16">
-                                        <path d="M2 2a2 2 0 0 0-2 2v8.01A2 2 0 0 0 2 14h5.5a.5.5 0 0 0 0-1H2a1 1 0 0 1-.966-.741l5.64-3.471L8 9.583l7-4.2V8.5a.5.5 0 0 0 1 0V4a2 2 0 0 0-2-2H2Zm3.708 6.208L1 11.105V5.383l4.708 2.825ZM1 4.217V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v.217l-7 4.2-7-4.2Z"/>
-                                        <path d="M14.247 14.269c1.01 0 1.587-.857 1.587-2.025v-.21C15.834 10.43 14.64 9 12.52 9h-.035C10.42 9 9 10.36 9 12.432v.214C9 14.82 10.438 16 12.358 16h.044c.594 0 1.018-.074 1.237-.175v-.73c-.245.11-.673.18-1.18.18h-.044c-1.334 0-2.571-.788-2.571-2.655v-.157c0-1.657 1.058-2.724 2.64-2.724h.04c1.535 0 2.484 1.05 2.484 2.326v.118c0 .975-.324 1.39-.639 1.39-.232 0-.41-.148-.41-.42v-2.19h-.906v.569h-.03c-.084-.298-.368-.63-.954-.63-.778 0-1.259.555-1.259 1.4v.528c0 .892.49 1.434 1.26 1.434.471 0 .896-.227 1.014-.643h.043c.118.42.617.648 1.12.648Zm-2.453-1.588v-.227c0-.546.227-.791.573-.791.297 0 .572.192.572.708v.367c0 .573-.253.744-.564.744-.354 0-.581-.215-.581-.8Z"/>
-                                      </svg>
-                                </div>
-                                {{ render_field(form.email, class ="form-control", placeholder="Ingrese su direccion de correro electrónico" ) }}
-                            </div>
+                <div class="flex w-full justify-end items-center gap-3">
+                    <button onclick="window.location.href= 'http://10.10.0.32/app_crm/layout' " class=" mt-3 cursor-pointer text-zinc-200 flex gap-2 items-center bg-rojo-crm px-4 py-2 rounded-lg font-medium text-sm hover:bg-azul-dark transition-all ease-in duration-200">
+                        Cancelar
+                    </button>
+                    <button type="submit" class=" mt-3 cursor-pointer text-zinc-200 flex gap-2 items-center bg-valor-azul px-4 py-2 rounded-lg font-medium text-sm hover:bg-azul-dark transition-all ease-in duration-200">
+                        Enviar
+                    </button>
+                </div>
+                
 
-                            <div class="d-flex justify-content-center mt-3 mb-0">
-                                <h5 class="mx-5">Zona</h5>
-                                </div>
-                                <div class="input-group mt-2 mb-4">
-                                    <div class="input-group-text">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope-at" viewBox="0 0 16 16">
-                                            <path d="M2 2a2 2 0 0 0-2 2v8.01A2 2 0 0 0 2 14h5.5a.5.5 0 0 0 0-1H2a1 1 0 0 1-.966-.741l5.64-3.471L8 9.583l7-4.2V8.5a.5.5 0 0 0 1 0V4a2 2 0 0 0-2-2H2Zm3.708 6.208L1 11.105V5.383l4.708 2.825ZM1 4.217V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v.217l-7 4.2-7-4.2Z"/>
-                                            <path d="M14.247 14.269c1.01 0 1.587-.857 1.587-2.025v-.21C15.834 10.43 14.64 9 12.52 9h-.035C10.42 9 9 10.36 9 12.432v.214C9 14.82 10.438 16 12.358 16h.044c.594 0 1.018-.074 1.237-.175v-.73c-.245.11-.673.18-1.18.18h-.044c-1.334 0-2.571-.788-2.571-2.655v-.157c0-1.657 1.058-2.724 2.64-2.724h.04c1.535 0 2.484 1.05 2.484 2.326v.118c0 .975-.324 1.39-.639 1.39-.232 0-.41-.148-.41-.42v-2.19h-.906v.569h-.03c-.084-.298-.368-.63-.954-.63-.778 0-1.259.555-1.259 1.4v.528c0 .892.49 1.434 1.26 1.434.471 0 .896-.227 1.014-.643h.043c.118.42.617.648 1.12.648Zm-2.453-1.588v-.227c0-.546.227-.791.573-.791.297 0 .572.192.572.708v.367c0 .573-.253.744-.564.744-.354 0-.581-.215-.581-.8Z"/>
-                                          </svg>
-                                    </div>
-                                    {{ render_field(form.zona, class ="form-control" ) }}
-                                </div>
 
-                        <div class="alfo ">
-                            {{ form.honeypot }}
-                            <input type ="hidden" name = "csrf_token" value ="{{csrf_token()}}"/>
-                           
-                            <button type="submit" class=" btn custom-btn"> Ingresar</button>
-                        </div>
-                </form>
-            </div>
-        </section>
-        
-    </main>
-    -->
+            
+        </form>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
 
 {% endblock %}
 
-{% block script %}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</body>
-</html>
+{% block js%}
+<script src="{{ url_for('static', filename='js/register_user.js') }}"></script>
 {% endblock %}

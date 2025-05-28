@@ -1,0 +1,208 @@
+{% extends 'layout.html' %}
+{% from 'helpers/_forms.html' import render_field %}
+
+{% block body %}
+{% block estilos %}
+<style>
+
+    .no-border{
+        border: none;
+    }
+
+    textarea{
+        padding: 0px !important;
+    }
+</style>
+{% endblock%}
+<link rel="stylesheet" href="{{ url_for('static', filename = 'css/estilos_tabla.css') }}">
+
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<input type="hidden" id="idIndicador" value={{indicador}}>
+<input type="hidden" id="indicador" value={{ficha_del_dueño_del_indicador}}> 
+<input type="hidden" id="fichaCurrentUser" value={{ficha}}>
+<input type="hidden" id="statusIndicador" value={{estado}} >
+
+
+            <!-----------------------------------------Main------------------------------------------------>
+            <div class="flex w-full justify-start mt-7 mx-7 items-center gap-3">
+
+                <a onclick="window.history.back()" class="tarjeta-base h-4 w-4 flex justify-center items-center cursor-pointer bg-slate-600 !transform-none hover:bg-slate-300 ">
+                    <span class="material-symbols-rounded text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+                        </span>
+                </a>
+                <h3>Indicadores y Competencia /</h3> <h3 class=" text-[--rojocrm]"> Cronograma</h3>
+            </div>
+    
+            <input type="hidden" name="" id="indicador" value="{{indicador}}">
+
+            <main class="py-5">
+                <form action="" id="formulario">
+
+
+
+                    <div class="w-full max-w-full overflow-x-auto border border-gray-200 dark:border-gray-700 md:rounded-xl" id="contenedor-table">
+                        <table class="divide-y divide-gray-200 dark:divide-gray-700 w-full" id="tabla-HV">
+                            <thead class="bg-gray-50 dark:bg-gray-800">
+                                <tr>
+                                    <th style="min-width: 350px;" class="px-4 py-3 text-sm font-normal text-gray-500 dark:text-gray-400 text-left border-l border-r border-gray-200 dark:border-gray-700" id="actividad">
+                                        ACTIVIDAD / ACCIÓN
+                                    </th>
+                                    <th class="px-4 py-3 min-w-[120px] text-sm font-normal text-gray-500 dark:text-gray-400 text-center border-l border-r border-gray-200 dark:border-gray-700" id="fechaing">
+                                        Fecha Ing. Prog
+                                    </th>
+                                    <th class="px-4 py-3 min-w-[120px] text-sm font-normal text-gray-500 dark:text-gray-400 text-center border-l border-r border-gray-200 dark:border-gray-700" id="fechafin">
+                                        Fecha Fin. Prog
+                                    </th>
+                                    <th class="px-4 py-3 min-w-[100px] text-sm font-normal text-gray-500 dark:text-gray-400 text-center border-l border-r border-gray-200 dark:border-gray-700" id="planifcado">
+                                        AVANCE PLANIFICADO
+                                    </th>
+                                    <th class="px-4 py-3 min-w-[120px] text-sm font-normal text-gray-500 dark:text-gray-400 text-center border-l border-r border-gray-200 dark:border-gray-700" id="inicio">
+                                        Fecha Inicio Real
+                                    </th>
+                                    <th class="px-4 py-3 min-w-[120px] text-sm font-normal text-gray-500 dark:text-gray-400 text-center border-l border-r border-gray-200 dark:border-gray-700" id="fin">
+                                        Fecha Fin Real
+                                    </th>
+                                    <th class="px-4 py-3 min-w-[100px] text-sm font-normal text-gray-500 dark:text-gray-400 text-center border-l border-r border-gray-200 dark:border-gray-700" id="avancereal">
+                                        Avance Con Fecha Real
+                                    </th>
+                                    <th class="px-4 py-3 min-w-[100px] text-sm font-normal text-gray-500 dark:text-gray-400 text-center border-l border-r border-gray-200 dark:border-gray-700" id="desviacionreal">
+                                        Desviación con Fecha Real %
+                                    </th>
+                                    <th class="px-4 py-3 min-w-[80px] text-sm font-normal text-gray-500 dark:text-gray-400 text-center border-l border-r border-gray-200 dark:border-gray-700">
+                                        
+                                    </th>
+                                </tr>
+                            </thead>
+                            
+                            <tbody class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+                                {% set ns = namespace(contador=1) %} 
+                                {%if data%}
+                                    {%for dato in data%}
+                                    <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <td class="border-t-0 px-4 py-3 align-middle text-sm border-l border-r border-gray-200 dark:border-gray-700">
+                                            {{dato.indicador}}
+                                            <textarea                               
+                                                id="Indicador{{ns.contador}}" 
+                                                name="Indicador{{ns.contador}}" 
+                                                placeholder="Ejemplo: Fase 1. Preparacion" 
+                                                required 
+                                                rows="3"
+                                                class="w-full bg-transparent hover:border border-solid p-0 focus:outline-none focus:ring-0 resize-none dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white">{%if dato.indicador%} {{dato.indicador}}{%endif%}</textarea>
+                                        </td>
+                                        
+                                        <td class="border-t-0 px-4 py-3 align-middle text-sm text-center border-l border-r border-gray-200 dark:border-gray-700">
+                                            <input 
+                                                id="fechaIngProg{{ns.contador}}"
+                                                type="date" 
+                                                name="fechaIngProg{{ns.contador}}" 
+                                                required 
+                                                value="{% if dato.fechaIngProg %}{{ dato.fechaIngProg }}{% endif %}"
+                                                class="w-full bg-transparent cursor-pointer hover:border border-solid no-border p-2 focus:outline-none focus:ring-0 dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white">
+                                            </td>
+                                        
+                                        <td class="border-t-0 px-4 py-3 align-middle text-sm text-center border-l border-r border-gray-200 dark:border-gray-700">
+                                            <input 
+                                                type="date" 
+                                                id="fechaFinProg{{ns.contador}}" 
+                                                name="fechaFinProg{{ns.contador}}" 
+                                                required 
+                                                value="{% if dato.fechaFinProg %}{{ dato.fechaFinProg }}{% endif %}"
+                                                class="w-full bg-transparent cursor-pointer hover:border border-solid no-border p-2 focus:outline-none focus:ring-0 dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white">
+                                        </td>
+                                        
+                                        <td class="border-t-0 px-4 py-3 align-middle text-sm text-center border-l border-r border-gray-200 dark:border-gray-700">
+                                            <input 
+                                                type="text" 
+                                                id="avancePlang{{ns.contador}}"
+                                                name="avancePlang{{ns.contador}}"
+                                                placeholder="%"
+                                                required
+                                                value="{{dato.avancePlan}}"
+                                                class="w-full bg-transparent cursor-pointer hover:border border-solid no-border p-2 focus:outline-none focus:ring-0 dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white">
+                                        </td>
+                                        
+                                        <td class="border-t-0 px-4 py-3 align-middle text-sm text-center border-l border-r border-gray-200 dark:border-gray-700">
+                                            <input 
+                                                type="date" 
+                                                id="fechaInicioR{{ns.contador}}" 
+                                                name="fechaInicioR{{ns.contador}}" 
+                                                required 
+                                                value="{% if dato.fechaInicioReal %}{{ dato.fechaInicioReal }}{% endif %}"
+                                                class="w-full bg-transparent cursor-pointer hover:border border-solid no-border p-2 focus:outline-none focus:ring-0 dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white">
+                                        </td>
+                                        
+                                        <td class="border-t-0 px-4 py-3 align-middle text-sm text-center border-l border-r border-gray-200 dark:border-gray-700">
+                                            <input 
+                                                type="date" 
+                                                id="fechaFinR{{ns.contador}}"
+                                                name="fechaFinR{{ns.contador}}" 
+                                                required 
+                                                value="{% if dato.fechaFinReal %}{{ dato.fechaFinReal }}{% endif %}"
+                                                class="w-full bg-transparent cursor-pointer hover:border border-solid no-border p-2 focus:outline-none focus:ring-0 dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white">
+                                        </td>
+                                        
+                                        <td class="border-t-0 px-4 py-3 align-middle text-sm text-center border-l border-r border-gray-200 dark:border-gray-700">
+
+                                            <input 
+                                                type="text" 
+                                                id="avanceReal{{ns.contador}}"
+                                                name="avanceReal{{ns.contador}}"
+                                                placeholder="%"
+                                                required
+                                                value="{% if dato.avanceReal %}{{ dato.avanceReal }}{% endif %}"
+                                                class="w-full bg-transparent cursor-pointer hover:border border-solid no-border p-2 focus:outline-none focus:ring-0 dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white">
+                                        </td>
+                                        
+                                        <td class="border-t-0 px-4 py-3 align-middle text-sm text-center border-l border-r border-gray-200 dark:border-gray-700">
+                                            <input 
+                                                type="number" 
+                                                id="desviacion{{ns.contador}}"
+                                                name="desviacion{{ns.contador}}"
+                                                placeholder="%"
+                                                required
+                                                value="{% if dato.desviacion %}{{ dato.desviacion }}{% endif %}"
+                                                class="w-full bg-transparent cursor-pointer hover:border border-solid no-border p-2 focus:outline-none focus:ring-0 dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white">
+                                        </td>
+                                        
+                                        <td class="border-t-0 px-4 py-3 align-middle text-sm text-center border-l border-r border-gray-200 dark:border-gray-700">
+                                            <button class="delete bg-red-500 w-8 h-8 rounded-full flex justify-center items-center hover:bg-red-400 focus:outline-none" onclick="deleteRow(this)">
+                                                <span class="material-symbols-rounded text-white">backspace</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {%endfor%}
+                                {%endif%}
+                            </tbody>
+                        </table>
+                        
+                        <div class="py-4 px-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                            <button type="button" class="add flex items-center text-sm px-4 py-2 bg-azul-dark text-white rounded-xl hover:bg-blue-600 transition-colors focus:outline-none" id="add" onclick="addRowHV()">
+                                <span class="material-symbols-rounded mr-2"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-plus-icon lucide-circle-plus"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg></span>
+                                Agregar fila
+                            </button>
+                        </div>
+                    </div>
+
+
+                    <div class=" flex justify-end items-center p-5">
+                        <button type="submit" class=" mt-3 cursor-pointer text-zinc-200 flex gap-2 items-center bg-valor-azul px-4 py-2 rounded-lg font-medium text-sm hover:bg-azul-dark transition-all ease-in duration-200" id="enviar">
+                            Enviar
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+
+                        </button>
+                    </div>
+                </form>
+            </main>
+
+        </div>
+    </div>
+    
+    {% endblock %}
+
+    {% block js%}
+    <script src="{{ url_for('static', filename='js/cronograma.js') }}"></script>
+    {% endblock %}   
+

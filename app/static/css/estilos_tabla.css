@@ -1,0 +1,100 @@
+th{
+    font-weight: 500;
+    color: #494949;
+    font-size: 14px;
+    padding: 10px;
+}
+
+table{
+    border-radius: 20px;
+    padding: 10px;
+    border: #d8d8d8 solid 1px;
+}
+
+/*-----------------------------------------------------AutoAyuda.js-------------------------------------------------------*/
+
+.driver-popover.driverjs-theme {
+    background-color: #b3d6ee;
+    color: #000;
+}
+
+.driver-popover.driverjs-theme .driver-popover-title {
+    font-size: 20px;
+    font-family: sans-serif;
+}
+
+.driver-popover.driverjs-theme .driver-popover-arrow{
+
+    display: flex;
+    justify-content: center;
+    background-color: #000000;
+}
+
+.driver-popover.driverjs-theme .driver-popover-title,
+.driver-popover.driverjs-theme .driver-popover-description,
+.driver-popover.driverjs-theme .driver-popover-progress-text {
+color: #000000;
+
+}
+
+
+
+#driver-popover-content > footer{
+    position: relative;
+    
+}
+
+#driver-popover-content > footer > span.driver-popover-progress-text{
+    position: absolute;
+    left: 45%;
+}
+
+#driver-popover-content > footer > span.driver-popover-navigation-btns{
+    width: 100%;
+    display: flex;
+    justify-content: space-between !important;
+
+}
+
+
+.driver-popover-navigation-btns button{
+    background-color:rgb(73 111 182 ) !important;
+    
+    color: #ffff !important;
+    text-shadow: none !important;
+    border: none !important;
+    
+}
+
+.driver-popover-navigation-btns button:hover{
+
+    background-color:rgb(45, 69, 114)  !important;
+}
+
+
+.driver-popover.driverjs-theme .driver-popover-arrow-side-left.driver-popover-arrow {
+border-left-color: #b3d6ee;
+}
+
+.driver-popover.driverjs-theme .driver-popover-arrow-side-right.driver-popover-arrow {
+border-right-color: #b3d6ee;
+}
+
+.driver-popover.driverjs-theme .driver-popover-arrow-side-top.driver-popover-arrow {
+border-top-color: #b3d6ee;
+}
+
+.driver-popover.driverjs-theme .driver-popover-arrow-side-bottom.driver-popover-arrow {
+border-bottom-color: #b3d6ee;
+}
+
+.popover{
+    background-color: transparent !important;
+}
+
+
+
+
+
+
+

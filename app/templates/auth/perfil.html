@@ -1,85 +1,212 @@
 {% extends 'layout.html' %}
 {% from 'helpers/_forms.html' import render_field %}
 
-{% block container %}
-<main>
 
-  <div class="container mt-3">
-    <div class="row"> 
-      <div class="card col-sm-3">
-        <div class="card-body">
-          <h4 class="card-title">{{current_user.username}}</h4>
-          <p class="card-text">Rif: {{current_user.rif}}</p>
-          <p class="card-text">Email: {{current_user.email}}</p>
-          <p class="card-text">Zona: {{current_user.zona}}</p>
-          <p class="card-text">Vendedor: {{current_user.seller}}</p>
-          <p class="card-text">Registrado: {{current_user.created_at}}</p>
+{% block body %}
+<meta name="csrf-token" content="{{ csrf_token() }}">
+{%set resultado_autocompletar = ""%}
+{% if rest[0]['plstx'] |length >= 24 or rest[0]['orgtx'] |length>= 24   %}
+  {%set resultado_autocompletar = consultar_cargo(ficha)%}
+{%endif%}
+
+
+  <form action=""  method="post">
+    {{ form.hidden_tag() }}
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
+
+      <div class="bg-white shadow-custom p-6 rounded-[30px] col-span-1 opado relative ">
+        <div class="grid grid-cols-3 gap-3 ">
+
+          <div class="col-span-1 flex items-center justify-center">
+            <div class="w-[90%] aspect-square">
+              <img src="{{ url_for('static', filename=usuario.path_imagen_user) }}" 
+                    class="w-full h-full object-cover rounded-full" 
+                    alt="User Image">
+            </div>
+          </div>
+
+          <div class=" col-span-2 flex items-center">
+            <div class=" flex flex-col">
+              <h3 class="text-[16px]">{{rest[0]['ename']}}</h3>
+              <div class="items-center py-2 gap-1 hidden lg:flex">
+                <h4 class=" text-[#757575] text-[12px]">Cargo:</h4>
+                {% if rest[0]['plstx'] |length >= 24 %}
+                    <h3 class="text-[12px]">{{resultado_autocompletar.cargo}}</h3>
+                  {%else%}
+                    <h3 class="text-[12px]">{{rest[0]['plstx']}}</h3>
+                {%endif%}
+              </div>
+              <div class="hidden lg:flex items-center  gap-1">
+                <h4 class=" text-[#757575] text-[12px]">Departamento:</h4>
+                {% if rest[0]['orgtx'] |length >= 24 %}
+                    <h3 class="text-[12px]">{{resultado_autocompletar.departamento}}</h3>
+                  {%else%}
+                  <h3 class="text-[12px]">{{rest[0]['orgtx']}}</h3>
+                {%endif%}
+
+              </div>
+              <div class="hidden lg:flex items-center py-2  gap-1">
+                <h4 class=" text-[#757575] text-[12px]">Ficha:</h4>
+                <h3 class="text-[12px]">{{ficha}}</h3>
+              </div>
+
+            </div>
+          </div>
         </div>
+
+        <div class=" flex w-full flex-col py-2 px-4 lg:hidden ">
+          <div class="items-center py-2 gap-1 flex">
+            <h4 class=" text-[#757575] text-[12px]">Cargo:</h4>
+            <h3 class="text-[12px]">{{rest[0]['plstx']}}</h3>
+          </div>
+          <div class= "items-center flex  gap-1">
+            <h4 class=" text-[#757575] text-[12px]">Departamento:</h4>
+            <h3 class="text-[12px]">{{rest[0]['orgtx']}}</h3>
+          </div>
+          <div class= "items-center py-2  flex gap-1">
+            <h4 class=" text-[#757575] text-[12px]">Ficha:</h4>
+            <h3 class="text-[12px]">{{ficha}}</h3>
+          </div>
+        </div>
+
+        <div class=" py-5  px-2 lg:px-10 flex flex-col gap-3">
+          
+          <div class=" bg-gray-200 flex items-center justify-between gap-2 p-2 rounded-full">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-rounded font-normal text-[#333]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail-icon lucide-mail"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                </span>
+              <p id="correoUsuario">{{usuario.email}}</p>
+            </div>
+            <button data-tooltip-target="tooltip-copiar" id="copiarCorreo" class="copy relative flex items-center justify-center text-gray-700 hover:text-blue-700 focus:outline-none p-2 rounded-lg hover:bg-gray-100">
+              <span>
+                <!-- Icono del clipboard (visible antes de copiar) -->
+                <svg xml:space="preserve" style="enable-background:new 0 0 512 512" viewBox="0 0 6.35 6.35" y="0" x="0" height="20" width="20" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xmlns="http://www.w3.org/2000/svg" class="clipboard">
+                  <g>
+                    <path fill="currentColor" d="M2.43.265c-.3 0-.548.236-.573.53h-.328a.74.74 0 0 0-.735.734v3.822a.74.74 0 0 0 .735.734H4.82a.74.74 0 0 0 .735-.734V1.529a.74.74 0 0 0-.735-.735h-.328a.58.58 0 0 0-.573-.53zm0 .529h1.49c.032 0 .049.017.049.049v.431c0 .032-.017.049-.049.049H2.43c-.032 0-.05-.017-.05-.049V.843c0-.032.018-.05.05-.05zm-.901.53h.328c.026.292.274.528.573.528h1.49a.58.58 0 0 0 .573-.529h.328a.2.2 0 0 1 .206.206v3.822a.2.2 0 0 1-.206.205H1.53a.2.2 0 0 1-.206-.205V1.529a.2.2 0 0 1 .206-.206z"></path>
+                  </g>
+                </svg>
+                <!-- Icono de verificación (visible después de copiar) -->
+                <svg xml:space="preserve" style="enable-background:new 0 0 512 512" viewBox="0 0 24 24" y="0" x="0" height="18" width="18" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xmlns="http://www.w3.org/2000/svg" class="checkmark hidden">
+                  <g>
+                    <path data-original="#000000" fill="currentColor" d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
+                  </g>
+                </svg>
+              </span>
+            </button>
+            
+            <!-- Tooltip al estilo Flowbite -->
+            <div id="tooltip-copiar" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+              <span class="tooltip-text" data-text-initial="Copiar" data-text-end="¡Copiado!">Copiar</span>
+              <div class="tooltip-arrow" data-popper-arrow></div>
+            </div>
+          </div>
+
+        </div>
+
       </div>
+
       
-      <div id="accordion" class="col-sm-8">
-        <form method="POST">
-        <div class="card">
-          <div class="card-header">
-            <a class="collapsed btn" data-bs-toggle="collapse" href="#collapseOne">
-              Cambiar contraseña:
-            </a>
+      
+      <div class="lg:col-span-1 2xl:col-span-1  w-full gap-4 bg-white shadow-custom p-5 rounded-[30px] opado">
+        <h3 class=" text-[16px]">Actualizar Datos</h3>
+        
+        <div class="flex flex-col gap-4 mt-3">
+          <!-- 
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-semibold text-gray-500" for="card_number">Nombre de Usario</label>
+            {{ render_field(form.username, class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all", readonly=readonly, value=usuario.username, id="NombreUsuario") }}
           </div>
-          <div id="collapseOne" class="collapse" data-bs-parent="#accordion">
-            <div class="card-body">
-              <div class="row">
-                <div class="col-sm-5">
-                  Nueva contraseña:{{ render_field(form.password, id="password" ,class="form-control") }}
-                </div>
-                <div class="col-sm-5">
-                  Verificar contraeña:{{ render_field(form.confirm_password , class="form-control", id="confirmar" ) }}
-                </div>
-                <div class="col mt-4">
-                  <button type="submit" class="btn btn-success" onclick="location.reload();" > <span>Enviar</span></button>
-                </div>
-              </div>
-              
-            </div>
-          </div>
+        -->
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-gray-500" for="card_name">Cambiar Número Telefónico</label>
+          {{ render_field(form.telefono, class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all" , value = usuario.telefono) }}
         </div>
-  
-        <div class="card">
-          <div class="card-header">
-            <a class="collapsed btn" data-bs-toggle="collapse" href="#collapseTwo">
-              Cambiar Email
-            </a>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-semibold text-gray-500" for="card_name">Cambiar Contraseña</label>
+            {{ render_field(form.password, id="password" , class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all" , id="Contraseña") }}
           </div>
-          <div id="collapseTwo" class="collapse" data-bs-parent="#accordion">
-            <div class="card-body">
-              <div class="row">
-                <div class="col-sm-5">
-                  Nuevo email:{{ render_field(form.email, id="email" ,class="form-control") }}
-                </div>
-                <div class="col-sm-5">
-                  Verificar email:{{ render_field(form.verify_email , class="form-control", id="confirmar" ) }}
-                </div>
-                <div class="col mt-4">
-                  <input type ="hidden" name = "csrf_token" value ="{{csrf_token()}}"/>
-                  <button type="submit" class="btn btn-success" onclick="location.reload();" > <span>Enviar</span></button>
-                </div>
-              </div>
-            </div>
+        
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-semibold text-gray-500" for="card_name">Confirmar cambio de contraseña</label>
+            {{ render_field(form.Confirmarpassword, id="passwordConfirmar", class="w-full h-10 px-4 rounded-lg bg-gray-200 border border-transparent focus:border-gray-900 focus:bg-white focus:outline-none transition-all" , id="ContraseñaConfirmar") }}
           </div>
+        </div> 
+
+        <div class="flex w-full justify-end items-center gap-3">
+          <button
+          class=" mt-3 cursor-pointer text-zinc-200 flex gap-2 items-center bg-rojo-crm px-4 py-2 rounded-lg font-medium text-sm hover:bg-azul-dark transition-all ease-in duration-200">
+            Cancelar
+
+        </button>
+        <button
+        class=" mt-3 cursor-pointer text-zinc-200 flex gap-2 items-center bg-valor-azul px-4 py-2 rounded-lg font-medium text-sm hover:bg-azul-dark transition-all ease-in duration-200">
+          Enviar
+
+      </button>
         </div>
-      </form>
+
+
       </div>
-    
+
+    </div>
+  </form>
+
+
+
+
+
+
+
+<!-- 
+<div class="flex w-full bg-white shadow-custom p-5 rounded-2xl">
+  <div class="grid grid-cols-5 w-full gap-5">
+    <div class="col-span-1 flex items-center justify-center">
+      <div class="w-full aspect-square">
+        <img src="{{ url_for('static', filename=usuario.path_imagen_user) }}" 
+              class="w-full h-full object-cover rounded-full" 
+              alt="User Image">
+      </div>
+    </div>
+
+    <div class="col-span-4 flex flex-col">
+      <div class="flex">
+        <h2>{{rest[0]['ename']}}</h2>
+      </div>
+
+      <div class="grid grid-cols-4">
+        <div class="flex p-3 gap-2 ">
+          <p class=" font-bold">Ficha :</p> {{rest[0]['pernr']}}
+        </div>
+
+        <div class="flex p-3 gap-2 col-span-2 ">
+          <p class=" font-bold">Departamento:</p> {{rest[0]['orgtx']}}
+        </div>
+
+
+        <div class="flex p-3 gap-2 col-span-2" >
+          <p class=" font-bold">Cargo :</p> {{rest[0]['plstx']}}
+        </div>
+
+        <div class="flex p-3 gap-2 col-span-2">
+          <p class="font-bold">Supervisor:</p> {{rest[0]['nombreSuperv']}}
+        </div>
+
+      </div>
+
     </div>
   </div>
-</main>
+</div>
+
+
+-->
+
+
 
 {% endblock %}
 
-{% block script %}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</body>
-</html>
+{% block js%}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js"></script>
+
 {% endblock %}

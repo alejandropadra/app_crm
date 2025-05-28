@@ -1,0 +1,317 @@
+<div class="col-span-1 flex items-center justify-center">
+    <div class="w-full aspect-square">
+      <img src="{{ url_for('static', filename=usuario.path_imagen_user) }}" 
+            class="w-full h-full object-cover rounded-full" 
+            alt="User Image">
+    </div>
+  </div>
+
+
+
+  <div class="flex flex-col flex-auto w-auto bg-white shadow-custom h-full p-4 rounded-[16px]">
+    <h3 class=" text-[16px] text-center mt-3 ">Información de Contacto</h3>
+    <div class="flex items-center justify-center gap-3 py-2 ">
+      <h5 class=" text-[14px]" id="correoUsuario">{{usuario.email}}</h5>
+        <button class="copy" id="copiarCorreo">
+          <span data-text-end="Copied!" data-text-initial="Copiar" class="tooltip"></span>
+          <span>
+            <svg xml:space="preserve" style="enable-background:new 0 0 512 512" viewBox="0 0 6.35 6.35" y="0" x="0" height="20" width="20" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xmlns="http://www.w3.org/2000/svg" class="clipboard">
+              <g>
+                <path fill="currentColor" d="M2.43.265c-.3 0-.548.236-.573.53h-.328a.74.74 0 0 0-.735.734v3.822a.74.74 0 0 0 .735.734H4.82a.74.74 0 0 0 .735-.734V1.529a.74.74 0 0 0-.735-.735h-.328a.58.58 0 0 0-.573-.53zm0 .529h1.49c.032 0 .049.017.049.049v.431c0 .032-.017.049-.049.049H2.43c-.032 0-.05-.017-.05-.049V.843c0-.032.018-.05.05-.05zm-.901.53h.328c.026.292.274.528.573.528h1.49a.58.58 0 0 0 .573-.529h.328a.2.2 0 0 1 .206.206v3.822a.2.2 0 0 1-.206.205H1.53a.2.2 0 0 1-.206-.205V1.529a.2.2 0 0 1 .206-.206z"></path>
+              </g>
+            </svg>
+            <svg xml:space="preserve" style="enable-background:new 0 0 512 512" viewBox="0 0 24 24" y="0" x="0" height="18" width="18" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xmlns="http://www.w3.org/2000/svg" class="checkmark">
+              <g>
+                <path data-original="#000000" fill="currentColor" d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
+              </g>
+            </svg>
+          </span>
+        </button>
+    </div>
+
+    <div class="flex items-center justify-center gap-3 py-2 ">
+      <h5 class=" text-[13px]" >Extensión Tel:</h5>
+      <h5 class=" text-[14px]" id="Extensión">4040</h5>
+        <button class="copy" id="copiarCorreo">
+          <span data-text-end="Copied!" data-text-initial="Copiar" class="tooltip"></span>
+          <span>
+            <svg xml:space="preserve" style="enable-background:new 0 0 512 512" viewBox="0 0 6.35 6.35" y="0" x="0" height="20" width="20" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xmlns="http://www.w3.org/2000/svg" class="clipboard">
+              <g>
+                <path fill="currentColor" d="M2.43.265c-.3 0-.548.236-.573.53h-.328a.74.74 0 0 0-.735.734v3.822a.74.74 0 0 0 .735.734H4.82a.74.74 0 0 0 .735-.734V1.529a.74.74 0 0 0-.735-.735h-.328a.58.58 0 0 0-.573-.53zm0 .529h1.49c.032 0 .049.017.049.049v.431c0 .032-.017.049-.049.049H2.43c-.032 0-.05-.017-.05-.049V.843c0-.032.018-.05.05-.05zm-.901.53h.328c.026.292.274.528.573.528h1.49a.58.58 0 0 0 .573-.529h.328a.2.2 0 0 1 .206.206v3.822a.2.2 0 0 1-.206.205H1.53a.2.2 0 0 1-.206-.205V1.529a.2.2 0 0 1 .206-.206z"></path>
+              </g>
+            </svg>
+            <svg xml:space="preserve" style="enable-background:new 0 0 512 512" viewBox="0 0 24 24" y="0" x="0" height="18" width="18" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xmlns="http://www.w3.org/2000/svg" class="checkmark">
+              <g>
+                <path data-original="#000000" fill="currentColor" d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
+              </g>
+            </svg>
+          </span>
+        </button>
+        <button class="copy items-center flex justify-center !bg-blue-500" id="copiarCorreo">
+          <span data-text-end="Copied!" data-text-initial="Modificar" class="tooltip "></span>
+          <span class="material-symbols-rounded !text-white">
+            edit
+            </span>
+        </button>
+    </div>
+
+
+  </div>
+
+
+
+
+  <script>
+    
+
+function AddRow(event) {
+  event.preventDefault(); 
+
+
+  const tabla = document.getElementById('indicadorTable').rows.length;
+  console.log(tabla)
+  
+  if (tabla > 4) {
+      showAlert('No puedes registrar mas de 3 Indicadores', 'error');
+      contador--
+      return;
+  }
+  if (contador == 1){
+      document.getElementById("footerPeso").textContent = "0";
+  }
+
+  const footerPesoText = document.getElementById("footerPeso").textContent.trim();
+  const footerPesoInt = parseInt(footerPesoText, 10) || 0; 
+  console.log(footerPesoText)
+  const indicador = document.getElementById("Indicador").value.trim();
+  const peso = document.getElementById("peso").value.trim();
+
+
+
+
+  if (parseInt(peso)>40 || parseInt(peso) <10 ){
+      showAlert('El Peso Minimo aceptable es 10%, El maximo es 40% ', 'error')
+      enfocarInput("peso");
+      contador --
+      return;
+  }
+
+  if (contador==2){
+      if (footerPesoInt + parseInt(peso) >70){
+          console.log(peso)
+          showAlert('El peso total te dará mayor que 80... lo cual no está permitido, coloca un peso menor que 30 ', 'error')
+          enfocarInput("peso");
+          contador --
+          return;
+      }
+  }
+
+  const tendencia = document.getElementById("Tendencia").value.trim();
+  let resultadoCumplimiento = 0;
+  const AFPROXPPTO = document.getElementById("AFPROXPPTO").value.trim();
+  const AFACTUAL = document.getElementById("AFACTUAL").value.trim();
+
+  
+  let AFPROX = document.getElementById("AFPROX").value.trim();
+  const desempeno = document.getElementById("desempeno")?.value.trim() || "N/A"; 
+  const version = document.getElementById("version")?.value.trim() || "N/A";
+
+  /* Condicionales de Para los indicadores*/
+
+  if(AFPROX != ''){
+      if (tendencia == "A"){
+          console.log("la tendencia es A")
+          resultadoCumplimiento = AFPROX / AFPROXPPTO * peso
+          console.log(resultadoCumplimiento)
+      }else if (tendencia == "D"){
+          console.log("la tendencia es D")
+          resultadoCumplimiento = AFPROXPPTO/ AFPROX * peso
+          console.log(resultadoCumplimiento)
+      }
+  }
+
+
+
+  
+  let sumaTotalPesos =0
+
+  sumaTotalPesos= footerPesoInt + parseInt(peso, 10);
+
+  if (sumaTotalPesos > 80) {
+      showAlert('La suma de los pesos no puede exceder el 80%', 'error');
+      contador --
+      return;
+  }
+
+  if( contador == 3 ){
+      if (sumaTotalPesos > 80){
+          showAlert('La suma de los pesos no puede exceder el 80%', 'error');
+          contador --
+          return;
+      }
+  }
+
+
+
+  if (!indicador || !peso || !tendencia || !AFACTUAL || !AFPROXPPTO ) {
+      showAlert('Todos los campos deben estar completos', 'error');
+      contador --
+      return;
+  }
+
+  if (isNaN(peso) || peso <= 0 || peso > 100) {
+      showAlert('El peso debe estar entre 1 y 100.', 'error');
+      contador --
+      return;
+  }
+  let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+
+  fetch('/api/indicadores', {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken 
+      },
+      body: JSON.stringify({
+          nombre_indicador: "Indicador X",
+          tendencia: "Ascendente",
+          peso: 0.8,
+          real_af_antes: 100,
+          objetivo_af_actual: 150,
+          real_af_actual: 120,
+          cumplimiento: 80,
+          desempeno: "Bueno",
+          status: "Activo",
+          fecha_aprobacion: "2025-04-10",
+          ficha_usuario: 12345,
+          año_fiscal: 2025
+      })
+  })
+  .then(res => res.json())
+  .then(data => console.log(data))
+  .catch(err => console.error('Error:', err));
+  
+
+  /*
+  const tableBody = document.getElementById("indicadorTable").querySelector("tbody");
+  const newRow = document.createElement("tr");
+  newRow.classList.add("hover:bg-gray-100", "dark:hover:bg-gray-700");
+
+  newRow.innerHTML = `
+      <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
+          <div class="flex items-center">
+              <input type="checkbox" class="row-checkbox w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+          </div>
+      </td>
+      <th class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4 text-left max-w-[12rem] break-words">${indicador}</th>
+      <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4 text-center">${tendencia}</td>
+      <td class="border-t-0 px-4 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap flex justify-center py-2">
+          <div class="relative w-8 h-24 z-10">
+              <div class="overflow-hidden w-full h-full flex flex-col justify-end items-center rounded bg-blue-200 relative">
+                  <div style="height: ${peso}%; width: 100%;" class="shadow-none flex items-center justify-center text-white bg-blue-500">
+                      <span class="text-white font-semibold absolute top-2/4">${peso}%</span>
+                  </div>
+              </div>
+          </div>
+      </td>
+      <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-center">${AFACTUAL}</td>
+      <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-center">${AFPROXPPTO}</td>
+      <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-center">${AFPROX}</td>
+      <td class="border-t-0 px-4 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap flex justify-center py-2">
+          <div class="relative w-8 h-24 z-10">
+              <div class="overflow-hidden w-full h-full flex flex-col justify-end items-center rounded bg-blue-200 relative">
+                  <div style="height: ${resultadoCumplimiento}%; width: 100%;" class="shadow-none flex items-center justify-center text-white bg-blue-500">
+                      <span class="text-white font-semibold absolute top-2/4">${resultadoCumplimiento}%</span>
+                  </div>
+              </div>
+          </div>
+      </td>
+      <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-center">${desempeno}</td>
+      <td class="border-t-0 px-4 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-center">${version}</td>
+      <td class="border-t-0 pr-4 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+          <div class="flex flex-col gap-2">
+              <div class="relative w-full">
+                  <!-- Botón con tooltip -->
+                  <button data-tooltip-target="tooltip-hoja${contador}" data-tooltip-placement="top" class="p-2 w-full bg-azul-dark text-white rounded-xl" onclick="window.open('/src/Plantillas/Hoja_vida.html', '_blank')">
+                      Hoja de Vida
+                  </button>
+                  <!-- Tooltip -->
+                  <div id="tooltip-hoja${contador}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700">
+                      Abrir en una nueva pestaña
+                      <div class="tooltip-arrow" data-popper-arrow></div>
+                  </div>
+              </div>
+
+              <div class="relative w-full">
+                  <!-- Botón con tooltip -->
+                  <button data-tooltip-target="tooltip-cronograma${contador}" data-tooltip-placement="top" class="p-2 w-full bg-azul-dark text-white rounded-xl" onclick="window.open('/src/Plantillas/Hoja_vida.html', '_blank')">
+                      Cronograma
+                  </button>
+                  <!-- Tooltip -->
+                  <div id="tooltip-cronograma${contador}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700">
+                      Abrir en una nueva pestaña
+                      <div class="tooltip-arrow" data-popper-arrow></div>
+                  </div>
+              </div>
+              
+          </div>
+      </td>
+      <td class="border-t-0 pr-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+          <button class="p-2 w-full bg-azul-dark text-white rounded-xl" onclick="editRow(this)">Editar</button>
+      </td>
+  `;
+
+  setTimeout(() => {
+      const trigger1 = document.querySelector(`[data-tooltip-target="tooltip-hoja${contador}"]`);
+      const target1 = document.getElementById(`tooltip-hoja${contador}`);
+      new Tooltip(target1, trigger1);
+
+      const trigger2 = document.querySelector(`[data-tooltip-target="tooltip-cronograma${contador}"]`);
+      const target2 = document.getElementById(`tooltip-cronograma${contador}`);
+      new Tooltip(target2, trigger2);
+  }, 100); // Delay mínimo para asegurar que se renderice
+
+
+  const filaEjemplo = document.getElementById("fila_ejemplo")
+  if (filaEjemplo){
+      filaEjemplo.remove()
+  }
+
+  tableBody.appendChild(newRow);*/
+
+  if (typeof cerrarModal === "function") {
+      cerrarModal();
+  }
+  /*
+  document.getElementById("footerPeso").textContent = "";
+  document.getElementById("footerPeso").textContent = sumaTotalPesos;
+*/
+  // Reiniciar formulario
+  /*
+  const indicatorForm = document.getElementById("indicatorForm");
+  if (indicatorForm) {
+      indicatorForm.reset();
+  }
+
+  let totalInput = document.getElementById("total_indicadores");
+  totalInput.value = contador;
+
+  const hiddenInputsContainer = document.getElementById("hiddenInputsContainer");
+  hiddenInputsContainer.insertAdjacentHTML("beforeend", `
+      <input type="hidden" name="indicador_${contador}" id="indicador_${contador}" value="${indicador}">
+      <input type="hidden" name="tendencia_${contador}" id="tendencia_${contador}" value="${tendencia}">
+      <input type="hidden" name="peso_${contador}" id="peso_${contador}" value="${peso}">
+      <input type="hidden" name="afactual_${contador}" id="afactual_${contador}" value="${AFACTUAL}">
+      <input type="hidden" name="afproxpppto_${contador}" id="afproxpppto_${contador}" value="${AFPROXPPTO}">
+      <input type="hidden" name="afprox_${contador}" id="afprox_${contador}" value="${AFPROX}">
+      <input type="hidden" name="cumplimiento_${contador}" id="cumplimiento_${contador}" value="${resultadoCumplimiento}">
+      <input type="hidden" name="desempeno_${contador}" id="desempeno_${contador}" value="${desempeno}">
+      <input type="hidden" name="estatus_${contador}" id="estatus_${contador}" value="${version}">
+  `);*/
+
+}
+
+
+
+
+  </script>

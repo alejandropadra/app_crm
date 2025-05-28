@@ -1,0 +1,77 @@
+
+{% extends 'layout.html' %}
+{% from 'helpers/_forms.html' import render_field %}
+{%block tittle%}Login{%endblock%}
+
+{%block body%}
+
+    <div class="flex gap-3 justify-center items-center  px-[100px] py-6">
+        <div class=" w-[75%] shadow-custom h-auto rounded-3xl py-7 px-11 flex flex-col gap-5 relative" style="background-color: rgba(255, 255, 255, 0.87);" >
+            <h1 class="text-center">Registro de Usuario</h1>
+            <form class="form-type-1 flex flex-col gap-5" method="post">
+                {{ form.hidden_tag() }}
+
+                <div class="grid grid-cols-1 gap-4 ">
+                    <div class="flex flex-col">
+                        <h3 class="ml-2">Nombre</h3>
+                        <div class="input-container">
+                            <span class="material-symbols-rounded">
+                                person
+                                </span>
+                            {{ render_field(form.nombre, class="styled-input", id="nombre", placeholder= "Ingrese el nombre del usuario") }}
+                        </div> 
+                    </div>
+                
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 ">
+                    <div class="flex flex-col">
+                        <h3 class="ml-2">Numero de cliente en SAP</h3>
+                        <div class="input-container">
+                            <span class="material-symbols-rounded">
+                                contact_emergency
+                                </span>
+                            {{ render_field(form.n_cliente, class="styled-input", id="n_cliente_sap", placeholder= "Ingrese el numero de  SAP del cliente") }}
+                        </div> 
+                    </div>
+                
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 ">
+                    <div class="flex flex-col">
+                        <h3 class="ml-2">Email</h3>
+                        <div class="input-container">
+                            <span class="material-symbols-rounded">
+                                alternate_email
+                                </span>
+                            {{ render_field(form.email, class="styled-input", id="nemail_cliente", placeholder= "Ingrese el correo del cliente") }}
+                        </div> 
+                    </div>
+                
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 ">
+                    <div class="flex flex-col">
+                        <h3 class="ml-2">Rif</h3>
+                        <div class="input-container">
+                            <span class="material-symbols-rounded">
+                                badge
+                                </span>
+                            {{ render_field(form.rif, class="styled-input", id="rif", placeholder= "Ingrese el rif del cliente") }}
+                        </div> 
+                    </div>
+                
+                </div>
+
+
+                <button class="bg-[--first-color] text-white px-4 py-3 rounded-[30px] transition duration-200 ease-in-out hover:bg-blue-600  focus:outline-none cursor-pointer text-center text-xl" >
+                    Enviar
+                </button>
+
+
+            </form>
+        </div>
+    </div>
+
+
+{%endblock%}

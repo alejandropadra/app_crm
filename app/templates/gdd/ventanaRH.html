@@ -1,0 +1,331 @@
+{% extends 'layout.html' %}
+{% from 'helpers/_forms.html' import render_field %}
+
+{% block body %}
+<style>
+.easepick-wrapper {
+    --color-fg-primary: #3073f1;
+    --color-fg-selected: #ffffff;
+}
+
+
+</style>
+
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<input type="hidden" value={{status_actual}} name="" id="status_actual">
+
+<div class="flex w-full justify-start my-7 mx-7 items-center gap-3">
+
+    <a onclick="window.history.back()"  class="tarjeta-base h-4 w-4 flex justify-center items-center cursor-pointer bg-[--azul-dark] !transform-none hover:bg-slate-300 transition-all ease-out duration-100 ">
+        <span class="material-symbols-rounded text-white">
+            arrow_back
+            </span>
+    </a>
+    <h3>Administración Talento Humano</h3> <h3 class=" text-[--coral]"> </h3>
+</div>
+
+
+
+
+
+
+<div class="p-6 flex gap-5 max-h-full" >
+
+
+
+
+<!-- 
+    <div class=" flex flex-col gap-5 max-w-72 bg-white rounded-xl shadow-custom p-4 items-center justify-center" >
+        <h3 class=" !text-[16px] text-center">Habilitar / bloquear masivamente proceso de GDD  </h3>
+        <div>Estdao actual: <span id="estadoActual" class=" font-bold {%if status_actual == 'Abierto'%} text-[#047c54] {%else%} text-[#e32c24] {%endif%}"> {%if status_actual == 'Abierto' or status_actual == 'AFACTIVO'%} Abierto {%else%} Cerrado {%endif%}  </span></div>
+        <input id="inpLock" type="checkbox"  >
+        <label class="btn-lock" for="inpLock">
+            <svg width="36" height="40" viewBox="0 0 36 40">
+                <path class="lockb" d="M27 27C27 34.1797 21.1797 40 14 40C6.8203 40 1 34.1797 1 27C1 19.8203 6.8203 14 14 14C21.1797 14 27 19.8203 27 27ZM15.6298 26.5191C16.4544 25.9845 17 25.056 17 24C17 22.3431 15.6569 21 14 21C12.3431 21 11 22.3431 11 24C11 25.056 11.5456 25.9845 12.3702 26.5191L11 32H17L15.6298 26.5191Z"></path>
+                <path class="lock" d="M6 21V10C6 5.58172 9.58172 2 14 2V2C18.4183 2 22 5.58172 22 10V21"></path>
+                <path class="bling" d="M29 20L31 22"></path>
+                <path class="bling" d="M31.5 15H34.5"></path>
+                <path class="bling" d="M29 10L31 8"></path>
+            </svg>
+        </label>
+    </div>-->
+
+
+    <div class=" flex p-5 gap-4 bg-white shadow-custom rounded-2xl flex-col">
+        <h3 class=" text-center">Cambio de Estado de forma masiva del proceso GDD</h3>
+        <p class=" text-center">Haga Click en el estado que desea activar</p>
+        <div class=" flex flex-col">
+            <p class=" font-semibold text-center"> Estado Actual GDD:  <span id="spanGDD" class=" font-bold {%if status_actual == 'Abierto'%} text-[#047c54] {%else%} text-[#e32c24] {%endif%}"  " > {{status_actual}}</span></p>
+            <p class=" font-semibold text-center"> Estado Actual indicadores:  <span id="spanIndicadores" class=" font-bold {%if status_actual == 'Abierto'%} text-[#047c54] {%else%} text-[#e32c24] {%endif%}"  " > {{status_actual}}</span></p>
+        </div>
+        
+
+        <div class="flex gap-4 justify-center">
+            <div class=" px-[7px] py-2 rounded-full ">
+                <label class="radioCheck uno text-white font-semibold">
+                    <input  name="radio" type="radio" value="Cerrado"  id="inputradioDos"/>
+                    <svg width="36" height="40" viewBox="0 0 36 40">
+                        <path class="lockb" d="M27 27C27 34.1797 21.1797 40 14 40C6.8203 40 1 34.1797 1 27C1 19.8203 6.8203 14 14 14C21.1797 14 27 19.8203 27 27ZM15.6298 26.5191C16.4544 25.9845 17 25.056 17 24C17 22.3431 15.6569 21 14 21C12.3431 21 11 22.3431 11 24C11 25.056 11.5456 25.9845 12.3702 26.5191L11 32H17L15.6298 26.5191Z"></path>
+                        <path class="lock" d="M6 21V10C6 5.58172 9.58172 2 14 2V2C18.4183 2 22 5.58172 22 10V21"></path>
+                        <path class="bling" d="M29 20L31 22"></path>
+                        <path class="bling" d="M31.5 15H34.5"></path>
+                        <path class="bling" d="M29 10L31 8"></path>
+                    </svg>
+                    
+                    <span class="name">Cerrar</span>
+                </label>
+            </div>
+    
+            <div class=" px-[7px] py-2 rounded-full ">
+                <label class="radioCheck dos text-white font-semibold">
+                    <input  name="radio" type="radio" value="Abierto"  id="inputradio"/>
+                    <svg width="36" height="40" viewBox="0 0 36 40">
+                        <path class="lockb" d="M27 27C27 34.1797 21.1797 40 14 40C6.8203 40 1 34.1797 1 27C1 19.8203 6.8203 14 14 14C21.1797 14 27 19.8203 27 27ZM15.6298 26.5191C16.4544 25.9845 17 25.056 17 24C17 22.3431 15.6569 21 14 21C12.3431 21 11 22.3431 11 24C11 25.056 11.5456 25.9845 12.3702 26.5191L11 32H17L15.6298 26.5191Z"></path>
+                        <path class="lock" d="M6 21V10C6 5.58172 9.58172 2 14 2V2C18.4183 2 22 5.58172 22 10V21"></path>
+                        <path class="bling" d="M29 20L31 22"></path>
+                        <path class="bling" d="M31.5 15H34.5"></path>
+                        <path class="bling" d="M29 10L31 8"></path>
+                    </svg>
+                    
+                    <span class="name">Abrir</span>
+                </label>
+            </div>
+    
+    
+            <div class=" px-[7px] py-2 rounded-full ">
+                <label class="radioCheck tres text-white font-semibold">
+                    <input  name="radio" type="radio" value="AFACTIVO"  id="inputradioTres"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-power-icon lucide-square-power !m-0"><path d="M12 7v4"/><path d="M7.998 9.003a5 5 0 1 0 8-.005"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                    
+                    <span class="name">AF Actual</span>
+                </label>
+            </div>
+        </div>
+        
+
+
+
+    </div>
+
+        <div class=" bg-white rounded-2xl shadow-custom p-5 flex flex-col gap-4 relative">
+            
+            <h3> Correo de
+                Notificación de inicio de periodo de carga de indicadores funcionales
+            </h3>
+            <form action="">
+                <div class=" relative  ">
+                    <div class="absolute top-3 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                        </svg>
+                    </div>
+                        <input id="startdate" class=" w-full blanco border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5" placeholder="El formato es DD-MM-YYY" />
+                    
+                </div>
+            <span class="small">Nota: Al abrir el calendario, seleccione dos fechas, una será la fecha de inicio y la ultima la de fin (en ese orden)</span>
+
+
+                <button id="enviarStart" type="button" class=" absolute bottom-8 right-5 cursor-pointer text-zinc-200 flex gap-2 items-center bg-valor-azul px-4 py-2 rounded-lg font-medium text-sm hover:bg-azul-dark transition-all ease-in duration-200">
+                    Enviar
+                </button>
+            </form>
+
+
+
+        </div>
+
+        <div class=" bg-white rounded-2xl shadow-custom p-5 flex flex-col gap-4 relative">
+            
+            <h3> Correo de
+                Notificación de cierre de periodo de carga de indicadores funcionales
+            </h3>
+            <form action="">
+                <div class=" relative  ">
+                    <div class="absolute top-3 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                        </svg>
+                    </div>
+                        <input id="finDate" class=" w-full blanco border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5" placeholder="El formato es DD-MM-YYY" />
+                    
+                </div>
+                <button id="enviarStartDos" type="button" class=" absolute bottom-8 right-5 cursor-pointer text-zinc-200 flex gap-2 items-center bg-valor-azul px-4 py-2 rounded-lg font-medium text-sm hover:bg-azul-dark transition-all ease-in duration-200 !z-0">
+                    Enviar
+                </button>
+            </form>
+
+
+
+        </div>
+
+
+
+
+
+    
+    
+
+
+
+
+</div>
+
+
+<div id="popup-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+            <button type="button" id="cancelButtons" class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="popup-modal">
+                <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                </svg>
+                <span class="sr-only">Close modal</span>
+            </button>
+            <div class="p-4 md:p-5 text-center">
+                <svg class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                </svg>
+                <div class=" mb-4">
+                    <h3 class= "text-lg font-normal text-gray-500 dark:text-gray-400" id="textoPrincipalModal">¿Estas seguro de hacer el bloqueo masivamente?</h3>
+                    <p class=" small" id="textoSmall">Recuerda, se le bloqueará a todos el proceso de GDD</p>
+                </div>
+
+                <button  type="button" id="seguro" class=" cancelButtons text-white bg-valor-azul hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                    Si, estoy seguro
+                </button>
+                <button  type="button" class=" cancelButtons py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">No, cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="popup-modalDos" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+            <button type="button" id="cancelButtons" class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="popup-modal">
+                <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                </svg>
+                <span class="sr-only">Close modal</span>
+            </button>
+            <div class="p-4 md:p-5 text-center">
+                <svg class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                </svg>
+                <div class=" mb-4">
+                    <h3 class= "text-lg font-normal text-gray-500 dark:text-gray-400" id="textoPrincipalModalDos">¿Estas seguro de hacer el bloqueo masivamente?</h3>
+                    <p class=" small" id="textoSmallDos">Recuerda, se le bloqueará a todos el proceso de GDD</p>
+                </div>
+
+                <button  type="button" id="seguroDos" class=" cancelButtons text-white bg-valor-azul hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                    Si, estoy seguro
+                </button>
+                <button  type="button" class=" cancelButtons py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">No, cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="popup-modalTres" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+            <button type="button" id="cancelButtons" class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="popup-modal">
+                <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                </svg>
+                <span class="sr-only">Close modal</span>
+            </button>
+            <div class="p-4 md:p-5 text-center">
+                <svg class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                </svg>
+                <div class=" mb-4">
+                    <h3 class= "text-lg font-normal text-gray-500 dark:text-gray-400" id="textoPrincipalModalTres">¿Estas seguro de hacer el bloqueo masivamente?</h3>
+                    <p class=" small" id="textoSmallTres">Recuerda, se le bloqueará a todos el proceso de GDD</p>
+                </div>
+
+                <button  type="button" id="seguroTres" class=" cancelButtons text-white bg-valor-azul hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                    Si, estoy seguro
+                </button>
+                <button  type="button" class=" cancelButtons py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">No, cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+<div id="popup-cargando" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700 flex items-center justify-center flex-col p-5 gap-4">
+            <h3>Enviando Correos... Por favor espera</h3>
+                <div role="status">
+                    <svg aria-hidden="true" class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/></svg>
+                    <span class="sr-only">Loading...</span>
+                </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+{% endblock %}
+
+{% block js%}
+<script src="{{ url_for('static', filename='js/ventanaRH.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.umd.min.js"></script>
+
+<script>
+        const picker = new easepick.create({
+        element: document.getElementById('startdate'),
+        css: [
+        'https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css',
+        ],
+        plugins: ['RangePlugin'],
+        RangePlugin: {
+        elementEnd: document.getElementById('end-date'),
+        },
+        format: 'DD-MM-YYYY',
+        lang: 'es-ES',
+    });
+
+
+
+        const picker2 = new easepick.create({
+        element: document.getElementById('finDate'),
+        css: [
+            'https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css',
+        ],
+        format: 'DD-MM-YYYY',
+        lang: 'es-ES',
+    });
+
+
+    function forceZIndex(pickerInstance, z = 9999) {
+
+    setTimeout(() => {
+        const shadowRoot = pickerInstance.ui.shadowRoot;
+        if (!shadowRoot) return;
+
+        const container = shadowRoot.querySelector('.container');
+        if (container) {
+            container.style.zIndex = z;
+        }
+    }, 100);
+}
+
+    forceZIndex(picker);
+    forceZIndex(picker2);
+</script>
+{% endblock %}

@@ -1,0 +1,313 @@
+{% extends 'layout.html' %}
+{% from 'helpers/_forms.html' import render_field %}
+
+{% block body %}
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<input type="hidden" value={{ficha_get}} id="ficha_get">
+<input type="hidden" value={{usuario.habilitacion_gdd}} name="" id="status_actual">
+
+
+<div class="flex w-full justify-start my-7 mx-7 items-center gap-3">
+
+    <button onclick="window.history.back()" class=" bg-slate-600 flex justify-center  w-10 h-10 rounded-[50%] items-center text-white hover:bg-slate-400 p-4  outline-none focus:outline-none ease-linear transition-all duration-150" type="button">
+        <span class="">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        </span>
+    </button>
+    <h3>Gestión de participante/</h3> <h3 class=" text-[--coral]"> Indicador del participante </h3>
+</div>
+
+
+
+
+
+<div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 mb-5">
+    {% include "components/tarjeta_perfil.html" %}
+
+
+    <div class="opado flex flex-col gap-5 max-w-80 bg-white rounded-xl shadow-custom p-4 items-center justify-center" >
+        <h3 class=" !text-[15px] text-center">Habilitar / bloquear proceso de GDD  </h3>
+        <div>Estdao actual: <span id="estadoActual" class=" font-bold {%if usuario.habilitacion_gdd == 'Abierto' or usuario.habilitacion_gdd=='AFACTIVO' %} text-[#047c54] {%else%} text-[#e32c24] {%endif%}"> {%if usuario.habilitacion_gdd == 'Abierto' or usuario.habilitacion_gdd == 'AFACTIVO'%} Abierto {%else%} Cerrado {%endif%}  </span></div>
+        <input id="inpLock" type="checkbox"  >
+        <label class="btn-lock" for="inpLock">
+            <svg width="36" height="40" viewBox="0 0 36 40">
+                <path class="lockb" d="M27 27C27 34.1797 21.1797 40 14 40C6.8203 40 1 34.1797 1 27C1 19.8203 6.8203 14 14 14C21.1797 14 27 19.8203 27 27ZM15.6298 26.5191C16.4544 25.9845 17 25.056 17 24C17 22.3431 15.6569 21 14 21C12.3431 21 11 22.3431 11 24C11 25.056 11.5456 25.9845 12.3702 26.5191L11 32H17L15.6298 26.5191Z"></path>
+                <path class="lock" d="M6 21V10C6 5.58172 9.58172 2 14 2V2C18.4183 2 22 5.58172 22 10V21"></path>
+                <path class="bling" d="M29 20L31 22"></path>
+                <path class="bling" d="M31.5 15H34.5"></path>
+                <path class="bling" d="M29 10L31 8"></path>
+            </svg>
+        </label>
+    </div>
+
+</div>
+
+<div class="bg-white p-5 rounded-[20px] shadow-custom " id="tarjetaprincipalgdi" >
+    <form action="" method="post">
+
+        <div class="rounded-t mb-0 px-4 py-3 border-0 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <!-- Contenedor del título con flex-grow para ocupar el espacio a la izquierda -->
+            <div class="relative px-0 md:px-4 flex-grow flex gap-5">
+                <h3 class="text-left opado">aprobacion de Indicadores Funcionales</h3>
+                <!--<button id="autoayuda" type="button" class=" opado absolute md:static top-[-30px] right-[-35px] autoayuda bg-slate-600 flex justify-center  w-8 h-8 rounded-[50%] items-center text-white hover:bg-slate-400 p-4  outline-none focus:outline-none ease-linear transition-all duration-150" type="button">
+                    <span class="">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#fff" stroke-width="2.5" viewBox="0 0 256 256"><path d="M192,96c0,28.51-24.47,52.11-56,55.56V160a8,8,0,0,1-16,0V144a8,8,0,0,1,8-8c26.47,0,48-17.94,48-40s-21.53-40-48-40S80,73.94,80,96a8,8,0,0,1-16,0c0-30.88,28.71-56,64-56S192,65.12,192,96Zm-64,96a16,16,0,1,0,16,16A16,16,0,0,0,128,192Z"></path></svg>
+                </button>-->
+            </div>
+        
+            <!-- Contenedor de botones, alineados a la derecha -->
+            <div class="flex space-x-2 items-center">
+                <button type="button" id="boton_bloquear" class="opado cursor-pointer text-zinc-200 flex gap-2 items-center bg-rojo-crm px-4 py-2 rounded-lg font-medium text-sm hover:bg-red-300 transition-all ease-in duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-keyhole-icon lucide-lock-keyhole"><circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg>
+                    <p class="text-white">Bloquear Indicador(es)</p>
+                </button>
+
+                <button type="button" id="boton_abrir" class="opado cursor-pointer text-zinc-200 flex gap-2 items-center bg-green-600 px-4 py-2 rounded-lg font-medium text-sm hover:bg-green-300 transition-all ease-in duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-keyhole-open-icon lucide-lock-keyhole-open"><circle cx="12" cy="16" r="1"/><rect width="18" height="12" x="3" y="10" rx="2"/><path d="M7 10V7a5 5 0 0 1 9.33-2.5"/></svg>
+                    <p class="text-white">Abrir Indicador(es)</p>
+                </button>
+                
+            </div>
+        </div>
+
+        <div class="opado relative overflow-x-auto border border-gray-200 dark:border-gray-700 md:rounded-xl" id="contenedor-table">
+            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 divide-y divide-gray-200" id="indicadorTable">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="p-4">
+                            <div class="flex items-center">
+                                <input id="checkbox-all-search" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                <label for="checkbox-all-search" class="sr-only">checkbox</label>
+                            </div>
+                        </th>
+                        <th scope="col" class="px-6 py-3 min-w-[300px] max-w-[280px] break-words whitespace-normal " id="indicadorAyuda">
+                            Indicadores
+                        </th>
+                        <th scope="col" class="px-6 py-3 min-w-[70px] max-w-[280px] text-center" id="tendenciaIndicador">
+                            Tendencia
+                        </th>
+                        <th scope="col" class="px-6 py-3 min-w-[100px] max-w-[280px] text-center" id="pesoIndicador">
+                            Peso
+                        </th>
+                        <th scope="col" class="px-6 py-3  min-w-[120px] max-w-[280px] text-center" id="realafIndicador">
+                            Real AF25
+                        </th>
+                        <th scope="col" class="px-6 py-3 min-w-[160px] max-w-[280px] text-center" id="objetivoAFIndicador">
+                            PPTO U OBJETIVO AF26
+                        </th>
+                        <th scope="col" class="px-6 py-3 min-w-[160px] max-w-[280px] text-center" id="REAlAFAyuda">
+                            REAL AF26
+                        </th>
+                        <th scope="col" class="px-6 py-3 min-w-[100px] max-w-[280px] text-center" id="cumplimientoIndicador">
+                            Cumplimiento
+                        </th>
+                        <th scope="col" class="px-6 py-3 min-w-[100px] max-w-[280px] text-center" id="desempeñoIndicador">
+                            Desempeño
+                        </th>
+                        <th scope="col" class="px-6 py-3 min-w-[120px] max-w-[280px] text-center" id="estatusIndicador">
+                            Estado
+                        </th>
+
+                        <th scope="col" class="px-6 py-3 min-w-[120px] max-w-[280px] text-center" id="estatusIndicador">
+                            Estado del proceso
+                        </th>
+                        <th scope="col" class="px-6 py-3 min-w-[120px] max-w-[280px] text-center" id="archivosAyuda">
+                            Archivos
+                        </th>
+
+                        <th class="hidden"></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for indicador in indicadores %}
+                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                        <td class="w-4 p-4">
+                            <div class="flex items-center">
+                                <input id="checkbox-table-search-1" type="checkbox" class="row-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
+                            </div>
+                        </td>
+        
+                        <td class="px-4 py-3 text-sm text-gray-700  text-left break-words whitespace-normal align-center">
+                            {{indicador.nombre_indicador}}
+                        </td>
+        
+                        <td class="px-6 py-4 text-sm text-gray-700 text-center">
+                            {{indicador.tendencia}}
+                        </td>
+        
+                        <td class="px-6 py-4 text-sm text-gray-700 text-center font-bold">
+                            {{indicador.peso|int}}%
+                        </td>
+        
+                        <td class="px-6 py-4 text-sm text-gray-700 text-center">
+                            {% if indicador.real_af_antes%} {{indicador.real_af_antes}} {%else%} N/A {%endif%}
+                        </td>
+        
+                        <td class="px-6 py-4 text-sm text-gray-700 text-center">
+                            {% if indicador.objetivo_af_actual%} {{indicador.objetivo_af_actual}} {%else%} N/A {%endif%}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-700 text-center">
+                            {% if indicador.real_af_actual%} {{indicador.real_af_actual}} {%elif indicador.real_af_actual == 0%} 0{%else%} N/A {%endif%}
+                        </td>
+                        <td class="px-6 py-4 text-gray-700 font-extrabold text-center">
+        
+                        {% if indicador.cumplimiento%} {{indicador.cumplimiento}}% {%else%} 0% {%endif%}
+                        </td>
+        
+                        <td class=" px-6 py-4  text-center font-bold text-[#333]">
+                            <span class="{% if indicador.desempeno == 'O'%} bg-blue-300  
+                                            {% elif indicador.desempeno == 'UP'%} bg-red-300 
+                                            {% elif indicador.desempeno == 'FP-'%} bg-yellow-300 
+                                            {% elif indicador.desempeno == 'FP'%} bg-green-300 
+                                            {% elif indicador.desempeno == 'FP+'%} bg-green-300 
+                                            {% else %} bg-slate-300 text-slate-600 {%endif%}
+                                            font-bold
+                                            p-3 rounded-2xl">{% if indicador.desempeno%} {{indicador.desempeno}} {%else%} NN {%endif%}</span>
+                        </td>
+        
+                        <td class=" px-6 py-4  text-center">
+
+                            {% if indicador.status_aprobacion%}
+                                <span class=" p-3 rounded-xl text-center {% if indicador.status_aprobacion == 'A'%} bg-green-300  
+                                            {% elif indicador.status_aprobacion == 'R'%} bg-red-300 
+                                            {% elif indicador.status_aprobacion == 'C'%} bg-blue-300 
+                                            {%endif%} font-bold  text-[#333]" >{{indicador.status_aprobacion}}</span> 
+                            {%else%}
+N/A
+                            {%endif%}
+
+
+
+                        </td>
+
+                                
+                        <td class=" px-6 py-4  text-center">
+
+                            <span class=" flex flex-col items-center justify-center p-3 rounded-xl text-center {% if indicador.status == 'Abierto'%} bg-green-600  
+                                {% elif indicador.status == 'Cerrado'%} bg-rojo-crm  
+                                {%endif%} font-bold  text-[#333]" >
+                                {% if indicador.status == 'Abierto'%}
+                                    <p class="small !text-white ">{{indicador.status}}</p>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-keyhole-open-icon lucide-lock-keyhole-open text-white"><circle cx="12" cy="16" r="1"/><rect width="18" height="12" x="3" y="10" rx="2"/><path d="M7 10V7a5 5 0 0 1 9.33-2.5"/></svg>
+                                {%else%}
+                                    <p class="small !text-white ">{{indicador.status}}</p>
+                                    <svg  xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-keyhole-icon lucide-lock-keyhole text-white"><circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg>
+                                {%endif%}
+                            </span> 
+                        </td>
+        
+                        <td class="p-2">
+                            <div class="flex flex-col gap-5">
+                                <div class="w-full">
+                                    <!-- Botón con tooltip -->
+                                    <a data-tooltip-target="tooltip-default{{loop.index0}}" href="{{ url_for('.hoja_vida', indicador=indicador.id) }}" class="p-2 w-full bg-azul-dark text-white rounded-xl" id="hojavida" aria-disabled="true">
+                                        Hoja de Vida
+                                    </a>
+
+                                    <div id="tooltip-default{{loop.index0}}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                        Ver hoja de Vida
+                                        <div class="tooltip-arrow" data-popper-arrow></div>
+                                    </div>
+                                    
+                                </div>
+        
+                                <div class="w-full">
+                                    <!-- Botón con tooltip -->
+                                    <a data-tooltip-target="tooltip-default-cr{{loop.index0}}" href="{{ url_for('.cronograma', indicador=indicador.id) }}" class="p-2 w-full bg-azul-dark text-white rounded-xl" id="cronograma">
+                                        Cronograma
+                                    </a>
+                                    
+                                    <div id="tooltip-default-cr{{loop.index0}}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700">
+                                        Ver Cronograma
+                                        <div class="tooltip-arrow" data-popper-arrow></div>
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </td>
+        
+                        <td class=" hidden">"
+                            {{indicador.id}}
+                        </td>
+        
+                    </tr>
+
+                    {%endfor%}
+                    
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th scope="row"></th>
+                        <td></td>
+                        <td></td>
+                        <td class="pr-4 align-middle border text-xs whitespace-nowrap p-4 text-center font-bold bg-blue-200 text-[#333]" id="footerPeso">  {{ total_peso }}%</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="pr-4 align-middle border text-xs whitespace-nowrap p-4 text-center font-extrabold text-gray-700
+                        
+                                {% if total_cumplimiento < 50%}
+                                    bg-blue-200 
+                                {% elif total_cumplimiento >= 50%}
+                                    bg-green-300 
+                            {%endif%}" id="footerCumplimiento">{{total_cumplimiento}}%
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+
+    </form>
+</div>
+
+
+
+
+<div id="popup-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+            <button type="button" id="cancelButtons" class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="popup-modal">
+                <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                </svg>
+                <span class="sr-only">Close modal</span>
+            </button>
+            <div class="p-4 md:p-5 text-center">
+                <svg class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                </svg>
+                <div class=" mb-4">
+                    <h3 class= "text-lg font-normal text-gray-500 dark:text-gray-400" id="textoPrincipalModal">¿Estas seguro de hacer el bloqueo masivamente?</h3>
+                    <p class=" small" id="textoSmall">Recuerda, se le bloqueará a todos el proceso de GDD</p>
+                </div>
+
+                <button  type="button" id="seguro" class=" cancelButtons text-white bg-valor-azul hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                    Si, estoy seguro
+                </button>
+                <button  type="button" class=" cancelButtons py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">No, cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+{% endblock %}
+
+{% block js%}
+<script src="{{ url_for('static', filename='js/detalles_list_user.js') }}"></script>
+{% endblock %}

@@ -2,3 +2,5 @@ env/
 wsgi.py
 respaldos/
 test_connect
+node_modules/
+app/static/node_modules/

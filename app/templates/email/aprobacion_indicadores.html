@@ -1,0 +1,342 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plantilla de Correo</title>
+    <style>
+        :root{
+            --Morado: #7453a4;
+            --Naranja: #e67c24;
+            --Verde: #6abe45;
+            --Azul: #496fb6;
+            --Amarillo: #fcd62b;
+            --bg: #eaeaec;
+            --azul-dark: #03162c;
+        }
+        /* Estilos fundamentales */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #eaeaec;
+            font-family: Arial, sans-serif;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        
+        /* Contenedor principal */
+        .email-container {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+        
+        /* Tarjeta */
+        .card {
+            background-color: #ffffff;
+            border-radius: 17px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+            padding: 30px 20px;
+            margin: 20px;
+            border-top: solid var(--azul-dark) 10px;
+        }
+        .header{
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .estimado{
+            max-width: 300px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .estimado h3{
+            font-size: 13px;
+            font-weight: 600;
+            margin: 7px 0px;
+        }
+
+        .estimado h4{
+            font-size: 13px;
+            font-weight: 500;
+            margin: 7px 0px;
+        }
+        
+        /* Header de la tarjeta */
+        .logo {
+            display: flex;
+            width: 200px;
+            max-width: 210px;
+            overflow: hidden;
+            flex-direction: column;
+            border-radius: 26px;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        
+        .imagen {
+            max-width: 75px;
+            width: 68px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        
+        .imagen img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .valor {
+            max-width: 75px;
+            width: 90px;
+            flex-shrink: 0;
+            overflow: hidden;
+            position: absolute;
+            right: 40px;
+            top: -20px;
+        }
+        
+        .valor img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+        
+        .descripcion {
+            display: flex;
+            justify-content: center;
+        }
+        
+
+        .descripcion h3 {
+            font-weight: 600;
+            color: #333; /* Cambiado de blanco para que sea visible en fondo blanco */
+            font-size: 16px;
+            margin: 0;
+        }
+        
+        hr.separador {
+            border-top: 1px solid #e74c3c; /* Asumiendo que este es el color rojo-crm */
+            width: 100%;
+            margin: 4px 0;
+        }
+        
+        .filiales {
+            color: #555; /* Cambiado de blanco para que sea visible en fondo blanco */
+            font-weight: 200;
+            letter-spacing: 2px;
+            font-size: 13px;
+            margin: 5px 0;
+        }
+        
+
+        .card-content {
+            text-align: justify;
+            margin-top: 20px;
+        }
+        
+        .card-title {
+            color: black;
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+        
+        .card-text {
+            color: #666666;
+            font-size: 16px;
+            line-height: 1.5;
+
+        }
+
+        .card-text {
+            color: #333;
+            font-size: 14px;
+            line-height: 1.5;
+
+        }
+        
+        .bullet-list {
+            padding: 0;
+            list-style: none;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .bullet-list li {
+            position: relative;
+            padding-left: 25px;
+            margin-bottom: 15px;
+        }
+        
+
+        .bullet-list li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: #496fb6; 
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+
+        .bullet-list strong {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #496fb6;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        /* Para clientes de correo que no soportan algunos estilos */
+        @media screen {
+            .card {
+                box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+            }
+        }
+
+
+        .grid-container {
+            margin: 0px !important;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+            justify-items: center;
+            align-items: center;
+        }
+        
+        .grid-item {
+            width: 100%;
+            max-width: 130px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 80px;
+        }
+        
+        .grid-item img {
+            max-height: 60px;
+            max-width: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .coletilla{
+            font-size: 13px;
+            font-weight: 600;
+            font-style: italic;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="card">
+            <div class="header">
+                <div class="logo">
+                    <div class="logo-container">
+                        <div class="imagen">
+                            <img src="/app/static/img/Corimon_logo.png" alt="">
+                        </div>
+                        <div class="descripcion">
+                            <h3>Corimon, C.A.</h3>
+                        </div>
+                    </div>
+                    <hr class="separador">
+                    <h4 class="filiales">y sus empresas filiales</h4>
+                </div>
+
+                <div class="valor">
+                    <img src="/app/static/img/valor-removebg-preview.png" alt="">
+                </div>
+
+            </div>
+
+            <div class="card-content">
+                <h1 class="card-title">Bienvenido al Programa</h1>
+                <div class="estimado">
+                    <h3>Estimado/a : </h3>
+                    <h4>Eliezer Chirino</h4>
+                </div>
+                <p class="card-text">
+                    ¡Reciba un cordial saludo y la bienvenida a nuestra nueva plataforma de gestión del desempeño! 
+                    <br> <br>
+                    Nos complace darle acceso a esta herramienta diseñada para facilitar y optimizar el seguimiento de sus objetivos y desarrollo profesional. A través de esta plataforma, usted podrá:
+                    
+                    <ul class="bullet-list">
+                        <li><strong>Gestionar sus indicadores:</strong> Registrar y hacer seguimiento a sus indicadores funcionales de manera sencilla y eficiente.</li>
+                        <li><strong>Realizar su autoevaluación de competencias:</strong> Evaluar sus competencias, identificando fortalezas y áreas de mejora.</li>
+                        <li><strong>Para supervisores:</strong> Si usted tiene colaboradores a su cargo que participan en el programa, podrá realizar el seguimiento de su gestión del desempeño de forma centralizada y organizada.</li>
+                    </ul>
+
+                    
+                </p>
+
+                <p class="card-text">
+                    Le invitamos a explorar la plataforma y familiarizarse con sus funcionalidades. Estamos seguros de que esta herramienta será de gran utilidad para su crecimiento y el logro de los objetivos de la organización.
+                    <br> <br>
+
+                    En caso de tener alguna pregunta o necesitar asistencia, no dude en contactar a nuestro equipo de Talento Humano.
+                    ¡Le deseamos una experiencia productiva con esta nueva plataforma!
+                </p>
+
+                <div style="width: 100%; display: flex; justify-content:center">
+                    <a href="#" class="btn">Ingresa Aquí</a>
+                </div>
+
+                <div class="grid-container">
+                    <div class="grid-item">
+                        <img src="/app/static/img/CRP.png" alt="Imagen 1">
+                    </div>
+                    <div class="grid-item">
+                        <img src="/app/static/img/corimonYFiliales.png" alt="Imagen 2">
+                    </div>
+                    <div class="grid-item">
+                        <img src="/app/static/img/CER.png" alt="Imagen 3">
+                    </div>
+                    <div class="grid-item">
+                        <img src="/app/static/img/EEE.png" alt="Imagen 4">
+                    </div>
+                    <div class="grid-item">
+                        <img src="/app/static/img/mg.png" alt="Imagen 5">
+
+                    </div>
+                    <div class="grid-item">
+                        <img src="/app/static/img/RES.png" alt="Imagen 6">
+                    </div>
+                    <div class="grid-item">
+                        <img src="/app/static/img/PPV.png" alt="Imagen 7">
+                    </div>
+                </div>
+
+            </div>
+
+            <p class="coletilla">Este es un correo Automatico, por favor no responder</p>
+        </div>
+    </div>
+</body>
+</html>

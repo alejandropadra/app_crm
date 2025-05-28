@@ -1,103 +1,83 @@
-from wtforms import Form
-from wtforms import validators
-from wtforms import StringField,PasswordField, SelectField, HiddenField,BooleanField, EmailField
-from wtforms import DateField,FileField,IntegerField,RadioField,FloatField,TextAreaField
-from wtforms.validators import DataRequired, Length
+from flask_wtf import FlaskForm
+from wtforms import StringField,DateField, TextAreaField, SelectField, EmailField, PasswordField, RadioField, SubmitField, FileField, BooleanField, IntegerField
+from wtforms.validators import DataRequired,  Length, NumberRange
+from flask_wtf.file import FileField, FileAllowed, FileRequired
 
-from .models import User
 
-def length_honeypot(form, field):
-    if len(field.data) > 0:
-        raise validators.ValidationError('Solo los humanos pueden completar el registro!')
+class LoginForm(FlaskForm):
+    ficha = IntegerField('', validators=[DataRequired(), Length(min=4, max=25)])
+    password = PasswordField('', validators=[DataRequired()])
+    submit = SubmitField('Iniciar sesión')
+
+class GestionUsers(FlaskForm):
+    password = PasswordField('', validators=[ Length(min=6, max=25)])
+    Confirmarpassword = PasswordField('', validators=[ Length(min=6, max=25)])
+    username = StringField('', validators=[DataRequired(), Length(min=4, max=25)])
+    telefono = IntegerField('', validators=[ Length(min=4, max=25)])
     
-class LoginForm(Form):
-    rif = SelectField("", choices=[("J","J"),("G","G"),("V","V")])
-    n_rif = StringField("",[ validators.length(min=4,max=10),
-                            validators.DataRequired()])
-    clave = PasswordField("",[validators.length(min=4,max=20),
-                            validators.DataRequired()])
-    honeypot = HiddenField("", [ length_honeypot])
-
-class ContactForm(Form):
-    nombre= StringField("",[validators.DataRequired()])
-    telefono_contacto= StringField("",[validators.DataRequired()])
-    email = EmailField("", [validators.DataRequired(message='El email es requerido.'),
-        validators.Email(message='Ingre un email valido.')
-    ])
-    motivo =SelectField("", [validators.DataRequired()], choices=[("",""), 
-                                                ("Ventas", "Quiero vender sus productos"),
-                                                ("Particular", "Quiero comprar pinturas"),
-                                                ("Compras", "Quiero ofrecer mis productos o servicios"),
-                                                ("Empleo", "Quiero unirme a su equipo de trabajo")])
-
-class RegisterForm(Form):
-    rif = SelectField("", choices=[("J","J"),("G","G"),("V","V")])
-    n_rif = StringField("",[ validators.length(min=5,max=10),
-                            validators.DataRequired()])
-    username = StringField("",[ validators.length(min=2,max=50),
-                            validators.DataRequired()])
-    email = EmailField('', [
-        validators.length(min=6, max=100),
-        validators.DataRequired(message='El email es requerido.'),
-        validators.Email(message='Ingre un email valido.')
-    ])
-    password = PasswordField('', [
-        validators.DataRequired('El password es requerido.'),
-        validators.EqualTo('confirm_password', message='La contraseña no coincide.')
-    ])
-    confirm_password = PasswordField('', [validators.DataRequired()],)
-    '''accept = BooleanField('', [
-        validators.DataRequired()
-    ])'''
-    zona = SelectField("",[validators.DataRequired()], choices = [("",""),("Occidente","Occidente"),("Oriente","Oriente"),("Centro","Centro"),("all","all"),("Capital","Capital")])
-    nivel = SelectField("", choices=[("cliente","Cliente"),("corimon","Corimon"),("administrador","Administrador")])
-    codigo = StringField("",[validators.DataRequired('El codigo es requerido.')])
-    vendedor = StringField("",[validators.DataRequired('El vendedor es requerido.')])
     
-    def validate_username(self, username):
-        if User.get_by_username(username.data):
-            raise validators.ValidationError('El username ya se encuentra en uso.')
-
-    def validate_email(self, email):
-        if User.get_by_email(email.data):
-            raise validators.ValidationError('El email ya se encuentra en uso.')
-        
-
-    def validate(self):
-        if not Form.validate(self):
-            return False
-
-        if len(self.password.data) < 3:
-            self.password.errors.append('El password es demasiado corto.')
-            return False
-
-        return True
+class RegistrarUsuarios(FlaskForm):
+    telefono = IntegerField('', validators=[DataRequired(), Length(min=4, max=25)])
+    nombre = StringField('', validators=[DataRequired(), Length(min=4, max=50)])
+    apellido = StringField('', validators=[DataRequired(), Length(min=4, max=50)])
+    password = PasswordField('', validators=[DataRequired(), Length(min=4, max=100)])
+    email = EmailField('', validators=[DataRequired()])
+    departamento = StringField(
+        '',
+        validators=[
+            DataRequired()
+        ]
+    )
+    cargo = StringField("")
+    supervisor = StringField("")
+    documento_texto = StringField('')
+    n_ficha = IntegerField('', validators=[NumberRange(min=1, max=10000)])
+    nivel_corp = StringField(
+        '',
+    )
     
-class EditForm(Form):
-    rif = StringField("")
-    username = StringField("",[ validators.length(min=2,max=50),
-                            validators.DataRequired()])
-    email = EmailField('', [
-        validators.length(min=6, max=100),
-        validators.DataRequired(message='El email es requerido.'),
-        validators.Email(message='Ingre un email valido.')
-    ])
-    zona = SelectField("",[validators.DataRequired()], choices = [("",""),("Occidente","Occidente"),("Oriente","Oriente"),("Centro","Centro"),("all","all"),("Capital","Capital")])
-    nivel = SelectField("", choices=[("cliente","Cliente"),("corimon","Corimon"),("administrador","Administrador")])
-    codigo = StringField("")
-    seller = StringField("")
-    password = StringField("")
+    filial = StringField(
+        '',
+        validators=[
+            DataRequired()
+        ]
+    )
+    
+    documento = FileField(
+        '',
+        render_kw={'multiple': False}, 
+        validators=[FileAllowed(['jpg', 'jpeg', 'png'], 'Solo imágenes')]
+    )
+    nivel = SelectField("", 
+                        choices=[("Administrador","Administrador"),
+                                    ("Alto","Alto"),
+                                    ("Medio","Medio"),
+                                    ("Bajo","Bajo")])
+    
+class formgdi(FlaskForm):
+    submit = SubmitField('Submit')
 
-class PerfilForm(Form):
-    password = PasswordField('', [
-        validators.EqualTo('confirm_password', message='La contraseña no coincide.')
-    ])
-    confirm_password = PasswordField('')
-    email = EmailField('', [
-        validators.length(min=6, max=100),
-        validators.Email(message='Ingre un email valido.')
-    ])
-    verify_email = EmailField('', [
-        validators.length(min=6, max=100),
-        validators.Email(message='Ingre un email valido.')
-    ])
+
+
+class RegistrarHojaVida(FlaskForm):
+    vigencia_inicio = DateField('', format='%Y-%m-%d', validators=[DataRequired()])
+    vigencia_fin = DateField('', format='%Y-%m-%d', validators=[DataRequired()])
+    nivel_generacion = StringField("")
+    nivel_util = StringField("")
+    unidad_medida = StringField("")
+    naturaleza = StringField("")
+    definicion = TextAreaField("")
+    calculo = TextAreaField("")
+    tipo_indicador = SelectField("", 
+                        choices=[("Eficacia (resultado)","Eficacia (resultado)"),
+                                    ("Eficiencia (recursos)","Eficiencia (recursos)"),
+                                    ("Calidad","Calidad"),
+                                    ("Productividad","Productividad"),
+                                    ("Seguridad", "Seguridad"),
+                                    ("Cumplimiento", "Cumplimiento")
+                                ])
+    
+    
+    
+    
+    

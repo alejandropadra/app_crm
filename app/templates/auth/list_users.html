@@ -1,84 +1,278 @@
-
 {% extends 'layout.html' %}
 {% from 'helpers/_forms.html' import render_field %}
-{% block estilos %}
 
-{% endblock%}
-{% block container %}
+{% block body %}
+<meta name="csrf-token" content="{{ csrf_token() }}">
 
-<main>
-{% if current_user.nivel == "corimon" or current_user.nivel=="administrador" %}
-<section class="mt-4 row d-flex justify-content-center">
-<div class="mt-4 row d-flex justify-content-center ">
-<a href="{{ url_for('.registroUsuario')}}" class="boton col-4 mx-3" style="text-align: center; font-weight: 500;">Registrar usuario <i class="bi bi-person-bounding-box"></i></i> </a>
-</div>
-</section>
-{% endif %}
+<div class="flex justify-center w-full">
 
-<div class="container mt-4 table-responsive" style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); padding: 20px 20px 20px 20px; border-radius: 7px;">  
-    <table id="example" class="display cell-border" style="width:100%">
-        <thead>
-            <tr>
-                <th>RIF</th>
-                <th>Usuario</th>
-                <th>Correo Electronico</th>
-                <th>Zona</th>
-                <th>Nivel</th>
-                <th>Codigo</th>
-                <th>Detalles</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-           
-            <tr class="celda text-center" onclick="location.href='{{ url_for('.usuario', rif=user.rif)}}'"; style="cursor:pointer;" data-toggle="tooltip" data-placement="top" title="Click para mas detalles">
+
+    
+
+
+
+    <div class="w-full opado shadow-custom h-auto rounded-3xl py-7 px-11 flex flex-col gap-5 relative" style="background-color: rgba(255, 255, 255, 0.87);">
+        <!-- Agregar este div con el buscador justo debajo del título -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <h2 class="text-2xl font-semibold text-gray-800">Participantes Gestión del Desempeño</h2>
+        </div>
+
+
+        <div class=" w-full flex flex-col  rounded-2xl" >
+
+            <div class=" grid grid-cols-4 gap-4">
+    
+    
+                <div class=" col-span-1 relative flex items-center"><!--Filtro de la filial-->
+                    <div class="flex items-center justify-between w-full">
+                        <button id="dropdown-button-2" data-dropdown-toggle="dropdown-search-city" class=" rounded-xl w-full  shrink-0 z-10 inline-flex items-center justify-between py-2.5 px-4 text-sm font-medium text-center text-gray-500 border  border-gray-300  bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type="button">
+                            Filtro por Filial
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
+                        </button>
+                    </div>
+    
+                    <div id="dropdown-search-city" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg  w-44 dark:bg-gray-700">
+                        <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdown-button-2">
+                            <li>
+                                <button type="button" data-filial-button="CRM" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                    <div class="inline-flex items-center">
+                                        <div class=" w-8">
+                                            <img src="{{ url_for('static', filename='img/Corimon_logo.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                        </div>
+                                        
+                                        <P class="">Corimon, C.A</P>
+                                    </div>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" data-filial-button="MGR" class=" FilialComparar inline-flex w-full px-4  gap-1 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                    <div class="inline-flex items-center">
+                                        <div class=" w-8">
+                                            <img src="{{ url_for('static', filename='img/mg.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                        </div>
+                                        
+                                        <P class="">Montana Gráfica</P>
+                                    </div>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" data-filial-button="CRP" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                    <div class="inline-flex items-center">
+                                        <div class=" w-8">
+                                            <img src="{{ url_for('static', filename='img/CRP.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                        </div>
+                                        
+                                        <P class="">Corimon Pinturas</P>
+                                    </div>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" data-filial-button="CER" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                    <div class="inline-flex items-center">
+                                        <div class=" w-8">
+                                            <img src="{{ url_for('static', filename='img/CER.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                        </div>
+                                        
+                                        <P class="">Cerdex</P>
+                                    </div>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" data-filial-button="EEE" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                    <div class="inline-flex items-center">
+                                        <div class=" w-8">
+                                            <img src="{{ url_for('static', filename='img/EEE.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                        </div>
+                                        
+                                        <P class="">Envaca</P>
+                                    </div>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" data-filial-button="RES" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                    <div class="inline-flex items-center">
+                                        <div class=" w-8">
+                                            <img src="{{ url_for('static', filename='img/RES.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                        </div>
+                                        
+                                        <P class="">Resimon</P>
+                                    </div>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" data-filial-button="PPV" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                    <div class="inline-flex items-center">
+                                        <div class=" w-8">
+                                            <img src="{{ url_for('static', filename='img/PPV.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                        </div>
+                                        
+                                        <P class="">PPV</P>
+                                    </div>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" data-filial-button="ALL" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                    <div class="inline-flex items-center">
+                                        <div class=" w-8">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-fullscreen-icon lucide-fullscreen"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect width="10" height="8" x="7" y="8" rx="1"/></svg>
+                                        </div>
+                                        
+                                        <P class="">Mostrar todo</P>
+                                    </div>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+    
+                </div> <!--Hasta aqui el filtro de la filial-->
+    
                 
-                <td>{{user.rif}}</td>
-                <td>{{user.username}}</td>
-                <td>{{user.email}}</td>
-                <td>{{user.zona }}</td>
-                <td>{{user.nivel}}</td>
-                <td>{{user.codigo}}</td>
-                <td class="td-container">
-                    <a href="{{ url_for('.usuario', rif=user.rif)}}" class="btn detalles" style="border:2px solid rgb(10, 10, 10);">
-                        Detalles
-                    </a>                   
-                </td>
-            </tr>
-        
-            {% endfor %}
-        </tbody>
+                <div class=" flex items-center  rounded-2xl">
+                    <form class=" min-w-72">   
+                        <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                                </svg>
+                            </div>
+                            <input type="search" id="default-search" class="block w-full p-[13px] ps-10 text-sm text-gray-900 border border-gray-300 rounded-xl bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Buscar Usuario" required />
+                            
+                        </div>
+                    </form>
+                </div>
+    
+            </div>
+    
+        </div>
+        <!-- Fin del buscador -->
 
-        <tfoot>
-            <tr>
-                <th>RIF</th>
-                <th>Usuario</th>
-                <th>Correo Electronico</th>
-                <th>Zona</th>
-                <th>Nivel</th>
-                <th>Codigo</th>
-                <th>Detalles</th>
-            </tr>
-        </tfoot>
-    </table>
+        <!-- El resto de tu código permanece igual -->
+        <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-600">Mostrar:</span>
+            <select id="rows-per-page" class="px-3 py-1 rounded-lg border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-valor-azul transition-all">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            <span class="text-sm text-gray-600">registros</span>
+        </div>
+
+        <div class="overflow-x-auto border border-gray-200 shadow-sm"">
+            <table class="w-full border-collapse" >
+                <thead>
+                    <tr class="bg-[--azul-dark] text-white">
+                        <th class="py-3 px-4 text-left rounded-tl-xl">Ficha</th>
+                        <th class="py-3 px-4 text-left">Nombre</th>
+                        <th class="py-3 px-4 text-left">Cargo</th>
+                        <th class="py-3 px-4 text-left">Departamento</th>
+                        <th class="py-3 px-4 text-left">Supervisor</th>
+                        <th class="py-3 px-4 text-left rounded-tr-xl">Filial</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for participante in participantes%}
+                        {% if  participante['indicadorGdd']=='X' %}
+                            <!-- Fila de ejemplo 1 -->
+                            {%set ficha_get = (participante['pernr'].lstrip('0')) %}
+                                <tr data-filial="{% if participante['bukrs']=='1000' %}CRM
+                                {% elif participante['bukrs']=='1100' %}CER
+                                {% elif participante['bukrs']=='1200' %}CRP 
+                                {% elif participante['bukrs']=='1300' %}MGR
+                                {% elif participante['bukrs']=='1400' %}RES
+                                {% elif participante['bukrs']=='1500' %}TMO
+                                {% elif participante['bukrs']=='1600' %}PPV
+                                {% endif %}" data-tooltip-target="tooltip-default-cr{{loop.index0}}" class="border-b border-gray-200 hover:bg-blue-50 transition-colors duration-200 group cursor-pointer" onclick="window.location.href='http://10.10.0.32/app_crm/detalles_usuarios/{{ficha_get}}'">
+                                <td class="py-3 px-4">{{participante['pernr'].lstrip('0')}}</td>
+                                <td class="py-3 px-4">{{participante['ename']}}</td>
+                                {%set resultado_autocompletar = ""%}
+                                {% if participante['plstx'] |length >= 24  or participante['orgtx'] |length >= 24 %}
+                                    {%set resultado_autocompletar = consultar_cargo(participante['pernr'].lstrip('0'))%}
+                                {%endif%}
+
+                                {% if participante['plstx'] |length >= 24 %}
+                                    <td class="py-3 px-4">{{resultado_autocompletar.cargo}}</td>
+                                    {%else%}
+                                    <td class="py-3 px-4">{{participante['plstx']}}</td>
+                                {%endif%}
+
+                                
+                                {% if participante['orgtx'] |length >= 24 %}
+                                    <td class=" py-3 px-4">{{resultado_autocompletar.departamento}}</td>
+                                    {%else%}
+                                    <td class="py-3 px-4">{{participante['orgtx']}}</td>
+                                {%endif%}
+
+                                <td class="py-3 px-4">{{participante['nombreSuperv']}}</td>
+                                <td  class="py-3 px-4">{% if  participante['bukrs']=='1000' %}CRM
+                                                    {% elif  participante['bukrs']=='1100' %}CER
+                                                    {% elif  participante['bukrs']=='1200' %}CRP 
+                                                    {% elif  participante['bukrs']=='1300' %}MGR
+                                                    {% elif  participante['bukrs']=='1400' %}RES
+                                                    {% elif  participante['bukrs']=='1500' %}TMO
+                                                    {% elif  participante['bukrs']=='1600' %}PPV
+                                                    {% endif %}</td>
+                            </tr>
+
+                            <div id="tooltip-default-cr{{loop.index0}}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-700 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700">
+                                Ver participante
+                                <div class="tooltip-arrow" data-popper-arrow></div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- Paginación -->
+            <div class="flex flex-col sm:flex-row justify-between items-center p-4 bg-gray-50 rounded-b-xl">
+                <div class="text-sm text-gray-600 mb-2 sm:mb-0">
+                    Mostrando <span class="font-medium">1</span> a <span class="font-medium">3</span> de <span class="font-medium">15</span> registros
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button class="px-3 py-1 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                        Primera
+                    </button>
+                    <button class="px-3 py-1 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                        Anterior
+                    </button>
+                    
+                    <div class="flex gap-1">
+                        <button class="w-8 h-8 rounded-lg border border-gray-300 bg-valor-azul text-white font-medium">
+                            1
+                        </button>
+                        <button class="w-8 h-8 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100">
+                            2
+                        </button>
+                        <button class="w-8 h-8 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100">
+                            3
+                        </button>
+                        <span class="px-2 flex items-center">...</span>
+                        <button class="w-8 h-8 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100">
+                            5
+                        </button>
+                    </div>
+                    
+                    <button class="px-3 py-1 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-all">
+                        Siguiente
+                    </button>
+                    <button class="px-3 py-1 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-all">
+                        Última
+                    </button>
+                </div>
+            </div>
+            
+
+        </div>
+    </div>
 </div>
-</main>
+
+
 
 {% endblock %}
 
-{% block js%}
-<script src="https://code.jquery.com/jquery-3.5.1.js"></script>  
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script> 
-<script src="https://code.jquery.com/jquery-3.5.1.js"></script>  
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>  
-<script src="https://cdn.datatables.net/1.10.22/js/dataTables.bulma.min.js"></script> 
-<script>  
-  $(document).ready(function () {
-    $('#example').DataTable();
-});
-$(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-})
-</script>
 
+{% block js%}
+<script src="{{ url_for('static', filename='js/list_user.js') }}"></script>
 {% endblock %}

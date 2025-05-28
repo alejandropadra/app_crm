@@ -1,0 +1,62 @@
+{%set resultado_autocompletar = ""%}
+{% if usuario_dueño_indicador[0]['plstx'] |length >= 24 or usuario_dueño_indicador[0]['orgtx'] |length>= 24   %}
+    {%set resultado_autocompletar = consultar_cargo(ficha_get)%}
+{%endif%}
+
+
+
+    <div class="bg-white shadow-custom p-6 rounded-[30px] col-span-1 opado relative ">
+        <div class="grid grid-cols-4 gap-3 ">
+
+            <div class="col-span-1 flex items-center justify-center">
+                <div class="w-[90%] aspect-square">
+                    {% set ruta = ruta_foto_personal(ficha_get) %}
+                        <img src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
+                                class="w-full h-full object-cover rounded-full border border-solid  " 
+                                alt="User Image">
+                </div>
+            </div>
+
+            <div class=" col-span-3 flex items-center">
+                <div class=" flex flex-col h-full justify-center gap-1">
+                    <h3 class="text-[16px]">{{usuario_dueño_indicador[0]['ename']}}</h3>
+                    <div class="items-center py-2 gap-1 hidden lg:flex">
+                        <h4 class=" text-[#757575] text-[12px]">Cargo:</h4>
+                        {% if usuario_dueño_indicador[0]['plstx'] |length >= 24 %}
+                            <h3 class="text-[12px]">{{resultado_autocompletar.cargo}}</h3>
+                            {%else%}
+                            <h3 class="text-[12px]">{{usuario_dueño_indicador[0]['plstx']}}</h3>
+                        {%endif%}
+                    </div>
+                    <div class="hidden lg:flex items-center  gap-1">
+                        <h4 class=" text-[#757575] text-[12px]">Departamento:</h4>
+                        {% if usuario_dueño_indicador[0]['orgtx'] |length >= 24 %}
+                            <h3 class="text-[12px]">{{resultado_autocompletar.departamento}}</h3>
+                            {%else%}
+                            <h3 class="text-[12px]">{{usuario_dueño_indicador[0]['orgtx']}}</h3>
+                        {%endif%}
+
+                    </div>
+                    <div class="hidden lg:flex items-center py-2  gap-1">
+                        <h4 class=" text-[#757575] text-[12px]">Ficha:</h4>
+                        <h3 class="text-[12px]">{{ficha_get}}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class=" flex w-full flex-col py-2 px-4 lg:hidden ">
+            <div class="items-center py-2 gap-1 flex">
+                <h4 class=" text-[#757575] text-[12px]">Cargo:</h4>
+                <h3 class="text-[12px]">{{usuario_dueño_indicador[0]['plstx']}}</h3>
+            </div>
+            <div class= "items-center flex  gap-1">
+                <h4 class=" text-[#757575] text-[12px]">Departamento:</h4>
+                <h3 class="text-[12px]">{{usuario_dueño_indicador[0]['orgtx']}}</h3>
+            </div>
+            <div class= "items-center py-2  flex gap-1">
+                <h4 class=" text-[#757575] text-[12px]">Ficha:</h4>
+                <h3 class="text-[12px]">{{ficha_get}}</h3>
+            </div>
+        </div>
+    </div>

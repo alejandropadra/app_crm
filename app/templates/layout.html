@@ -3,92 +3,632 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}My App{% endblock %}</title>
-    <!--Estilos Tailwind -->
-    <link href="{{ url_for('static', filename='css/output.css') }}" rel="stylesheet">
-    <!-- Estilos personalizados -->
+    <title>{%block tittle%}{{titulo}}{%endblock%}</title>
+    <!--Icono-->
+    <link rel='icon' type='image/png' href="{{ url_for('static', filename = 'img/Corimon_logo.png') }}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@latest/dist/driver.css"/>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+
     <link rel="stylesheet" href="{{ url_for('static', filename = 'css/estilos.css') }}">
-    <!----===== Iconscout CSS ===== -->
-    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
-    <!--Iconos de Google Fonts-->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/animaciones.css') }}">
+
+    {% block estilos %}
+
+    {% endblock%}
 </head>
-<body>
-    <div class=" grid grid-cols-[16rem_auto]">
+<body class="">
 
-      <aside class=" min-h-screen bg-[#5193be] p-[16px] flex flex-col items-center" style=" box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;">
-        <div>
-          <h1 class=" text-2xl font-bold text-white "> Logo</h1>
-        </div>
-
-        <ul class="nav-links list-none p-5">
-          <li><a href="#" class="p-5 flex gap-2 text-lg text-white font-semibold">
-              <i class="uil uil-estate"></i>
-              <span class="link-name">Dahsboard</span>
-          </a></li>
-          <li><a href="#" class="p-5 flex gap-2 text-lg text-white font-semibold" >
-              <i class="uil uil-files-landscapes"></i>
-              <span class="link-name">Content</span>
-          </a></li>
-          <li><a href="#" class="p-5 flex gap-2 text-lg text-white font-semibold">
-              <i class="uil uil-chart"></i>
-              <span class="link-name">Analytics</span>
-          </a></li>
-          <li><a href="#" class="p-5 flex gap-2 text-lg text-white font-semibold">
-              <i class="uil uil-thumbs-up"></i>
-              <span class="link-name">Like</span>
-          </a></li>
-          <li><a href="#" class="p-5 flex gap-2 text-lg text-white font-semibold">
-              <i class="uil uil-comments"></i>
-              <span class="link-name">Comment</span>
-          </a></li>
-
-      </ul>
-      </aside>
-      <div class=" bg-white">
-        <nav class=" h-16 flex items-center px-6" style=" box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;">
-            
-          <ul class=" flex list-none items-center justify-between w-full"  >
-            <li><a href="">algo</a></li>
-
-            <li> <a href=""> <span class="material-symbols-sharp">
-              account_circle
-              </span></a></li>
-          </ul>
+    <input type="hidden" id="titulo" value={{titulo}}>
 
 
-        </nav>
-
-        <div class="p-5">
-          {% block content %}
-          {% endblock %}
-        </div>
-      </div>
-
-
-
-
-
-
-
-
-
-
-
+    <div class="fixed top-24 md:top-5 z-[100000] animate-fade-in-up left-[12%] md:left-[40%]">
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == 'error' %}
+                    <div class="flex flex-col gap-2 w-[300px] text-[10px] sm:text-xs">
+                        <div class="error-alert cursor-default flex items-center  w-full h-12 sm:h-14 rounded-lg bg-azul-dark px-[10px]">
+                            <div class="flex gap-2 items-center justify-around w-full">
+                                <div class="text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert-icon lucide-circle-alert"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                                </div>
+                                <div class="flex flex-col">
+                                    <div>
+                                        <h4 class=" text-white">Error:</h4>
+                                    </div>
+                                    <div>
+                                        <p class="text-white">{{ message }}</p>
+                                    </div>
+                                </div>
+                                <button class="flex close-btn">
+                                    <div class="text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="flex flex-col gap-2 w-[300px] text-[10px] sm:text-xs">
+                        <div class="error-alert cursor-default flex items-center  w-full h-12 sm:h-14 rounded-lg bg-azul-dark px-[10px]">
+                            <div class="flex gap-2 items-center justify-around w-full">
+                                <div class="text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check"><path d="M20 6 9 17l-5-5"/></svg>
+                                </div>
+                                <div class="flex flex-col">
+                                    <div>
+                                        <h4 class=" text-white">Proceso Exitoso:</h4>
+                                    </div>
+                                    <div>
+                                        <p class="text-white">{{ message }}</p>
+                                    </div>
+                                </div>
+                                <button class="flex close-btn">
+                                    <div class="text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
     </div>
+    
+
+    <div id="principal" class="flex py-2 pl-2  gap-5 h-screen w-full transition-all ease-in-out duration-300">
+        <!-- drawer component -->
+        <div id="drawer-navigation" class="fixed top-0 left-0 z-40 w-64 h-screen p-4 overflow-y-auto transition-transform -translate-x-full bg-[--azul-dark] " tabindex="-1" aria-labelledby="drawer-navigation-label">
+            <div class=" relative w-full">
+                <button type="button" data-drawer-hide="drawer-navigation" aria-controls="drawer-navigation" class=" bg-rojo-crm p-2 rounded-full absolute top-[-7px] right-[-10px] text-white " >
+                    <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                    <span class="sr-only">Close menu</span>
+                </button>
+            </div>
+            <div id="logo" class=" flex-col w-full rounded-[26px] items-center cursor-pointer " onclick="window.location.href='/app_crm/gdd/menu'" >
+
+                <div class="flex items-end gap-2">
+                    <div class="w-[68px] flex-shrink-0">
+                        <img src="{{ url_for('static', filename = 'img/Corimon_logo.png') }}" alt="" class="w-full h-auto object-contain">
+                    </div>
+                    <div class="flex justify-center  descripcion">
+                        <h3 class="font-semibold text-white text-[16px]">Corimon, C.A.</h3>
+                    </div>
+                </div>
+                <hr class="border-t border-rojo-crm w-full my-1">
+
+                <h4 class=" text-white font-extralight tracking-[2px] text-[13px] descripcion">y sus empresas filiales</h4>
 
 
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+            </div>
+
+            <!-- Menú -->
+            <div id="menu">
+                <h3 class="small my-4">Menú:</h3>
+                <ul class="list-none gap-4 flex-col flex">
+    
+                    <li onclick="toggleSubMenu(this)" class="cursor-pointer ">
+                        <a href="#" class="flex items-center justify-between mi-nueva-clase p-3 gap-4 rounded-[22px] text-white hover:-translate-y-1 duration-200 ease-in-out hover:bg-orange-500">
+                            <div class="flex gap-5 items-center">
+                                <span class=" text-[28px] flex-shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-icon lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                </span>
+                                <div class="descripcion text-[15px] font-semibold">
+                                    Gestión del Desempeño
+                                </div>
+                            </div>
+                            <span class="material-symbols-rounded transition-transform duration-300 {%if vista%} {%if vista == 'gdd'%} rotate-180 {%endif%} {%endif%}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
+                            </span>
+                        </a>
+                        
+                        <!-- Submenú con animación -->
+                        <div class="overflow-hidden {%if vista%} {%if vista == 'gdd'%} h-auto {%else%} max-h-0 {%endif%} {%endif%} transition-[max-height] duration-300 ease-in-out submenu ">
+                            <ul class="py-2 bg-transparent rounded-md relative after:absolute after:top-0 after:left-5 after:h-full after:w-[2px] after:bg-red-600 ">
+                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white " >
+                                    <a href="{{ url_for('.gdi')}}" class=" flex items-center gap-2  ">
+                                        <span class="">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trophy-icon lucide-trophy"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                                        </span>
+                                        <span class="descipcionesSubmenu">Gestión de Indicadores</span>
+                                    </a>
+                                </li>
+                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white  ">
+                                    <a href="" class=" flex items-center gap-2  ">
+                                        <span class="">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-handshake-icon lucide-handshake"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/></svg>
+                                        </span>
+                                        <span class="descipcionesSubmenu">Competencias</span>
+                                    </a>
+                                </li>
+                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white  ">
+                                    <a href="" class=" flex items-center gap-2  ">
+                                        <span class="">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-clock-icon lucide-file-clock"><path d="M16 22h2a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><circle cx="8" cy="16" r="6"/><path d="M9.5 17.5 8 16.25V14"/></svg>
+                                        </span>
+                                        <span class="descipcionesSubmenu">Reportes</span>
+                                    </a>
+                                </li>
+
+                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white ">
+                                    <a href="" class=" flex items-center gap-2  ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calculator-icon lucide-calculator"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+                                        <span class="descipcionesSubmenu">Resultados</span>
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+
+
+
+
+
+        <!-- Menú Lateral -->
+        <div id="SideNav" class=" animate-slide-left bg-[--azul-dark] relative p-[30px] sombra rounded-[23px] h-full w-[17rem] transition-all duration-300 hidden lg:!block ">
+            <div id="logo" class=" flex-col w-full rounded-[26px] items-center cursor-pointer " onclick="window.location.href='/app_crm/gdd/menu'" >
+                <div class="flex items-end justify-between gap-2">
+                    <div class="w-[68px] flex-shrink-0">
+                        <img src="{{ url_for('static', filename = 'img/Corimon_logo.png') }}" alt="" class="w-full h-auto object-contain">
+                    </div>
+                    <div class="flex justify-center items-end descripcion">
+                        <h3 class="font-semibold text-white text-[16px]">Corimon, C.A.</h3>
+                    </div>
+                </div>
+                <hr class="border-t border-rojo-crm w-full my-1">
+
+                <h4 class=" text-white font-extralight tracking-[2px] text-[13px] descripcion">y sus empresas filiales</h4>
+            </div>
+    
+            <!-- Botón para abrir/cerrar -->
+            <div class="absolute bg-orange-500 transition-all duration-150 ease-in-out hover:bg-green-600  
+                        top-24 right-[-15px] text-white w-10 h-10 rounded-full p-3 flex justify-center items-center cursor-pointer" 
+                        id="abrir-cerrar">
+                <span class="" id="icono-flecha">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-left-icon lucide-chevrons-left"><path d="m11 17-5-5 5-5"/><path d="m18 17-5-5 5-5"/></svg>
+                </span>
+            </div>
+    
+            
+    
+            <!-- Menú -->
+            <div id="menu">
+                <h3 class="small my-4">Menú:</h3>
+                <ul class="list-none gap-4 flex-col flex">
+    
+                    <li onclick="toggleSubMenu(this)" class="cursor-pointer ">
+                        <a href="#" class="flex items-center justify-between p-3 gap-4 rounded-[22px] text-white hover:-translate-y-1 duration-200 ease-in-out hover:bg-orange-500" id="gestion">
+                            <div class="flex gap-5 items-center">
+                                <span class=" text-[28px] flex-shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-icon lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                </span>
+                                <div class="descripcion text-[15px] font-semibold">
+                                    Gestión del Desempeño
+                                </div>
+                            </div>
+                            <span class="material-symbols-rounded transition-transform duration-300 {%if vista%} {%if vista == 'gdd'%} rotate-180 {%endif%} {%endif%}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
+                            </span>
+                        </a>
+                        
+                        <!-- Submenú con animación -->
+                        <div class="overflow-hidden {%if vista%} {%if vista == 'gdd'%} h-auto {%else%} max-h-0 {%endif%} {%endif%} transition-[max-height] duration-300 ease-in-out submenu ">
+                            <ul class="py-2 bg-transparent rounded-md relative after:absolute after:top-0 after:left-5 after:h-full after:w-[2px] after:bg-red-600 ">
+                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white" >
+                                    <a href="{{ url_for('.gdi')}}" class=" flex items-center gap-2  ">
+                                        <span class="">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trophy-icon lucide-trophy"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                                        </span>
+                                        <span class="descipcionesSubmenu">Gestión de Indicadores</span>
+                                    </a>
+                                </li>
+                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white ">
+                                    <a href="#" class=" flex items-center gap-2  ">
+                                        <span class="">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-handshake-icon lucide-handshake"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/></svg>
+                                        </span>
+                                        <span class="descipcionesSubmenu">Competencias</span>
+                                    </a>
+                                </li>
+                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white ">
+                                    <a href="" class=" flex items-center gap-2  ">
+                                        <span class="">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-clock-icon lucide-file-clock"><path d="M16 22h2a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><circle cx="8" cy="16" r="6"/><path d="M9.5 17.5 8 16.25V14"/></svg>
+                                        </span>
+                                        <span class="descipcionesSubmenu">Reportes</span>
+                                    </a>
+                                </li>
+
+                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white">
+                                    <a href="{{ url_for('.gestion_equipo')}}" class=" flex items-center gap-2  ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-command-icon lucide-command"><path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"/></svg>
+                                        <span class="descipcionesSubmenu">Gestión de Equipo</span>
+                                    </a>
+                                </li>
+
+                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white">
+                                    <a href="#" class=" flex items-center gap-2  ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calculator-icon lucide-calculator"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+                                        <span class="descipcionesSubmenu">Resultados</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    
+
+
+        <div class=" w-full h-full overflow-x-hidden max-w-full relative">
+            <div id="content" class="flex-1 transition-all duration-300 h-full overflow-y-auto overflow-x-hidden pr-2 ">
+                <div class=" pr-[1px]">
+
+                
+                    <nav class=" opado animate-fade-in-up  flex items-center bg-[#ffffff] p-[10px] sombra rounded-[18px] min-h-[50px] justify-between ">
+                        <div class=" flex items-center gap-3">
+                            <button id="autoayuda" class="autoayuda bg-slate-600 flex justify-center  w-8 h-8 rounded-[50%] items-center text-white hover:bg-slate-400 p-4  outline-none focus:outline-none ease-linear transition-all duration-150" type="button">
+                                <span class="">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#fff" stroke-width="2.5" viewBox="0 0 256 256"><path d="M192,96c0,28.51-24.47,52.11-56,55.56V160a8,8,0,0,1-16,0V144a8,8,0,0,1,8-8c26.47,0,48-17.94,48-40s-21.53-40-48-40S80,73.94,80,96a8,8,0,0,1-16,0c0-30.88,28.71-56,64-56S192,65.12,192,96Zm-64,96a16,16,0,1,0,16,16A16,16,0,0,0,128,192Z"></path></svg>
+    
+                                </button>
+                                <h4>Ayuda</h4>
+                        </div>
+
+
+                        <button id="menuBtnResponsive" type="button" data-drawer-target="drawer-navigation" data-drawer-show="drawer-navigation" aria-controls="drawer-navigation" class="lg:hidden text-white bg-[--azul-dark] p-2 rounded-lg cursor-pointer transition-transform transform hover:-translate-y-1  duration-200 ease-in-out">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu-icon lucide-menu"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+                        </button>
+
+
+                        <!--Notificaciones-->
+                        <div class="relative hidden">
+                            <div id="noti" class=" blanco flex items-center  p-3 gap-4 rounded-[22px] cursor-pointer transition-transform transform hover:-translate-y-1  duration-200 ease-in-out">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                                </svg>                          
+
+
+            
+                                <span id="exponente-notificacion" class="absolute">
+                                    <p>5</p>
+                                </span>
+                            </div>
+
+                            <div  id="ficacion" class="sombra">
+                                <ul class=" list-none w-full ">
+                                    <li class=" hover:bg-custom-gradient p-2 transition-all ease-out duration-200 rounded-xl"> 
+                                        <a href="" class=" " >
+                                            <div class="flex flex-col">
+                                                <h4>Nueva Evaluación Regsitrada</h4>
+                                                <p class="text-[#757575] small">Click Para verificar</p>
+                                            </div>
+                                        </a>
+                                    </li>
+
+                                    <hr class="border-t border-gray-300 w-[100%] my-2 mx-auto">
+
+                                    <li class="hover:bg-custom-gradient p-2 transition-all ease-out duration-200 rounded-xl"> 
+                                        <a href="" >
+                                            <div class="flex flex-col">
+                                                <h4>Nueva Evaluación Regsitrada</h4>
+                                                <p class="text-[#757575] small">Click Para verificar</p>
+                                            </div>
+                                        </a>
+                                    </li>
+
+                                    <hr class="border-t border-gray-300 w-[100%] my-2 mx-auto">
+
+                                    <li class="hover:bg-custom-gradient p-2 transition-all ease-out duration-200 rounded-xl"> 
+                                        <a href="" >
+                                            <div class="flex flex-col">
+                                                <h4>Nueva Evaluación Regsitrada</h4>
+                                                <p class="text-[#757575] small">Click Para verificar</p>
+                                            </div>
+                                        </a>
+                                    </li>
+
+                                    <hr class="border-t border-gray-300 w-[100%] my-2 mx-auto">
+
+                                    <li class="hover:bg-custom-gradient p-2 transition-all ease-out duration-200 rounded-xl"> 
+                                        <a href="" >
+                                            <div class="flex flex-col">
+                                                <h4>Nueva Evaluación Regsitrada</h4>
+                                                <p class="text-[#757575] small">Click Para verificar</p>
+                                            </div>
+                                        </a>
+                                    </li>
+
+                                    <hr class="border-t border-gray-300 w-[100%] my-2 mx-auto">
+                                </ul>
+                            </div>
+
+                        </div>
+
+                        <!--Droprdown de Usuario-->
+                        <div class="relative">
+                            <div id="drop" class=" blanco flex items-center  p-3 gap-4 rounded-[22px] cursor-pointer transition-transform transform hover:-translate-y-1  duration-200 ease-in-out">
+                                <div class=" w-10 h-10 rounded-full overflow-hidden">
+                                    <img src="{{ url_for('static', filename=usuario.path_imagen_user) }}" class="w-full h-full object-cover" alt="User Image">
+                                </div>
+                                
+                                
+                                <div class=" text-[15px] font-semibold hidden md:!block">
+                                    {{usuario.nombre | title}} {{usuario.apellido | title}}
+                                </div>
+
+                                <span class="">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
+                                </span>
+                            </div>
+
+                            <div id="down" class=" sombra flex-col flex">
+                                <div class="flex p-3 gap-3  rounded-2xl ">
+            
+                                    <div class="p-[2px] border-solid border-[--verde-succes] border-2 rounded-full flex items-center justify-center" >
+                                        <div class=" w-16 h-16 rounded-full overflow-hidden">
+                                            <img src="{{ url_for('static', filename=usuario.path_imagen_user) }}" class="w-full h-full object-cover" alt="User Image">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="">
+
+                                        <h3 class=" text-[15px]">{{usuario.nombre | title}} {{usuario.apellido | title}}</h3>
+                                        {%set resultado_autocompletar = ""%}
+                                        {% if rest[0]['plstx'] |length >= 24 %}
+                                            {%set resultado_autocompletar = consultar_cargo(ficha)%}
+                                        {%endif%}
+
+                                        {% if rest[0]['plstx'] |length >= 24 %}
+                                                <p class="text-[#757575] small">{{resultado_autocompletar.departamento}}</p>
+                                            {%else%}
+                                            <p class="text-[#757575] small">{{rest[0]['plstx']}}</p>
+                                        {%endif%}
+                                    
+                            
+                                        
+                                    </div>
+            
+                                </div>
+            
+                                <hr class="border-t border-gray-300 w-[80%] my-2 mx-auto">
+            
+                                <ul class=" list-none">
+                                    <li class=" px-5">
+                                        <a href="{{ url_for('.perfil')}}" class="flex items-center hover:bg-custom-gradient p-3 gap-4 rounded-[22px] text-[--texto] hover:text-[--text] cursor-pointer transition-transform transform hover:-translate-y-1 duration-200 ease-in-out" >
+                                            <span class="material-symbols-rounded">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-icon lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                                </span>
+                                            <div class=" text-[15px] font-normal">
+                                                Ajustes del perfil
+                                            </div>
+                                        </a>
+                                    </li>
+
+                                    {% if  usuario.nivel_usuario == "Administrador" or usuario.nivel_usuario == "admin"%}
+                                    <li class=" px-5">
+                                        <a href="{{ url_for('.add_user')}}" class="flex items-center hover:bg-custom-gradient p-3 gap-4 rounded-[22px] text-[--texto] hover:text-[--text] cursor-pointer transition-transform transform hover:-translate-y-1 duration-200 ease-in-out" >
+                                            <span class="material-symbols-rounded">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                                </span>
+                                            <div class=" text-[15px] font-normal">
+                                                Agregar Usuario
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class=" px-5">
+                                        <a href="{{ url_for('.participantes')}}" class="flex items-center hover:bg-custom-gradient p-3 gap-4 rounded-[22px] text-[--texto] hover:text-[--text] cursor-pointer transition-transform transform hover:-translate-y-1 duration-200 ease-in-out" >
+                                            <span class="material-symbols-rounded">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-person-standing-icon lucide-person-standing"><circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/></svg>
+                                                </span>
+                                            <div class=" text-[15px] font-normal">
+                                                Gestión de participantes
+                                            </div>
+                                        </a>
+                                    </li>
+
+                                    <li class=" px-5">
+                                        <a href="{{ url_for('.configuracionGDD')}}" class="flex items-center hover:bg-custom-gradient p-3 gap-4 rounded-[22px] text-[--texto] hover:text-[--text] cursor-pointer transition-transform transform hover:-translate-y-1 duration-200 ease-in-out" >
+                                            <span class="material-symbols-rounded">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                </span>
+                                            <div class=" text-[15px] font-normal">
+                                                Configuración GDD
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <!-- 
+                                    <li class="group px-5 transition-all duration-300 ease-in-out hover:bg-[#f5f3f3] hover:rounded-xl ">
+                                        <a  class="flex items-center hover:bg-custom-gradient p-3 gap-4 rounded-[22px] text-[--texto] hover:text-[--text] cursor-pointer transition-transform transform hover:scale-105 duration-200 ease-in-out">
+                                            <span class="material-symbols-rounded">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/></svg>
+                                            </span>
+                                            <div class="text-[15px] font-normal">Administración Recursos Humanos</div>
+                                        </a>
+                                    
+                                        <div class=" pl-5 hidden group-hover:block transition-all duration-300 ease-in-out">
+                                            <a href="{{ url_for('.participantes')}}"  class="flex items-center hover:bg-custom-gradient p-3 gap-4 rounded-[22px] text-[--texto] hover:text-[--text] cursor-pointer transition-transform transform hover:scale-105 duration-200 ease-in-out">
+                                                <div class="text-[15px] font-normal">Gestión de participantes</div>
+                                            </a>
+
+                                            <a href="{{ url_for('.configuracionGDD')}}" class="flex items-center hover:bg-custom-gradient p-3 gap-4 rounded-[22px] text-[--texto] hover:text-[--text] cursor-pointer transition-transform transform hover:scale-105 duration-200 ease-in-out">
+                                                <div class="text-[15px] font-normal">Configuración GDD </div>
+                                            </a>
+                                        </div>
+                                    </li>
+                                                                        <li class=" px-5">
+                                        <a  class="flex items-center hover:bg-custom-gradient p-3 gap-4 rounded-[22px] text-[--texto] hover:text-[--text] cursor-pointer transition-transform transform hover:-translate-y-1 duration-200 ease-in-out" >
+                                            <span class="material-symbols-rounded">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help-icon lucide-circle-help"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                                                </span>
+                                            <div class=" text-[15px] font-normal">
+                                                Ayuda
+                                            </div>
+                                        </a>
+                                    </li>-->
+                                    
+                                    
+                                    {%endif%}
+            
+                                    <li class=" px-5">
+                                        <a href="{{ url_for('.logout')}}" class="flex items-center hover:bg-custom-gradient p-3 gap-4 rounded-[22px] text-[--texto] hover:text-[--text] cursor-pointer transition-transform transform hover:-translate-y-1 duration-200 ease-in-out" >
+                                            <span class="material-symbols-rounded">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out-icon lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                                                </span>
+                                            <div class=" text-[15px] font-normal">
+                                                Cerrar Sesión
+                                            </div>
+                                        </a>
+                                    </li>
+
+
+                                </ul>
+                            </div>
+                        </div>
+                    </nav>
+
+                <!-----------------------------------------Main------------------------------------------------>
+                
+                    <main class="py-5 relative">
+
+                        
+
+<!-- Show tooltip on hover -->
+
+                        {% block body %}
+
+                        {% endblock %}
+
+                    <!--ESTE ES EL MODAL, LO COMENTO POR SI ACASO ALGÚN DÍA SALE LA IDEA DE UN MODAL-->
+                        <!--<button id="openModal" class=" hidden">Abrir Modal</button>
+
+                        <div id="myModal" class="modal">
+                            <div class="modal-content relative ">
+                                <div class="close absolute z-10 left-4 top-2 bg-red-500 text-white rounded-full w-[40px] h-[40px] flex items-center justify-center" >
+                                    <span class="material-symbols-rounded text-white">
+                                        close
+                                        </span>
+                                </div>
+
+                                <div class="swiper z-0 rounded-xl" >
+
+                                        <div class="swiper-wrapper">
+
+                                            <div class="swiper-slide"><img src="/src/imagenes/Wallpaper4.jpg" alt=""></div>
+                                            <div class="swiper-slide"><img src="/src/imagenes/Wallpaper.jpg" alt=""></div>
+                                            <div class="swiper-slide"><img src="/src/imagenes/Wallpaper2.png" alt=""></div>
+                                            <div class="swiper-slide"><img src="/src/imagenes/Wallpaper3.png" alt=""></div>
+                                        </div>
+                                        <div class="swiper-pagination"></div>
+
+                                        <div class="swiper-button-prev"></div>
+                                        <div class="swiper-button-next"></div>
+                                    </div>
+                            </div>
+                        </div>-->
+
+                        
+                    </main>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <!--sadasdasdasd
+
+                    <div class="absolute z-10 top-0 ">
+                        <iframe id="chatbot" src="https://copilotstudio.microsoft.com/environments/Default-57afc244-fb7b-4301-8c79-0655bd22b338/bots/cr267_montanito/webchat?__version__=2" frameborder="0" ></iframe>
+                    </div>-->
+
+                    
+                    <!--
+                    <div class="absolute bottom-0 right-0 z-50" id="boton_contenedor">
+                        <div class="flex items-center justify-between">
+                            <button 
+                                id="boton_expandible"
+                                type="button"
+                                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium text-sm px-2 py-1 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 transition-all duration-500 overflow-hidden">
+                                <img src="">
+                            </button>
+                    
+                            <button class="close-btn" id="close-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-x">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="m15 9-6 6"/>
+                                    <path d="m9 9 6 6"/>
+                                </svg>
+                            </button>
+                        </div>
+                    
+                        <div class="chat-wrapper hidden" id="chat-wrapper">
+                            <iframe id="chatbot" src="" frameborder="0"></iframe>
+ -->
+                    
+
+
+
+    <!--Driver (Autoayuda)-->
+    <script  src="https://cdn.jsdelivr.net/npm/driver.js@latest/dist/driver.js.iife.js"></script>
+    <!--Js propios del Layout de la app-->
+    <script  src="{{ url_for('static', filename='js/base.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/autoayuda.js') }}"></script>
+
+    <!--Flowbite-->
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.1/dist/flowbite.min.js"></script>
+    <!--Swiper-->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <!-- Tabulator JS -->
+    <script src="https://unpkg.com/tabulator-tables@5.4.3/dist/js/tabulator.min.js"></script>
+
 
     {% block js%}
-      <!--AQUÍ SE AGREGA LOS JS DE CADA PAGINA-->
+    <!--JS propios de la vista actual-->
+
     {% endblock %}
+    
+    <script>
+        const swiper = new Swiper('.swiper', {
+
+            direction: 'horizontal',
+            loop: true,
+            pagination: {
+                el: '.swiper-pagination',
+            },
+            autoplay: {
+                delay: 3000,
+                disableOnInteraction: false
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+        });
+
+
+        
+
+    </script>
 </body>
 </html>
-
-
-
-
-
-
-

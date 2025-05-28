@@ -1,126 +1,229 @@
-{% extends 'layout_landings.html' %}
-{% from 'helpers/_forms.html' import render_field %}
-{% block content %}
-{% block stilos%}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/estilos_login.css') }}">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-{% endblock%}
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link rel='icon' type='image/png' href="{{ url_for('static', filename = 'img/Corimon_logo.png') }}">
 
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
 
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/estilos.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/animaciones.css') }}">
+    <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+    />
+    <title>Login</title>
+    {% from 'helpers/_forms.html' import render_field %}
+</head>
 
-<main class="position-relative">
+<style>
+    body {
+        background-color: #e6e3e3;
+        height: 100vh;
+    }
 
-  
-<div class="container d-flex justify-content-center w-100 position-absolute mensaje-flashc"  >
-  <div class="col-12  col-md-offset-1 flash  z-2 " >
-    {% with messages = get_flashed_messages(with_categories=True) %}
-      {% if messages %}
-        <div class="alert-container d-flex justify-content-center" >
-          {% for category, message in messages %}
-            {% if category == 'error' %}
-              <div class="alert mensaje_flash  alert-dismissible " role="alert">
-                <div class="error__icon">
-                  <svg
-                    fill="none"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    width="24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="m13 13h-2v-6h2zm0 4h-2v-2h2zm-1-15c-1.3132 0-2.61358.25866-3.82683.7612-1.21326.50255-2.31565 1.23915-3.24424 2.16773-1.87536 1.87537-2.92893 4.41891-2.92893 7.07107 0 2.6522 1.05357 5.1957 2.92893 7.0711.92859.9286 2.03098 1.6651 3.24424 2.1677 1.21325.5025 2.51363.7612 3.82683.7612 2.6522 0 5.1957-1.0536 7.0711-2.9289 1.8753-1.8754 2.9289-4.4189 2.9289-7.0711 0-1.3132-.2587-2.61358-.7612-3.82683-.5026-1.21326-1.2391-2.31565-2.1677-3.24424-.9286-.92858-2.031-1.66518-3.2443-2.16773-1.2132-.50254-2.5136-.7612-3.8268-.7612z"
-                      fill="#393a37"
-                    ></path>
-                  </svg>
-                </div>
-                <div class="error-tittle"> {{ message }} </div>
-                <div class="error__close">
-                <button type="button" class="btn-close p-1" data-bs-dismiss="alert" aria-label="Close"></button></div>
-              </div>
-            {% else %}
-            <div class="alert mensaje_flash  alert-dismissible succes " role="alert">
-              <div class="error__icon">
-                <i class="bi bi-check-circle-fill" style="color: #fff" > </i>
-              </div>
-              <div class="error-tittle"> {{ message }} </div>
-              <div class="error__close">
-              <button type="button" class="btn-close p-1" data-bs-dismiss="alert" aria-label="Close"></button></div>
-            
-            </div>
+    
+    
+    .button {
+        --color: #03162c;
+        font-family: inherit;
+        display: inline-block;
+        width: 100%; /* Ancho completo */
+        height: 2.6em;
+        line-height: 2.5em;
+        overflow: hidden;
+        cursor: pointer;
+        font-size: 17px;
+        z-index: 1;
+        color: var(--color);
+        border: 2px solid var(--color);
+        border-radius: 6px;
+        position: relative;
+    }
+    
+    .button::before {
+        position: absolute;
+        content: "";
+        background: var(--color);
+        width: 100%;  /* Se adapta al ancho completo */
+        height: 100%; /* Se adapta a la altura completa */
+        top: 100%;    /* Inicialmente oculto */
+        left: 0;      /* Se alinea al borde izquierdo */
+        z-index: -1;
+        transition: 0.3s all;
+    }
+    
+    .button:hover {
+        color: white;
+    }
+
+    .swiper-button-prev::after,
+.swiper-button-next::after {
+  color: transparent;
+  font-size: 24px;
+}
+
+/* Añadir efecto hover para cambiar a rojo */
+.swiper-button-prev:hover::after,
+.swiper-button-next:hover::after {
+  color: #fff;
+}
+    
+    button:hover::before {
+        top: 0; /* Cubre completamente el botón al hacer hover */
+    }
+    
+</style>
+<body class=" h-screen  w-full flex items-center relative p-3 lg:p-0  ">
+
+    <div class="fixed top-5 z-50 animate-fade-in-up left-[12%] md:left-[40%]">
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == 'error' %}
+                    <div class="flex flex-col gap-2 w-[300px] text-[10px] sm:text-xs">
+                        <div class="error-alert cursor-default flex items-center  w-full h-12 sm:h-14 rounded-lg bg-azul-dark px-[10px]">
+                            <div class="flex gap-2 items-center justify-around w-full">
+                                <div class="text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert-icon lucide-circle-alert"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                                </div>
+                                <div class="flex flex-col">
+                                    <div>
+                                        <h4 class=" text-white">Error:</h4>
+                                    </div>
+                                    <div>
+                                        <p class="text-white">{{ message }}</p>
+                                    </div>
+                                </div>
+                                <button class="flex close-btn">
+                                    <div class="text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="flex flex-col gap-2 w-[300px] text-[10px] sm:text-xs">
+                        <div class="error-alert cursor-default flex items-center  w-full h-12 sm:h-14 rounded-lg bg-azul-dark px-[10px]">
+                            <div class="flex gap-2 items-center justify-around w-full">
+                                <div class="text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check"><path d="M20 6 9 17l-5-5"/></svg>
+                                </div>
+                                <div class="flex flex-col">
+                                    <div>
+                                        <h4 class=" text-white">Proceso Exitoso:</h4>
+                                    </div>
+                                    <div>
+                                        <p class="text-white">{{ message }}</p>
+                                    </div>
+                                </div>
+                                <button class="flex close-btn">
+                                    <div class="text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
             {% endif %}
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
-  </div>
-</div>
-
-  <div class="login_contenedor row col-9 mb-2"  >
-    <div class="imagen_login col-xl-6 col-lg-6 col-sm-12">
-
-      <img src="{{ url_for('static', filename='img/montana_galon_planta.jpg') }}" alt="">
+        {% endwith %}
     </div>
-    <div class="formulario_login col-xl-6 col-sm-12 col-lg-6 ">
-      <form method="POST"  class="w-100">
-        <div class="titulo"> <h3> Inicio de sesión </h3></div>
-        
-        <div class="primer_input col-12 ">
-          <div class="row">
-            <div class="input-container col-2"  >
-              {{ render_field(form.rif, class ="entrada rif", id="person") }}
-              <label for="person" class="label">Usuario</label>
-              <div class="underline"></div>
+    
+
+    <div class="container grid grid-cols-1 m-3 lg:grid-cols-3   bg-white lg:gap-6 shadow-lg mx-auto rounded-[--radius] animate-fade-in opado z-0">
+        <div class=" col-span-2 rounded-[--radius]" ">
+            <div class="swiper z-0 rounded-xl" >
+
+                <div class="swiper-wrapper">
+
+                    <div class="swiper-slide"><img src="{{ url_for('static', filename = 'img/Wallpaper.png') }}"" alt=""></div>
+                    <div class="swiper-slide"><img src="{{ url_for('static', filename = 'img/Wallpaper2.png') }}" alt=""></div>
+                    <div class="swiper-slide"><img src="{{ url_for('static', filename = 'img/Wallpaper3.png') }}" alt=""></div>
+                    <div class="swiper-slide"><img src="{{ url_for('static', filename = 'img/Wallpaper4.png') }}" alt=""></div>
+                    <div class="swiper-slide"><img src="{{ url_for('static', filename = 'img/Wallpaper5.png') }}" alt=""></div>
+                </div>
+                <div class="swiper-pagination"></div>
+                <!-- If we need navigation buttons -->
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>
             </div>
-            <div class="input-container col" style="margin-right: 13px;" >
-            {{ render_field(form.n_rif, class ="entrada", id="usuario" ) }}
-            <div class="underline" style="margin-left: 10px; max-width: 100.9vh; " ></div>
+        </div>
+
+        <div class=" col-span-1 py-5 h-full justify-center items-center px-2 lg:pr-5 w-full">
             
-            </div>
-          </div>
-          
-        </div>
+                <form class="flex flex-col h-full justify-center gap-3" method="post">
+                    {{ form.hidden_tag() }}
+                    <h2 class="text-center animate-fade-in opado ">Inicio de Sesión</h2>
+                    <div class="form-group flex flex-col gap-0.5 mb-4 animate-fade-in opado">
+                        <label for="Ficha" class="mb-1">Ficha de Usuario</label>
+                        {{ render_field(form.ficha, class="w-full p-3 rounded-md border-2 border-azul-dark focus:outline-none focus:border-blue-900", placeholder= "Ingrese su ficha" , id="Ficha") }}
+                    </div>
+                    <div class="form-group flex flex-col gap-0.5 mb-4 animate-fade-in opado">
+                        <label for="Ficha" class="mb-1">Contraseña</label>
+                        {{ render_field(form.password, class="w-full p-3 rounded-md border-2 border-azul-dark focus:outline-none focus:border-blue-900", placeholder= "Ingrese su contraseña" , id="passoword") }}
+                        
+                    </div>
 
-         <!--PASSWORD-->
-         <div class="input-container d-flex">
-          {{ render_field(form.clave, class ="entrada", id="password" ) }}
-          <div class="eye"><i class="bi bi-eye h-100"></i></div>
-          <label for="password" class="label">Ingrese la Contraseña</label>
-          <div class="underline"></div>
-        </div>
-        <div class="elboton d-flex justify-content-center" >
-          {{ form.honeypot }}
-          <input type ="hidden" name ="csrf_token" value ="{{csrf_token()}}"/>
-          <button class="submit " > <span>Enviar</span></button >
-        </div>
+                    <button class="animate-fade-in opado button">Ingresar</button>
+                    <p class="signup-link text-center font-medium mt-4">
+                        ¿No tienes una cuenta o no puedes entrar? 
+                        <a href="#" class="link text-blue-600 hover:underline"> Click aquí</a>
+                    </p>
+                </form>
 
-       
-      </form>
+        </div>
     </div>
-  </div>
 
 
-</main>
+        <!--Swiper-->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        const swiper = new Swiper('.swiper', {
 
-<script>
-  const eye = document.querySelector('.eye');
-    const input = document.getElementById('password');
+            direction: 'horizontal',
+            loop: true,
+            // If we need pagination
+            pagination: {
+                el: '.swiper-pagination',
+            },
+            autoplay: {
+                delay: 7000,
+                disableOnInteraction: false
+            },
 
-    // Función para mostrar la contraseña
-    function showPassword() {
-      input.type = 'text';
-    }
+            // Navigation arrows
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+        });
 
-    // Función para ocultar la contraseña
-    function hidePassword() {
-      input.type = 'password';
-    }
 
-    // Agregar event listeners
-    eye.addEventListener('mousedown', showPassword);
-    eye.addEventListener('mouseup', hidePassword);
-    eye.addEventListener('mouseleave', hidePassword);
+    </script>
 
-    // Prevenir el comportamiento predeterminado de arrastrar el botón en algunos navegadores
-    eye.addEventListener('dragstart', (e) => e.preventDefault());
-</script>
-{% endblock %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const closeButtons = document.querySelectorAll(".close-btn");
+        
+            closeButtons.forEach((button) => {
+                button.addEventListener("click", function () {
+                    const alertBox = button.closest(".error-alert"); // Encuentra la alerta más cercana
+                    if (alertBox) {
+                        alertBox.classList.add("animate-fade-out-right"); // Aplica la animación
+                        setTimeout(() => {
+                            alertBox.classList.add("hidden"); // Oculta el elemento después de la animación
+                        }, 500); // Espera 500ms hasta que termine la animación
+                    }
+                });
+            });
+        });
+        </script>
+</body>
+</html>
+

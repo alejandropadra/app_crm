@@ -2,6 +2,16 @@ from datetime import datetime
 
 import hashlib
 
+import random
+import string
+import secrets
+
+def generar_contrasena_aleatoria(longitud=8):
+    """Genera una contraseña aleatoria SOLO con letras mayúsculas y minúsculas."""
+    # string.ascii_letters contiene 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    letras = string.ascii_letters
+    contrasena = ''.join(secrets.choice(letras) for _ in range(longitud))
+    return contrasena
 
 def obtener_hora_minutos_segundos_fecha():
     ahora = datetime.now()
