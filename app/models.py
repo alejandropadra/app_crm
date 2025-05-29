@@ -80,7 +80,7 @@ class User(db.Model, UserMixin):
         """
         try:
             encrypted_password = generate_password_hash(password)  
-            path_imagen_user = f"img/fotos_personal/{ficha}.jpg"  
+            path_imagen_user = f"img/fotos_personal/{ficha}.png"  
             
             nuevo_usuario = cls(
                 nombre=nombre,

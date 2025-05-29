@@ -736,7 +736,7 @@ def insertar_indicador():
             
         )
         print('todo bien mi rey')
-        flash("Indicador registrado exitosamente", "success")
+        flash("Indicador registrado exitosamente, no olvides cargar tu hoja de vida", "success")
         return jsonify({"success": True, "message": "Indicador registrado exitosamente"}), 200
 
     except Exception as e:
