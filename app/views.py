@@ -66,7 +66,7 @@ def internar_error_server(error):
 @page.app_errorhandler(404)
 def page_not_found(error):
     flash(ERROR_404)
-    return "no hay nada pa, no se que no se encontró pero no se encontro"
+    return "ERROR 404, NO SE ENCONTRÓ LA RUTA ESPECIFICADA"
 #======================================== FIN MANEJO DE ERRORES=================================================================<
 
 
@@ -183,17 +183,17 @@ def add_user():
                     telefono=telefono,
                 )
                 #---------agregar envio de correo aqui
-                #welcome_mail(user, contrasena)
+                welcome_mail(user, contrasena)
                 flash("Usuario registrado exitosamente", "success")
-                #return redirect(url_for('.add_user'))  
+                return redirect(url_for('.add_user'))  
             else:
                 #Actualizar
                 user= User.update(ficha_formulario, password,email,nivel_usuario,telefono)
 
                 flash("Usuario editado exitosamente", "success")
-                #return redirect(url_for('.add_user'))
+                return redirect(url_for('.add_user'))
 
-            print(contrasena)
+            #print(contrasena)
             #welcome_mail(user, contrasena)        
             #Prueba_mail(user, "22/05/2025 hasta 22/05/2025")       
         except Exception as e:
@@ -205,6 +205,93 @@ def add_user():
             return redirect(url_for('.add_user'))  
 
     return render_template("auth/register_user.html", consultar_cargo= consultar_cargo,  titulo="Perfil Usuario", usuario=usuario, rest=rest, form=form, ficha = ficha)
+
+
+
+
+@page.route("/app_crm/usuario/agregar_admin", methods=['GET', 'POST'])
+
+def add_user_admin():
+    form = RegistrarUsuarios() 
+    usuario = current_user
+    ficha = current_user.ficha
+    if usuario.nivel_usuario == "Medio":
+        return redirect(url_for('.menu'))  
+    rest = consultar_sap(ficha)
+        
+    if request.method == 'POST':
+        try:
+            nombre = form.nombre.data
+            apellido = form.apellido.data
+            email = form.email.data
+            username = f"{form.nombre.data.lower()}_{form.apellido.data.lower()}"
+            ficha_formulario = str(form.n_ficha.data)
+            nivel_usuario = form.nivel.data
+            password = form.password.data
+            documento_texto = form.documento_texto.data
+            print(documento_texto)
+            ruta_guardar = None
+            contrasena = generar_contrasena_aleatoria()
+            if not documento_texto:
+                documento = form.documento.data
+                # Manejo de subida de archivo
+                if documento:
+                    documento.filename = f"{ficha_formulario}.jpg"
+                    nombre_archivo = secure_filename(documento.filename)
+                    ruta_guardar = os.path.join(os.path.abspath(adj_imagenes), nombre_archivo)
+
+                    # Verificar si el archivo ya existe
+                    if os.path.exists(ruta_guardar):
+                        print(f'Error: Ya existe un archivo con el nombre {nombre_archivo}. No se puede sobrescribir.')
+                        flash("Error: Ya existe un usuario con estos datos", "error")
+                        return redirect(url_for('.add_user')) 
+                    else:
+                        documento.save(ruta_guardar)
+                        print(f'Archivo guardado en: {ruta_guardar}')
+            filial = form.filial.data
+            telefono = form.telefono.data
+
+            existe = User.get_by_ficha(ficha_formulario)
+
+            if not existe:
+
+                # Inserción del usuario en la base de datos
+                user = User.insertar_usuario(
+                    nombre=nombre,
+                    apellido=apellido,
+                    email=email,
+                    filial=filial,
+                    ficha=ficha_formulario,
+                    nivel_usuario=nivel_usuario,
+                    password=contrasena,
+                    telefono=telefono,
+                )
+                #---------agregar envio de correo aqui
+                welcome_mail(user, contrasena)
+                flash("Usuario registrado exitosamente", "success")
+                return redirect(url_for('.add_user'))  
+            else:
+                #Actualizar
+                user= User.update(ficha_formulario, password,email,nivel_usuario,telefono)
+
+                flash("Usuario editado exitosamente", "success")
+                return redirect(url_for('.add_user'))
+
+            #print(contrasena)
+            #welcome_mail(user, contrasena)        
+            #Prueba_mail(user, "22/05/2025 hasta 22/05/2025")       
+        except Exception as e:
+            if "UNIQUE constraint failed" in str(e):
+                flash("Error: Ya existe un usuario con estos datos", "error")
+            else:
+                flash(f"Error inesperado: {str(e)}", "error")
+
+            return redirect(url_for('.add_user'))  
+
+    return render_template("auth/register_user_admin.html", consultar_cargo= consultar_cargo,  titulo="Perfil Usuario", usuario=usuario, rest=rest, form=form, ficha = ficha)
+
+
+
 
 @page.route("/app_crm/usuarios", methods=['GET'] )
 @login_required
