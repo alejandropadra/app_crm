@@ -35,9 +35,8 @@ page = Blueprint('page', __name__)
 
 
 @page.route("/app_crm/prueba", methods=['GET', 'POST'])
-@login_required
 def prueba():
-    """
+    
     ruta = 'app/static/adj/Cargos_GDD.xlsx'
     df = pd.read_excel(ruta, usecols=['   Ficha', 'Departamento', 'Cargo'])
     df = df.dropna(subset=['   Ficha', 'Departamento', 'Cargo'])
@@ -49,7 +48,7 @@ def prueba():
             departamento=str(row['Departamento']).strip(),
             cargo=str(row['Cargo']).strip()
         )
-"""
+
     return 'Prueba rey'
 
 #======================================== MANEJO DE ERRORES====================================================================>
