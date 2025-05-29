@@ -12,8 +12,8 @@ class DevelopmentConfig(Config):
     MAIL_SERVER = 'smtp.office365.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
-    MAIL_USERNAME = 'alejandro_padra@corimon.com'#'noreply@corimon.com'
-    MAIL_PASSWORD = 'flqlgksndjffxyqn'#'yxjtrjppvwgjqmld'
+    MAIL_USERNAME = 'noreply@corimon.com'#'alejandro_padra@corimon.com'
+    MAIL_PASSWORD = 'yxjtrjppvwgjqmld' #'flqlgksndjffxyqn'
     MAIL_TEST = ''
 
 class ProductionConfig(DevelopmentConfig):
