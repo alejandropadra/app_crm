@@ -210,14 +210,13 @@ def add_user():
 
 
 @page.route("/app_crm/usuario/agregar_admin", methods=['GET', 'POST'])
-
 def add_user_admin():
     form = RegistrarUsuarios() 
-    usuario = current_user
-    ficha = current_user.ficha
-    if usuario.nivel_usuario == "Medio":
-        return redirect(url_for('.menu'))  
-    rest = consultar_sap(ficha)
+    #usuario = current_user
+    #ficha = current_user.ficha
+    """f usuario.nivel_usuario == "Medio":
+        return redirect(url_for('.menu'))  """
+    #rest = consultar_sap(ficha)
         
     if request.method == 'POST':
         try:
@@ -288,7 +287,7 @@ def add_user_admin():
 
             return redirect(url_for('.add_user'))  
 
-    return render_template("auth/register_user_admin.html", consultar_cargo= consultar_cargo,  titulo="Perfil Usuario", usuario=usuario, rest=rest, form=form, ficha = ficha)
+    return render_template("auth/register_user_admin.html", consultar_cargo= consultar_cargo,  titulo="Perfil Usuario", form=form)
 
 
 
