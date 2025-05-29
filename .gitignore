@@ -4,4 +4,6 @@ respaldos/
 test_connect
 node_modules/
 app/static/node_modules/
+__pycache__/
+app/__pycache__/
 *.pyc
