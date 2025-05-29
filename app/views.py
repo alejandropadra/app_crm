@@ -659,7 +659,6 @@ def participantes_gdd():
     return participantes
 
 @page.route('/app_crm/buscar_sap', methods=['POST'])
-@login_required
 def rutaSap():
     try:
         data = request.get_json()  
