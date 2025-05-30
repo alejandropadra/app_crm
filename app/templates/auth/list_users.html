@@ -183,7 +183,7 @@
                                 {% elif participante['bukrs']=='1400' %}RES
                                 {% elif participante['bukrs']=='1500' %}TMO
                                 {% elif participante['bukrs']=='1600' %}PPV
-                                {% endif %}" data-tooltip-target="tooltip-default-cr{{loop.index0}}" class="border-b border-gray-200 hover:bg-blue-50 transition-colors duration-200 group cursor-pointer" onclick="window.location.href='http://10.10.0.32/app_crm/detalles_usuarios/{{ficha_get}}'">
+                                {% endif %}" data-tooltip-target="tooltip-default-cr{{loop.index0}}" class="border-b border-gray-200 hover:bg-blue-50 transition-colors duration-200 group cursor-pointer" onclick="window.location.href='http://10.10.0.33/app_crm/detalles_usuarios/{{ficha_get}}'">
                                 <td class="py-3 px-4">{{participante['pernr'].lstrip('0')}}</td>
                                 <td class="py-3 px-4">{{participante['ename']}}</td>
                                 {%set resultado_autocompletar = ""%}

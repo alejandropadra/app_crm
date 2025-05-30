@@ -15,7 +15,7 @@ ERROR_404 = 'Error 404'
 ERROR_500 = 'Error en consulta de origen de datos.'
 
 
-USRL_SAP_PARTICIPANTES_FICHA ="http://10.207.4.68:8000/sap/bc/zhr_rest/zhrgestiondes"
+USRL_SAP_PARTICIPANTES_FICHA ="http://10.207.4.66:8000/sap/bc/zhr_rest/zhrgestiondes"
 URL_SAP_PARTICIPANTES = "http://10.207.4.66:8000/sap/bc/zhr_rest/zhrgestiondes_2"
 
 

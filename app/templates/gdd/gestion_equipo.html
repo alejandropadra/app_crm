@@ -146,7 +146,9 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-6  gap-3  rounded-2xl p-2">
         {% for participante in participantes%}
-
+            {% if participante['plstx'] |length >= 24 or participante['orgtx'] |length>= 24   %}
+                {%set resultado_autocompletar = consultar_cargo(participante['pernr'].lstrip('0'))%}
+            {%endif%}
                 {% set indicadores = obtener_indicador_usuario(participante['pernr'].lstrip('0'))%}
                 <a href="http://10.10.0.33/app_crm/gdd/gestion_equipo/{{(participante['pernr'].lstrip('0'))}}" class="flex flex-col col-span-3 2xl:col-span-2  p-2 bg-white shadow-custom rounded-2xl hover:bg-slate-200 relative  cursor-pointer " >
 
@@ -167,7 +169,11 @@
                             <hr class="border-t bg-[--azul-dark] w-full my-1 border-orange-300">
                             <div class="texto flex gap-2 ">
                                 <h5 class=" font-bold text-sm text-[#333]">Cargo:</h5>
-                                <h5 class=" text-sm text-[#333]">{{participante['plstx']}} </h5>
+                                {% if participante['plstx'] |length >= 24 %}
+                                    <h3 class="text-[12px]">{{resultado_autocompletar.cargo}}</h3>
+                                    {%else%}
+                                    <h3 class="text-[12px]">{{participante['plstx']}}</h3>
+                                {%endif%}
                             </div>
                             <hr class="border-t bg-[--azul-dark] w-full my-1 border-green-300">
                             <div class="texto flex gap-2 ">
@@ -191,7 +197,11 @@
                             <hr class="border-t bg-[--morado] w-full my-1 border-purple-300">
                             <div class="texto flex gap-2 ">
                                 <h5 class=" font-bold text-sm text-[#333]">Departamento:</h5>
-                                <h5 class=" text-sm text-[#333]">{{participante['orgtx']}} </h5>
+                                {% if participante['orgtx'] |length >= 24 %}
+                                    <h3 class="text-[12px]">{{resultado_autocompletar.departamento}}</h3>
+                                    {%else%}
+                                    <h3 class="text-[12px]">{{participante['orgtx']}}</h3>
+                                {%endif%}
                             </div>
                             <hr class="border-t bg-[--azul-dark] w-full my-1 border-orange-300">
                             <div class="texto flex gap-2 items-center ">
