@@ -519,6 +519,7 @@ def hoja_vida(indicador):
                 form.definicion.data = str(info_indicador.definicion)
                 form.calculo.data = str(info_indicador.calculo)
                 Tipo_indicador = json.loads(info_indicador.naturaleza)
+            
 
         except:
             pass
