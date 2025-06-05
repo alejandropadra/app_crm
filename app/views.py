@@ -636,13 +636,13 @@ def consultar_sap(ficha):
 
 "consultar listado de participantes gdd"
 def participantes_gdd():
-    sap_url = "http://10.207.4.68:8000/sap/bc/zhr_rest/zhrgestiondes_2"
+    sap_url = URL_SAP_PARTICIPANTES
     args = {
         'sap-client': '510',
     }
     
-    user_fuente = "RFCUSER"
-    contra_fuente = "C0rimon.0724$"
+    user_fuente = U_FUENTE
+    contra_fuente = C_FUENTE
     
     response = requests.get(sap_url, auth=HTTPBasicAuth(user_fuente, contra_fuente), params=args, verify=True)
 
