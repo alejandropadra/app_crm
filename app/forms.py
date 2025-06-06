@@ -49,10 +49,10 @@ class RegistrarUsuarios(FlaskForm):
         validators=[FileAllowed(['jpg', 'jpeg', 'png'], 'Solo imágenes')]
     )
     nivel = SelectField("", 
-                        choices=[("Administrador","Administrador"),
+                        choices=[("Bajo","Bajo"),
                                     ("Alto","Alto"),
                                     ("Medio","Medio"),
-                                    ("Bajo","Bajo")])
+                                    ("Administrador","Administrador")])
     
 class formgdi(FlaskForm):
     submit = SubmitField('Submit')
