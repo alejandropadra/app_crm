@@ -591,15 +591,15 @@ def gestion_gdd():
 """
 
 def consultar_sap(ficha):
-    sap_url = "http://10.207.4.68:8000/sap/bc/zhr_rest/zhrgestiondes"
+    sap_url = USRL_SAP_PARTICIPANTES_FICHA
     
     params = {
         'sap-client': '510',
         'FICHA': ficha,
     }
     
-    user_fuente = "RFCUSER"
-    contra_fuente = "C0rimon.0724$"
+    user_fuente = U_FUENTE
+    contra_fuente = C_FUENTE
     
     try:
         response = requests.get(
