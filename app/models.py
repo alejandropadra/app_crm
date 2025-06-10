@@ -450,7 +450,7 @@ class HojaVida(db.Model):
     vigencia_fin = db.Column(db.Date)#asegurar que viene con el formato indicado
     nivel_generacion = db.Column(db.String(3000))
     nivel_util = db.Column(db.String(3000))
-    unidad_medida = db.Column(db.String(300))
+    unidad_medida = db.Column(db.String(3000))
     naturaleza = db.Column(db.Text)
     calculo = db.Column(db.Text)
     definicion = db.Column(db.Text, nullable=False)
