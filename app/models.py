@@ -448,9 +448,9 @@ class HojaVida(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     vigencia_inicio = db.Column(db.Date)#asegurar que viene con el formato indicado
     vigencia_fin = db.Column(db.Date)#asegurar que viene con el formato indicado
-    nivel_generacion = db.Column(db.String(700))
-    nivel_util = db.Column(db.String(700))
-    unidad_medida = db.Column(db.String(700))
+    nivel_generacion = db.Column(db.String(3000))
+    nivel_util = db.Column(db.String(3000))
+    unidad_medida = db.Column(db.String(300))
     naturaleza = db.Column(db.Text)
     calculo = db.Column(db.Text)
     definicion = db.Column(db.Text, nullable=False)
