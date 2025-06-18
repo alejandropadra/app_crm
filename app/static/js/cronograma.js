@@ -86,7 +86,7 @@ function addRowHV() {
                 required 
                 class="w-full bg-transparent no-border cursor-pointer p-2 focus:outline-none focus:ring-0 dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white">
         </td>
-
+        <!--
         <td class="border-t-0 px-4 py-3 align-middle text-sm text-center border-l border-r border-gray-200 dark:border-gray-700">
             <input 
                 type="text" 
@@ -107,6 +107,26 @@ function addRowHV() {
                 readonly
                 style = "border-none" 
                 class="w-full bg-transparent no-border cursor-pointer p-2 focus:outline-none focus:ring-0 dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white">
+        </td>--->
+
+        <td class="border-t-0 px-4 py-3 align-middle text-sm text-center border-l border-r border-gray-200 dark:border-gray-700">
+            <input 
+                type="text" 
+                name="EstadoActvidad${index}"  
+                required
+                readonly
+                style = "border-none"
+                class="w-full  no-border  p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-gray-200">
+        </td>
+
+        <td class="border-t-0 px-4 py-3 align-middle text-sm text-center border-l border-r border-gray-200 dark:border-gray-700">
+            <input 
+                type="text" 
+                name="semaforo${index}" 
+                required
+                readonly
+                style = "border-none" 
+                class="w-full  no-border  p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm">
         </td>
 
         <td class="border-t-0 px-4 py-3 align-middle text-sm text-center border-l border-r border-gray-200 dark:border-gray-700">
@@ -128,7 +148,9 @@ function addRowHV() {
     const inputFinReal = fila.querySelector(`input[name="fechaFinR${index}"]`);
     const inputAvanceRea = fila.querySelector(`input[name="avanceRea${index}"]`);
     const inputDesviacion = fila.querySelector(`input[name="desviacion${index}"]`);
-
+    const inputEstadoActividad = fila.querySelector(`input[name="EstadoActvidad${index}"]`);
+    const inputSemaforo =fila.querySelector(`input[name="semaforo${index}"]`);
+    
     let diffHoyAInicio = 0;
     let diffInicioAFin = 0;
     let diffHoyInicioReal = 0;
@@ -137,15 +159,20 @@ function addRowHV() {
     let avancePlanificado = 0;
 
     function actualizarResultado() {
+        console.log(diffInicioAFin)
+        console.log(diffHoyAInicio)
         if (diffInicioAFin > 0) {
             let total = (diffHoyAInicio / diffInicioAFin) * 100;
             total = Math.min(100, parseFloat(total.toFixed(2)));
+            console.log(total)
             inputAvance.value = `${total}%`;
             avancePlanificado = total;
-            actualizarDesviacion();
+            //actualizarDesviacion();
         } else {
             inputAvance.value = "0%";
         }
+
+
     }
 
     function calcularAvancePlanificado() {
@@ -159,9 +186,10 @@ function addRowHV() {
             const fechaFin = new Date(partesFin[0], partesFin[1] - 1, partesFin[2]);
 
             const diffMsHoy = hoy - fechaInicio;
+            console.log(diffMsHoy)
             diffHoyAInicio = Math.max(Math.round(diffMsHoy / (1000 * 60 * 60 * 24)), 0);
+            console.log(diffHoyAInicio)
             diffInicioAFin = Math.round((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24));
-
             if (diffInicioAFin < 0) {
                 showAlert('Error: no puedes colocar que la fecha de fin es antes que la de inicio', 'error');
                 inputAvance.value = "0%";
@@ -174,7 +202,11 @@ function addRowHV() {
     }
 
     inputInicio.addEventListener("change", calcularAvancePlanificado);
-    inputFin.addEventListener("change", calcularAvancePlanificado);
+    inputFin.addEventListener("change", () => {
+        calcularAvancePlanificado();
+        calcularEstadoActividad();
+    });
+
 
     function actualizarResultadoAvance() {
         if (diffInicioRealFinReal > 0) {
@@ -182,12 +214,91 @@ function addRowHV() {
             total = Math.min(100, parseFloat(total.toFixed(2)));
             inputAvanceRea.value = `${total}%`;
             avanceReal = total;
-            actualizarDesviacion();
+            //actualizarDesviacion();
         } else {
             inputAvanceRea.value = 0;
         }
     }
 
+    function calcularEstadoActividad(){
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        // Verificar que ambas fechas estén completas
+        
+
+        const partesFinReal = inputFinReal.value.split("-");
+        const fechaFinReal = new Date(partesFinReal[0], partesFinReal[1] - 1, partesFinReal[2]);
+        const partesFin = inputFin.value.split("-");
+        const fechaFin = new Date(partesFin[0], partesFin[1] - 1, partesFin[2]);
+        
+
+        if (inputFinReal.value !== '' && inputInicioR.value !== '' ||(inputFinReal.value !== '' && inputInicioR.value !== '' && fechaFin < hoy) ) {
+
+            inputEstadoActividad.value = 'Actividad completada';
+            inputEstadoActividad.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-green-200';
+        }
+        
+        if(inputFinReal.value == '' && inputInicioR.value == ''){
+            if ( (fechaFin < hoy) ) {
+                console.log('si')
+                // Si no hay fechas, mantener estado por defecto
+                inputEstadoActividad.value = 'Actividad retrasada';
+                inputEstadoActividad.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-red-200 text-red-700 ';
+                inputSemaforo.value = '';
+                inputSemaforo.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-gray-300';
+                return;
+            }else if (fechaFin >hoy){
+                inputEstadoActividad.value = 'A tiempo';
+                inputEstadoActividad.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-green-200 text-green-700';
+                            inputSemaforo.value = '';
+                inputSemaforo.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-gray-300';
+            }
+        }
+
+
+        /*
+        if ( (fechaFin < hoy) ) {
+            console.log('si')
+            // Si no hay fechas, mantener estado por defecto
+            inputEstadoActividad.value = 'Actividad retrasada';
+            inputEstadoActividad.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-red-200 text-red-700 ';
+            inputSemaforo.value = '';
+            inputSemaforo.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-red-500';
+            return;
+        }
+
+
+        if(inputFinReal.value == '' && inputInicioR.value == '' && fechaFin >hoy){
+            inputEstadoActividad.value = 'A tiempo';
+            inputEstadoActividad.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-green-200 text-green-700';
+        }*/
+
+        if (inputFinReal.value !== ''){
+            if (fechaFinReal > fechaFin){
+                inputSemaforo.value = 'rojo';
+                inputSemaforo.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-red-500 text-red-500';
+            }else if (fechaFinReal <= fechaFin){
+                inputSemaforo.value = 'verde';
+                inputSemaforo.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-green-200 text-green-200';
+            }
+            
+        }
+
+
+        /*
+        if (inputFinReal.value !== '' && inputInicioR.value !== '' && fechaFinReal > fechaFin){
+            inputSemaforo.value = 'rojo';
+            inputSemaforo.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-red-500 text-red-500';
+        } else if (inputFinReal.value !== '' && inputInicioR.value !== '' && fechaFinReal < fechaFin ) {
+            
+        }else{
+            inputSemaforo.value = '';
+            inputSemaforo.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-gray-200 text-gray-200';
+        }*/
+    }
+    
+
+/*
     function calcularAvanceReal() {
         const partesInicio = inputInicioR.value.split("-");
         const partesFin = inputFinReal.value.split("-");
@@ -205,17 +316,26 @@ function addRowHV() {
             actualizarResultadoAvance();
         }
     }
-
+*/
+/*
     function actualizarDesviacion() {
         if (avanceReal > 0 && avancePlanificado > 0) {
             inputDesviacion.value = (avanceReal - avancePlanificado).toFixed(2);
         } else {
             inputDesviacion.value = "0";
         }
-    }
+    }*/
 
-    inputInicioR.addEventListener("change", calcularAvanceReal);
-    inputFinReal.addEventListener("change", calcularAvanceReal);
+    //inputInicioR.addEventListener("change", calcularAvanceReal);
+    inputFinReal.addEventListener("change", () => {
+        //calcularAvanceReal();
+        calcularEstadoActividad();
+    });
+
+    inputInicio.addEventListener("change", () => {
+        calcularAvancePlanificado();
+        calcularEstadoActividad();
+    });
 }
 
 
@@ -248,9 +368,11 @@ document.querySelector('button[type="submit"]').addEventListener('click', functi
         const fechaFinReal = fila.querySelector('input[name^="fechaFinR"]')?.value || "";
         const avanceReal = fila.querySelector('input[name^="avanceReal"], input[name^="avanceRea"]')?.value || "";
         const desviacion = fila.querySelector('input[name^="desviacion"]')?.value || "";
-
+        const EstadoActividad = fila.querySelector('input[name^="EstadoActvidad"]')?.value || "";
+        const semaforo = fila.querySelector('input[name^="semaforo"]')?.value || "";
+        console.log(EstadoActividad)
         // Solo agregamos si al menos uno tiene datos
-        if (indicador || fechaIngProg || fechaFinProg || avancePlan || fechaInicioReal || fechaFinReal || avanceReal || desviacion) {
+        if (indicador || fechaIngProg || fechaFinProg || avancePlan || fechaInicioReal || fechaFinReal || avanceReal || desviacion || EstadoActividad || semaforo) {
             data.push({
                 indicador,
                 fechaIngProg,
@@ -259,15 +381,19 @@ document.querySelector('button[type="submit"]').addEventListener('click', functi
                 fechaInicioReal,
                 fechaFinReal,
                 avanceReal,
-                desviacion
+                desviacion,
+                EstadoActividad,
+                semaforo
             });
         }
     });
 
+
+    /*
     if (data.length === 0) {
-        alert("No hay datos para enviar.");
+        console.log('a')
         return;
-    }
+    }*/
 
     console.log("Enviando:", { id, data });
 
@@ -447,6 +573,88 @@ function showAlert(message, category = 'success') {
 
     /*Si se esta editando*/
 /*Es literalmente lo mismo que se hace en addrow pero aja es para editar */
+
+function calcularEstadoActividad(fila, index) {
+    const inputFinReal = fila.querySelector(`input[name="fechaFinR${index}"]`);
+    const inputFin = fila.querySelector(`input[name="fechaFinProg${index}"]`);
+    const inputEstadoActividad = fila.querySelector(`input[name="EstadoActvidad${index}"]`);
+    const inputSemaforo = fila.querySelector(`input[name="semaforo${index}"]`);
+    const inputInicioR = fila.querySelector(`input[name="fechaInicioR${index}"]`);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    
+    const partesFinReal = inputFinReal.value.split("-");
+    const fechaFinReal = new Date(partesFinReal[0], partesFinReal[1] - 1, partesFinReal[2]);
+    const partesFin = inputFin.value.split("-");
+    const fechaFin = new Date(partesFin[0], partesFin[1] - 1, partesFin[2]);
+    
+
+    if (inputFinReal.value !== '' && inputInicioR.value !== '' ||(inputFinReal.value !== '' && inputInicioR.value !== '' && fechaFin < hoy) ) {
+
+        inputEstadoActividad.value = 'Actividad completada';
+        inputEstadoActividad.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-green-200';
+    }
+    
+    if(inputFinReal.value == '' && inputInicioR.value == ''){
+        if ( (fechaFin < hoy) ) {
+            console.log('si')
+            // Si no hay fechas, mantener estado por defecto
+            inputEstadoActividad.value = 'Actividad retrasada';
+            inputEstadoActividad.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-red-200 text-red-700 ';
+            inputSemaforo.value = '';
+            inputSemaforo.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-gray-300';
+            return;
+        }else if (fechaFin >hoy){
+            inputEstadoActividad.value = 'A tiempo';
+            inputEstadoActividad.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-green-200 text-green-700';
+                        inputSemaforo.value = '';
+            inputSemaforo.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-gray-300';
+        }
+    }
+
+
+    /*
+    if ( (fechaFin < hoy) ) {
+        console.log('si')
+        // Si no hay fechas, mantener estado por defecto
+        inputEstadoActividad.value = 'Actividad retrasada';
+        inputEstadoActividad.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-red-200 text-red-700 ';
+        inputSemaforo.value = '';
+        inputSemaforo.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-red-500';
+        return;
+    }
+
+
+    if(inputFinReal.value == '' && inputInicioR.value == '' && fechaFin >hoy){
+        inputEstadoActividad.value = 'A tiempo';
+        inputEstadoActividad.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-green-200 text-green-700';
+    }*/
+
+    if (inputFinReal.value !== ''){
+        if (fechaFinReal > fechaFin){
+            inputSemaforo.value = 'rojo';
+            inputSemaforo.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-red-500 text-red-500';
+        }else if (fechaFinReal <= fechaFin){
+            inputSemaforo.value = 'verde';
+            inputSemaforo.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-green-200 text-green-200';
+        }
+        
+    }
+
+
+    /*
+    if (inputFinReal.value !== '' && inputInicioR.value !== '' && fechaFinReal > fechaFin){
+        inputSemaforo.value = 'rojo';
+        inputSemaforo.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-red-500 text-red-500';
+    } else if (inputFinReal.value !== '' && inputInicioR.value !== '' && fechaFinReal < fechaFin ) {
+        
+    }else{
+        inputSemaforo.value = '';
+        inputSemaforo.className = 'w-full no-border p-2 focus:outline-none focus:ring-0 rounded-full text-center font-semibold text-sm bg-gray-200 text-gray-200';
+    }*/
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
     const tablaHV = document.getElementById('tabla-HV').querySelector("tbody");
     const filas = tablaHV.querySelectorAll("tr");
@@ -469,14 +677,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let avancePlanificado = parseFloat(inputAvance?.value?.replace('%', '') || '0');
         let avanceReal = parseFloat(inputAvanceRea?.value?.replace('%', '') || '0');
-
+        /*
         function actualizarDesviacion() {
             if (avanceReal > 0 && avancePlanificado > 0) {
                 inputDesviacion.value = (avanceReal - avancePlanificado).toFixed(2);
             } else {
                 inputDesviacion.value = "0";
             }
-        }
+        }*/
 
         function actualizarResultado() {
             if (diffInicioAFin > 0) {
@@ -484,7 +692,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 total = Math.min(100, parseFloat(total.toFixed(2)));
                 inputAvance.value = `${total}%`;
                 avancePlanificado = total;
-                actualizarDesviacion();
+                //actualizarDesviacion();
             } else {
                 inputAvance.value = "0%";
             }
@@ -520,12 +728,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 total = Math.min(100, parseFloat(total.toFixed(2)));
                 inputAvanceRea.value = `${total}%`;
                 avanceReal = total;
-                actualizarDesviacion();
+                //actualizarDesviacion();
             } else {
                 inputAvanceRea.value = "0";
             }
         }
-
+        /*
         function calcularAvanceReal() {
             const partesInicio = inputInicioR?.value.split("-");
             const partesFin = inputFinReal?.value.split("-");
@@ -542,17 +750,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 actualizarResultadoAvance();
             }
         }
+*/
 
+        inputInicio?.addEventListener("change", () => {
+            calcularAvancePlanificado();
+            calcularEstadoActividad(fila, index); 
+        });
+        
+        inputFin?.addEventListener("change", () => {
+            calcularAvancePlanificado();
+            calcularEstadoActividad(fila, index); 
+        });
+        
+        inputInicioR?.addEventListener("change", calcularEstadoActividad(fila, index));
+        
+        inputFinReal?.addEventListener("change", () => {
+            //calcularAvanceReal();
+            calcularEstadoActividad(fila, index); 
+        });
 
-        inputInicio?.addEventListener("change", calcularAvancePlanificado);
-        inputFin?.addEventListener("change", calcularAvancePlanificado);
-        inputInicioR?.addEventListener("change", calcularAvanceReal);
-        inputFinReal?.addEventListener("change", calcularAvanceReal);
-
-
+        // Calcular estado inicial al cargar
         calcularAvancePlanificado();
-        calcularAvanceReal();
+        //calcularAvanceReal();
+        calcularEstadoActividad(fila, index);  
     });
 });
+
 
     

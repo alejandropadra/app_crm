@@ -63,11 +63,19 @@
                                     <th class="px-4 py-3 min-w-[120px] text-sm font-normal text-gray-500 dark:text-gray-400 text-center border-l border-r border-gray-200 dark:border-gray-700" id="fin">
                                         Fecha Fin Real
                                     </th>
+                                    <!-- 
                                     <th class="px-4 py-3 min-w-[100px] text-sm font-normal text-gray-500 dark:text-gray-400 text-center border-l border-r border-gray-200 dark:border-gray-700" id="avancereal">
                                         Avance Con Fecha Real
                                     </th>
                                     <th class="px-4 py-3 min-w-[100px] text-sm font-normal text-gray-500 dark:text-gray-400 text-center border-l border-r border-gray-200 dark:border-gray-700" id="desviacionreal">
                                         Desviación con Fecha Real %
+                                    </th>
+                                    -->
+                                    <th style="min-width: 200px;" class="px-4 py-3 min-w-[120px] text-sm font-normal text-gray-500 dark:text-gray-400 text-center border-l border-r border-gray-200 dark:border-gray-700" id="estadoActividad">
+                                        Estado de la Actividad
+                                    </th>
+                                    <th class="px-4 py-3 min-w-[100px] text-sm font-normal text-gray-500 dark:text-gray-400 text-center border-l border-r border-gray-200 dark:border-gray-700" id="semaforocierre">
+                                        Semáforo cierre
                                     </th>
                                     <th class="px-4 py-3 min-w-[80px] text-sm font-normal text-gray-500 dark:text-gray-400 text-center border-l border-r border-gray-200 dark:border-gray-700">
                                         
@@ -81,7 +89,6 @@
                                     {%for dato in data%}
                                     <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
                                         <td class="border-t-0 px-4 py-3 align-middle text-sm border-l border-r border-gray-200 dark:border-gray-700">
-                                            {{dato.indicador}}
                                             <textarea                               
                                                 id="Indicador{{ns.contador}}" 
                                                 name="Indicador{{ns.contador}}" 
@@ -141,7 +148,7 @@
                                                 value="{% if dato.fechaFinReal %}{{ dato.fechaFinReal }}{% endif %}"
                                                 class="w-full bg-transparent cursor-pointer hover:border border-solid no-border p-2 focus:outline-none focus:ring-0 dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white">
                                         </td>
-                                        
+                                        <!-- 
                                         <td class="border-t-0 px-4 py-3 align-middle text-sm text-center border-l border-r border-gray-200 dark:border-gray-700">
 
                                             <input 
@@ -163,6 +170,29 @@
                                                 required
                                                 value="{% if dato.desviacion %}{{ dato.desviacion }}{% endif %}"
                                                 class="w-full bg-transparent cursor-pointer hover:border border-solid no-border p-2 focus:outline-none focus:ring-0 dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white">
+                                        </td>-->
+
+                                        <td class="border-t-0 px-4 py-3 align-middle text-sm text-center border-l border-r border-gray-200 dark:border-gray-700">
+                                            <input 
+                                            
+                                                type="text" 
+                                                id="EstadoActvidad{{ns.contador}}" 
+                                                name="EstadoActvidad{{ns.contador}}" 
+                                                required
+                                                value="{% if dato.EstadoActividad %}{{ dato.EstadoActividad }}{% endif %}"
+                                                class="w-full bg-transparent cursor-pointer hover:border border-solid no-border p-2 focus:outline-none focus:ring-0 dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white">
+                                                
+                                        </td>
+
+                                        <td class="border-t-0 px-4 py-3 align-middle text-sm text-center border-l border-r border-gray-200 dark:border-gray-700">
+                                            <input 
+                                                type="text" 
+                                                id="semaforo{{ns.contador}}" 
+                                                name="semaforo{{ns.contador}}" 
+                                                required
+                                                value="{% if dato.semaforo %}{{ dato.semaforo }}{% endif %}"
+                                                class="w-full bg-transparent cursor-pointer hover:border border-solid no-border p-2 focus:outline-none focus:ring-0 dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white">
+                                                
                                         </td>
                                         
                                         <td class="border-t-0 px-4 py-3 align-middle text-sm text-center border-l border-r border-gray-200 dark:border-gray-700">
@@ -171,10 +201,12 @@
                                             </button>
                                         </td>
                                     </tr>
+                                    {% set ns.contador = ns.contador + 1 %}
                                     {%endfor%}
                                 {%endif%}
                             </tbody>
                         </table>
+                        
                         
                         <div class="py-4 px-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
                             <button type="button" class="add flex items-center text-sm px-4 py-2 bg-azul-dark text-white rounded-xl hover:bg-blue-600 transition-colors focus:outline-none" id="add" onclick="addRowHV()">

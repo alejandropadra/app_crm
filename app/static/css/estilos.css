@@ -20,7 +20,9 @@
     --gris-dark: #dddddd;
 }
 
-
+.colorverde{
+    color: #0d9c6b !important ;
+}
 /*
 #boton_contenedor {
     width: 60px;

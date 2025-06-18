@@ -372,7 +372,7 @@ def detalles_usuarios(ficha_get):
     
     
     
-    return render_template('/auth/detalles_list_user.html', consultar_cargo= consultar_cargo,  titulo= "Detalles" ,usuario=usuario,rest=rest, participantes= participantes, indicadores = indicadores, total_cumplimiento= total_cumplimiento, total_peso=total_peso, ficha_get= ficha_get, ficha=ficha, ruta_foto_personal= ruta_foto_personal, usuario_dueño_indicador = usuario_dueño_indicador )
+    return render_template('/auth/detalles_list_user.html', consultar_cargo= consultar_cargo,  titulo= "Detalles" ,usuario=usuario,rest=rest, participantes= participantes, indicadores = indicadores, total_cumplimiento= total_cumplimiento, total_peso=total_peso, ficha_get= ficha_get, ficha=ficha, ruta_foto_personal= ruta_foto_personal, usuario_dueño_indicador = usuario_dueño_indicador, recortarFicha= recortarFicha, consultar_sap= consultar_sap )
 #-------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------- GDD-----------------------------------------------------------------------------------
 
@@ -581,7 +581,17 @@ def gestion_gdd():
 
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------- COMPETENCIAS---------------------------------------------------------------------
+@page.route("/app_crm/gdd/competencias-evaluacion", methods=['GET','POST'])
+@login_required
+def evaluar_colaborador():
+    usuario = current_user
+    ficha = usuario.ficha
+    rest = consultar_sap(ficha)
+    participantes = participantes_gdd()
+    colaboradores = obtener_colaboradores_directos(participantes,ficha)
 
+    return render_template('/gdd/evaluar_colaborador', titulo ="Seleccion de evalucacion de competencias", usuario = usuario, rest=rest,colaboradores=colaboradores)
 
 #---------------------------------------ENDPOINTS PARA JS-------------------------------------
 """
@@ -857,8 +867,7 @@ def consultarStatus():
 def consultar_status_con_ficha():
     try:
         datos = request.get_json()
-        
-
+    
         if datos and 'numero' in datos:
             ficha = datos['numero']
             estado= User.estado_gdd(ficha)
@@ -983,6 +992,29 @@ def obtener_lista_equipo(participantes, ficha_superior):
     subordinados = encontrar_subordinados_recursivo(participantes, ficha_superior_str)
     return subordinados
 
+def obtener_colaboradores_directos(participantes, ficha_superior):
+    """
+    Obtiene los colaboradores directos (subordinados de primer nivel) de una persona
+    
+    Args:
+        participantes: Lista de diccionarios con información de empleados
+                    (debe contener 'pernr' y 'fichaSuperv')
+        ficha_superior: Ficha de la persona cuyos colaboradores directos se buscan
+    
+    Returns:
+        Lista con los colaboradores directos (puede estar vacía)
+    """
+    # Normalizamos la ficha del superior (eliminar ceros izquierda)
+    ficha_superior_normalizada = str(int(ficha_superior)) if ficha_superior else None
+    
+    # Filtramos los participantes cuyo supervisor sea el indicado
+    colaboradores = [
+        p.copy() for p in participantes 
+        if p.get('fichaSuperv') and str(int(p['fichaSuperv'])) == ficha_superior_normalizada
+    ]
+    
+    return colaboradores
+
 def consultar_cargo(ficha):
     registro = Cargos.select_by_ficha(ficha)
     #print(registro)
@@ -1004,6 +1036,14 @@ def ruta_foto_personal(numero):
         except Exception as e:
             #print(f"Error al acceder al directorio: {e}")
             return None
+        
+def recortarFicha(ficha):
+    ficha_superv_corta =0
+    if len(ficha) >= 5 and ficha[4] != '0':
+        ficha_superv_corta = ficha[4:]
+    else:
+        ficha_superv_corta = ficha[-4:]
+    return ficha_superv_corta
 
 
 @page.route('/app_crm/consultarCargo', methods=['POST'])
