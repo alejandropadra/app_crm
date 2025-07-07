@@ -336,6 +336,408 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function toTitleCase(str) {
+    return str.toLowerCase().split(' ').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+}
+
+
+let colaboradores = [];
+let subordinados = [];
+let filteredColaboradores = [];
+let filteredColaboradoresSubordinado = [];
+let currentSelection = -1;
+let currentSelectionSubordinado = -1;
+
+// Función auxiliar para convertir a Title Case
+function toTitleCase(str) {
+    return str.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        // Cargar datos de colaboradores principales
+        const colaboradoresScript = document.getElementById('colaboradores-data');
+        if (!colaboradoresScript) {
+            console.error('#colaboradores-data no encontrado');
+            return;
+        }
+        const colaboradoresData = colaboradoresScript.textContent || colaboradoresScript.innerText;
+        colaboradores = JSON.parse(colaboradoresData);
+        filteredColaboradores = [...colaboradores];
+
+        // Cargar datos de subordinados
+        const subordinadosScript = document.getElementById('subordinados-data');
+        if (!subordinadosScript) {
+            console.error('#subordinados-data no encontrado');
+            return;
+        }
+        const subordinadosData = subordinadosScript.textContent || subordinadosScript.innerText;
+        subordinados = JSON.parse(subordinadosData);
+        filteredColaboradoresSubordinado = [...subordinados];
+        console.log(filteredColaboradoresSubordinado)
+        
+    } catch (error) {
+        console.error('Error al cargar colaboradores:', error);
+        return;
+    }
+
+    // === BUSCADOR PRINCIPAL ===
+    const searchInput = document.getElementById('searchInput');
+    const dropdown = document.getElementById('dropdown');
+    const dropdownContent = document.getElementById('dropdownContent');
+    const noResults = document.getElementById('noResults');
+
+    if (searchInput && dropdown && dropdownContent && noResults) {
+        initSearchInput(searchInput, dropdown, dropdownContent, noResults, 'main');
+    }
+
+    // === BUSCADOR SUBORDINADO ===
+    const searchInputSubordinado = document.getElementById('searchInputSubordinado');
+    const dropdownSubordinado = document.getElementById('dropdownSubordinado');
+    const dropdownContentSubordinado = document.getElementById('dropdownContentSubordinado');
+    const noResultsSubordinado = document.getElementById('noResultsSubordinado');
+
+    if (searchInputSubordinado && dropdownSubordinado && dropdownContentSubordinado && noResultsSubordinado) {
+        initSearchInput(searchInputSubordinado, dropdownSubordinado, dropdownContentSubordinado, noResultsSubordinado, 'subordinado');
+    }
+
+    function initSearchInput(searchInput, dropdown, dropdownContent, noResults, type) {
+        // Mostrar dropdown al hacer click en el input
+        searchInput.addEventListener('click', function() {
+            showDropdown(dropdown);
+            if (type === 'main') {
+                renderColaboradores(filteredColaboradores, dropdownContent, noResults, type);
+            } else {
+                renderColaboradores(filteredColaboradoresSubordinado, dropdownContent, noResults, type);
+            }
+        });
+
+        // Filtrar mientras se escribe
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            filterColaboradores(searchTerm, type);
+            if (type === 'main') {
+                currentSelection = -1;
+            } else {
+                currentSelectionSubordinado = -1;
+            }
+        });
+
+        // Navegación con teclado
+        searchInput.addEventListener('keydown', function(e) {
+            const items = dropdown.querySelectorAll('.colaborador-item');
+            
+            switch(e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (type === 'main') {
+                        currentSelection = Math.min(currentSelection + 1, items.length - 1);
+                        updateSelection(items, currentSelection);
+                    } else {
+                        currentSelectionSubordinado = Math.min(currentSelectionSubordinado + 1, items.length - 1);
+                        updateSelection(items, currentSelectionSubordinado);
+                    }
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (type === 'main') {
+                        currentSelection = Math.max(currentSelection - 1, -1);
+                        updateSelection(items, currentSelection);
+                    } else {
+                        currentSelectionSubordinado = Math.max(currentSelectionSubordinado - 1, -1);
+                        updateSelection(items, currentSelectionSubordinado);
+                    }
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    const currentIdx = type === 'main' ? currentSelection : currentSelectionSubordinado;
+                    const filteredData = type === 'main' ? filteredColaboradores : filteredColaboradoresSubordinado;
+                    if (currentIdx >= 0 && items[currentIdx]) {
+                        selectColaborador(filteredData[currentIdx], type);
+                    }
+                    break;
+                case 'Escape':
+                    hideDropdown(dropdown, type);
+                    break;
+            }
+        });
+
+        // Cerrar dropdown al hacer click fuera
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+                hideDropdown(dropdown, type);
+            }
+        });
+    }
+
+    function filterColaboradores(searchTerm, type) {
+        let filtered;
+        if (!searchTerm) {
+            if (type === 'main') {
+                filtered = [...colaboradores];
+            } else {
+                filtered = [...subordinados];
+            }
+        } else {
+            if (type === 'main') {
+                filtered = colaboradores.filter(colaborador => 
+                    colaborador.ename.toLowerCase().includes(searchTerm) ||
+                    colaborador.plstx.toLowerCase().includes(searchTerm) ||
+                    colaborador.orgtx.toLowerCase().includes(searchTerm) ||
+                    colaborador.pernr.includes(searchTerm)
+                );
+            } else {
+                filtered = subordinados.filter(colaborador => 
+                    colaborador.ename.toLowerCase().includes(searchTerm) ||
+                    colaborador.plstx.toLowerCase().includes(searchTerm) ||
+                    colaborador.orgtx.toLowerCase().includes(searchTerm) ||
+                    colaborador.pernr.includes(searchTerm)
+                );
+            }
+        }
+
+        if (type === 'main') {
+            filteredColaboradores = filtered;
+            const dropdown = document.getElementById('dropdown');
+            const dropdownContent = document.getElementById('dropdownContent');
+            const noResults = document.getElementById('noResults');
+            renderColaboradores(filteredColaboradores, dropdownContent, noResults, type);
+        } else {
+            filteredColaboradoresSubordinado = filtered;
+            const dropdown = document.getElementById('dropdownSubordinado');
+            const dropdownContent = document.getElementById('dropdownContentSubordinado');
+            const noResults = document.getElementById('noResultsSubordinado');
+            renderColaboradores(filteredColaboradoresSubordinado, dropdownContent, noResults, type);
+        }
+    }
+
+    function renderColaboradores(colaboradoresToShow, dropdownContent, noResults, type) {
+        dropdownContent.innerHTML = '';
+        
+        if (colaboradoresToShow.length === 0) {
+            noResults.classList.remove('hidden');
+            return;
+        } else {
+            noResults.classList.add('hidden');
+        }
+
+        colaboradoresToShow.forEach((colaborador, index) => {
+            const item = document.createElement('div');
+            item.className = 'colaborador-item px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0';
+            item.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-900 text-sm">${toTitleCase(colaborador.ename)}</div>
+                    </div>
+                    <div class="text-xs text-gray-400 ml-2">#${recortarFicha(colaborador.pernr)}</div>
+                </div>
+            `;
+            
+            item.addEventListener('click', function() {
+                selectColaborador(colaborador, type);
+            });
+            
+            dropdownContent.appendChild(item);
+        });
+    }
+
+    function recortarFicha(ficha) {
+        ficha = String(ficha).padStart(4, '0'); 
+        const cuartoDesdeDerecha = ficha[ficha.length - 4];
+        if (cuartoDesdeDerecha === '0') {
+            return ficha.slice(-3);
+        } else {
+            return ficha.slice(-4); 
+        }
+    }
+
+    function obtenerRutaFoto(fichaRecortada, callback) {
+        const extensiones = ['.png', '.jpg', '.jpeg'];
+        const baseRuta = '/app_crm/static/img/fotos_personal/';
+        const notFoundRuta = '/app_crm/static/img/notfoundUser.png';
+        let index = 0;
+
+        function intentarCargarImagen() {
+            if (index >= extensiones.length) {
+                callback(notFoundRuta); 
+                return;
+            }
+
+            const ruta = baseRuta + fichaRecortada + extensiones[index];
+            const img = new Image();
+
+            img.onload = function() {
+                callback(ruta); 
+            };
+
+            img.onerror = function() {
+                index++;
+                intentarCargarImagen();
+            };
+
+            img.src = ruta;
+        }
+
+        intentarCargarImagen();
+    }       
+
+    function selectColaborador(colaborador, type) {
+        const fichaRecortada = recortarFicha(colaborador.pernr);
+        
+        if (type === 'main') {
+            // Buscador principal
+            const searchInput = document.getElementById('searchInput');
+            const selectedColaborador = document.getElementById('selectedColaborador');
+            const selectedImage = document.getElementById('selectedImage');
+            const selectedName = document.getElementById('selectedName');
+            const dropdown = document.getElementById('dropdown');
+            
+            if (searchInput) searchInput.value = colaborador.ename;
+            if (selectedColaborador) selectedColaborador.value = fichaRecortada;
+            if (selectedName) selectedName.textContent = toTitleCase(colaborador.ename);
+            
+            obtenerRutaFoto(fichaRecortada, function(ruta) {
+                if (selectedImage) {
+                    selectedImage.src = ruta;
+                }
+            });
+            
+            hideDropdown(dropdown, type);
+        } else {
+            // Buscador subordinado
+            const searchInputSubordinado = document.getElementById('searchInputSubordinado');
+            const selectedColaboradorSubordinado = document.getElementById('selectedColaboradorSubordinado');
+            const selectedImageSubordinado = document.getElementById('selectedImageSubordinado');
+            const selectedNameSubordinado = document.getElementById('selectedNameSubordinado');
+            const dropdownSubordinado = document.getElementById('dropdownSubordinado');
+            
+            if (searchInputSubordinado) searchInputSubordinado.value = colaborador.ename;
+            if (selectedColaboradorSubordinado) selectedColaboradorSubordinado.value = fichaRecortada;
+            if (selectedNameSubordinado) selectedNameSubordinado.textContent = toTitleCase(colaborador.ename);
+            
+            obtenerRutaFoto(fichaRecortada, function(ruta) {
+                if (selectedImageSubordinado) {
+                    selectedImageSubordinado.src = ruta;
+                }
+            });
+            
+            hideDropdown(dropdownSubordinado, type);
+        }
+        
+        console.log('Colaborador seleccionado (' + type + '):', colaborador);
+    }
+
+    function showDropdown(dropdown) {
+        dropdown.classList.remove('dropdown-closed');
+        dropdown.classList.add('dropdown-open');
+    }
+
+    function hideDropdown(dropdown, type) {
+        dropdown.classList.remove('dropdown-open');
+        dropdown.classList.add('dropdown-closed');
+        if (type === 'main') {
+            currentSelection = -1;
+        } else {
+            currentSelectionSubordinado = -1;
+        }
+    }
+
+    function updateSelection(items, currentSelectionValue) {
+        items.forEach((item, index) => {
+            if (index === currentSelectionValue) {
+                item.classList.add('bg-blue-50');
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.classList.remove('bg-blue-50');
+            }
+        });
+    }
+
+
+
+
+
+
+
+
+
+
+
+    const botonEnviar = document.getElementById("enviarEvaluadores");
+    const formulario = document.getElementById("formEstablecerEvaluadores");
+
+    botonEnviar.addEventListener("click", function () {
+        const colaboradorId = document.getElementById("selectedColaborador").value;
+        const subordinadoId = document.getElementById("selectedColaboradorSubordinado").value 
+        const ficha_get = document.getElementById("ficha_get").value
+
+        let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+        fetch('/app_crm/establecer_evaluadores', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken 
+            },
+            body: JSON.stringify({
+                fichaUsuarioEvaluar: ficha_get,
+                idPar: colaboradorId,
+                idSubordinado : subordinadoId
+            })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Respuesta del servidor no OK");
+            return res.json();
+        })
+        .then(data => {
+            console.log("Respuesta:", data);
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(err => {
+            console.error('Fetch error:', err);
+        });
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
 function showAlert(message, category = 'success') {
 
     const alertContainer = document.createElement('div');

@@ -36,7 +36,7 @@
         </a>
 
 
-        <div class="bg-[#ffffff] relative w-full tarjeta-base cursor-pointer opado  indi sombra   duration-200 ease-in-out" id="evaluacion">
+        <div class="bg-[#ffffff] relative w-full tarjeta-base cursor-pointer opado  indi sombra   duration-200 ease-in-out tarjeta-elevada" id="evaluacion">
             <div class="  flex items-start justify-between mb-10 flex-col gap-3">
                 <div class=" flex items-center " >
                     <span class=" text-[#333]">
@@ -85,8 +85,8 @@
 
             
             <div id="select-evaluacion" class="flex flex-col gap-2 p-3" >
-                <a href="/src/PlantillaConSidenav/Evaluacion.html " class="p-2 rounded-[30px]   font-semibold cursor-pointer text-white hover:bg-neutral-700">Auto Evaluación</a>
-                <a href="/src/PlantillaConSidenav/EvaluacionTerc.html" class="p-2  font-semibold cursor-pointer text-white hover:bg-neutral-700 rounded-[30px]">Evaluación a Terceros</a>
+                <a  href="{{ url_for('.evaluacion_competencias', ficha_get=current_user.ficha) }}" class="p-2 rounded-[30px]   font-semibold cursor-pointer text-white hover:bg-neutral-700">Auto Evaluación</a>
+                <a href="{{ url_for('.Seleccionar_evaluar')}}" class="p-2  font-semibold cursor-pointer text-white hover:bg-neutral-700 rounded-[30px]">Evaluación a Terceros</a>
             </div>
         </div>
 

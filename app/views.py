@@ -7,7 +7,7 @@ from .forms import LoginForm
 from .forms import GestionUsers
 from .forms import RegistrarUsuarios
 from .forms import formgdi, RegistrarHojaVida
-from .models import User, Indicadores,HojaVida,Cronograma, Cargos
+from .models import User, Indicadores,HojaVida,Cronograma, Cargos, Evaluacion
 from .email import welcome_mail, Prueba_mail, inicio_gdd, cierre_gdd, aprobacion_indicadores, indicadores_cargados
 from .servicios import servicio_notificacion
 from . import login_manager
@@ -76,6 +76,22 @@ def logout():
     logout_user()
     flash(LOGOUT)
     return redirect(url_for('.login'))
+
+def procesar_ficha(ficha):
+    """
+    Procesa un número de ficha para extraer una parte específica.
+
+    Args:
+        ficha (str): El número de ficha a procesar.
+
+    Returns:
+        str: La parte procesada de la ficha.
+    """
+    if len(ficha) >= 5 and ficha[4] != '0':
+        ficha_procesada = ficha[4:]
+    else:
+        ficha_procesada = ficha[-4:]
+    return ficha_procesada
 
 @page.route('/app_crm/', methods=['GET', 'POST'])
 @page.route('/app_crm//login', methods=['GET', 'POST'])
@@ -302,12 +318,66 @@ def participantes():
     rest = consultar_sap(ficha)
     participantes = participantes_gdd()
     print(participantes)
-    return render_template('/auth/list_users.html', consultar_cargo= consultar_cargo, ficha = ficha,  titulo= "participantes", participantes = participantes,usuario=usuario,rest=rest)
+    return render_template('/auth/list_users.html', ruta_foto_personal= ruta_foto_personal,   obtener_indicador_usuario = Indicadores.obtener_indicador_usuario,  consultar_cargo= consultar_cargo, ficha = ficha,  titulo= "participantes", participantes = participantes,usuario=usuario,rest=rest)
 
 
 @page.route("/app_crm/detalles_usuarios/<int:ficha_get>", methods=['GET','POST'] )
 @login_required
 def detalles_usuarios(ficha_get):
+    
+    usuario = current_user
+    if usuario.nivel_usuario == "Medio":
+        return redirect(url_for('.menu'))  
+    usuario_dueño_indicador= consultar_sap(ficha_get)
+    ficha = current_user.ficha
+    rest = consultar_sap(ficha)
+    ficha_supervisor = procesar_ficha(rest[0]['fichaSuperv'])     
+    evaluacion = Evaluacion.asignar_supervisor(
+        ficha_usuario=ficha_get,
+        año_fiscal='AF26',
+        ficha_supervisor=ficha_supervisor
+    )
+    
+    print(evaluacion)
+    #print(rest)
+    participantes = participantes_gdd()
+    indicadores = Indicadores.obtener_indicador_usuario(ficha_get)
+    total_peso = sum(float(i.peso) for i in indicadores if i.peso)
+    total_cumplimiento = round(
+        sum(float(i.cumplimiento) for i in indicadores if i.cumplimiento),
+        2
+    )
+    
+    colaboradores =obtener_colaboradores_directos( participantes=participantes, ficha_superior=usuario_dueño_indicador[0]['fichaSuperv'] )
+    colaboradores_json = json.dumps(colaboradores, ensure_ascii=False)
+    equipo = obtener_colaboradores_directos(participantes,ficha_get)
+    equipo_json =  json.dumps(equipo, ensure_ascii=False)
+    usuario_par = None
+    usuario_subordinado = None
+    nombre_apellido_usuario_par= None
+    nombre_apellido_usuario_subordinado = None
+    registro_evaluacion= None
+    registro_evaluacion = Evaluacion.obtener_evaluaciones_por_usuario(
+        ficha_usuario=ficha_get
+    )
+    
+    
+    if registro_evaluacion.par_evaluador:
+        usuario_par = User.get_by_ficha(registro_evaluacion.par_evaluador)
+        if not usuario_par:
+            usuario_par_from_sap = consultar_sap(registro_evaluacion.par_evaluador)
+            nombre_apellido_usuario_par= usuario_par_from_sap[0]['ename']
+            print(nombre_apellido_usuario_par)
+
+    if registro_evaluacion.subordinado_evaluador:
+        usuario_subordinado = User.get_by_ficha(registro_evaluacion.subordinado_evaluador)
+        if not usuario_subordinado:
+            usuario_subordinado_from_sap = consultar_sap(registro_evaluacion.par_evaluador)
+            nombre_apellido_usuario_subordinado= usuario_subordinado_from_sap[0]['ename']
+            print(nombre_apellido_usuario_subordinado)
+            
+    
+    
     
     if request.method == 'POST':
         lista_ids= []
@@ -354,25 +424,10 @@ def detalles_usuarios(ficha_get):
         # Si ninguno de los casos anteriores aplica
         return jsonify({"status": "error", "message": "Formato de datos no reconocido"})
     
+
+            
     
-    usuario = current_user
-    if usuario.nivel_usuario == "Medio":
-        return redirect(url_for('.menu'))  
-    usuario_dueño_indicador= consultar_sap(ficha_get)
-    ficha = current_user.ficha
-    rest = consultar_sap(ficha)
-    #print(rest)
-    participantes = participantes_gdd()
-    indicadores = Indicadores.obtener_indicador_usuario(ficha_get)
-    total_peso = sum(float(i.peso) for i in indicadores if i.peso)
-    total_cumplimiento = round(
-        sum(float(i.cumplimiento) for i in indicadores if i.cumplimiento),
-        2
-    )
-    
-    
-    
-    return render_template('/auth/detalles_list_user.html', consultar_cargo= consultar_cargo,  titulo= "Detalles" ,usuario=usuario,rest=rest, participantes= participantes, indicadores = indicadores, total_cumplimiento= total_cumplimiento, total_peso=total_peso, ficha_get= ficha_get, ficha=ficha, ruta_foto_personal= ruta_foto_personal, usuario_dueño_indicador = usuario_dueño_indicador, recortarFicha= recortarFicha, consultar_sap= consultar_sap )
+    return render_template('/auth/detalles_list_user.html', nombre_apellido_usuario_subordinado = nombre_apellido_usuario_subordinado ,  nombre_apellido_usuario_par= nombre_apellido_usuario_par,  usuario_subordinado = usuario_subordinado,  usuario_par= usuario_par, registro_evaluacion= registro_evaluacion, equipo = equipo, equipo_json= equipo_json, colaboradores=colaboradores, colaboradores_json = colaboradores_json,  consultar_cargo= consultar_cargo,  titulo= "Detalles" ,usuario=usuario,rest=rest, participantes= participantes, indicadores = indicadores, total_cumplimiento= total_cumplimiento, total_peso=total_peso, ficha_get= ficha_get, ficha=ficha, ruta_foto_personal= ruta_foto_personal, usuario_dueño_indicador = usuario_dueño_indicador, recortarFicha= recortarFicha, consultar_sap= consultar_sap )
 #-------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------- GDD-----------------------------------------------------------------------------------
 
@@ -382,8 +437,58 @@ def menu():
     usuario = current_user
     ficha = current_user.ficha
     rest = consultar_sap(ficha)
+    print()
+    
+    ficha_supervisor = procesar_ficha(rest[0]['fichaSuperv'])     
+    print(ficha_supervisor)
+    evaluacion = Evaluacion.asignar_supervisor(
+        ficha_usuario=ficha,
+        año_fiscal='AF26',
+        ficha_supervisor=ficha_supervisor
+    )
+    
+    print(evaluacion)
+
 
     return render_template('/gdd/menu.html', consultar_cargo= consultar_cargo,  titulo= "Menu",usuario=usuario,rest=rest, ficha = ficha)
+
+
+
+@page.route("/app_crm/gdd/Seleccionar_evaluar", methods=['GET'] )
+@login_required
+def Seleccionar_evaluar():
+    usuario = current_user
+    ficha = current_user.ficha
+    rest = consultar_sap(ficha)
+    participantes = participantes_gdd()
+    equipo = obtener_colaboradores_directos(participantes,ficha)
+    
+    for evaluador in equipo:
+        plstx_valor = evaluador['plstx']
+        if len(plstx_valor) >= 24:
+            resultado_cargo = consultar_cargo(procesar_ficha(evaluador['pernr']))
+            departamento_final = resultado_cargo.departamento
+
+        else:
+            departamento_final = plstx_valor
+        if departamento_final:
+            evaluador['plstx'] = departamento_final
+
+    
+    
+    fichas_a_evaluar = Evaluacion.obtener_evaluaciones_como_evaluador(current_user.ficha)
+    fichas_a_evaluar_json =  json.dumps(fichas_a_evaluar, ensure_ascii=False)
+
+    return render_template('/gdd/seleccionar_evaluar.html', equipo = equipo, fichas_a_evaluar= fichas_a_evaluar, fichas_a_evaluar_json = fichas_a_evaluar_json,  consultar_cargo= consultar_cargo,  titulo= "Seleccionar quien evaluar",usuario=usuario,rest=rest, ficha = ficha, procesar_ficha= procesar_ficha, ruta_foto_personal= ruta_foto_personal, consultar_sap= consultar_sap)
+
+
+
+
+
+
+
+
+
 
 
 @page.route("/app_crm/gdd/gestion_equipo", methods=['GET'] )
@@ -577,6 +682,7 @@ def gestion_gdd():
     ficha = usuario.ficha
     rest = consultar_sap(ficha)
 
+
     return render_template('/gdd/gestion_gdd.html', consultar_cargo= consultar_cargo,  titulo= "Gestion",usuario=usuario,rest=rest)
 
 
@@ -590,8 +696,127 @@ def evaluar_colaborador():
     rest = consultar_sap(ficha)
     participantes = participantes_gdd()
     colaboradores = obtener_colaboradores_directos(participantes,ficha)
+    
 
     return render_template('/gdd/evaluar_colaborador', titulo ="Seleccion de evalucacion de competencias", usuario = usuario, rest=rest,colaboradores=colaboradores)
+
+@page.route("/app_crm/gdd/Evaluacion<int:ficha_get>", methods=['GET','POST'])
+@login_required
+def evaluacion_competencias(ficha_get):
+    usuario = current_user
+    ficha = usuario.ficha
+    rest = consultar_sap(ficha)
+    habilitacion_supervisor = False
+    estado_evaluacion = ""
+    usuario_dueño_evaluacion= rest
+    if ficha_get != ficha:
+        usuario_dueño_evaluacion = consultar_sap(ficha_get)
+    
+    resultados = Evaluacion.obtener_resultados(
+        ficha_usuario=ficha_get,
+        año_fiscal= "AF26"
+    )
+    
+    def actualizar_diccionario_evaluaciones(diccionario, resultados_lista, columna):
+        for i, resultado in enumerate(resultados_lista):
+            key = f'numero_{i + 1}'
+            if key in diccionario:
+                diccionario[key] = resultado[columna]
+
+    
+    autoevaluaciones = {
+        'numero_1': None,
+        'numero_2': None,
+        'numero_3': None,
+        'numero_4': None,
+        'numero_5': None
+    }
+    print(autoevaluaciones)
+    actualizar_diccionario_evaluaciones(autoevaluaciones, resultados, 'autoeval')
+    
+    
+    supervisor_evaluaciones ={
+        'numero_1': None,
+        'numero_2': None,
+        'numero_3': None,
+        'numero_4': None,
+        'numero_5': None
+    }
+    actualizar_diccionario_evaluaciones(supervisor_evaluaciones, resultados, 'superv_eval')
+    
+    par_evaluaciones ={
+        'numero_1': None,
+        'numero_2': None,
+        'numero_3': None,
+        'numero_4': None,
+        'numero_5': None
+    }
+    actualizar_diccionario_evaluaciones(par_evaluaciones, resultados, 'par_eval')
+    
+    
+    subordinado_eval ={
+        'numero_1': None,
+        'numero_2': None,
+        'numero_3': None,
+        'numero_4': None,
+        'numero_5': None
+    }
+    actualizar_diccionario_evaluaciones(subordinado_eval, resultados, 'subordinado_eval')
+    
+    
+    
+    cumplimientos ={
+        'numero_1': None,
+        'numero_2': None,
+        'numero_3': None,
+        'numero_4': None,
+        'numero_5': None
+    }
+    actualizar_diccionario_evaluaciones(cumplimientos, resultados, 'cumplimiento_eval')
+
+    desempeños ={
+        'numero_1': None,
+        'numero_2': None,
+        'numero_3': None,
+        'numero_4': None,
+        'numero_5': None
+    }
+    actualizar_diccionario_evaluaciones(desempeños, resultados, 'desempeno_eval')
+    
+    registro_evaluacion = Evaluacion.obtener_evaluaciones_por_usuario(
+        ficha_usuario=ficha_get
+    )
+    if registro_evaluacion:
+        ficha_evaluador_supervisor = registro_evaluacion.supervisor_evaluador
+        ficha_evaluador_par = registro_evaluacion.par_evaluador
+        ficha_subordinado = registro_evaluacion.subordinado_evaluador
+        total_desempeño = registro_evaluacion.total
+    else:
+        ficha_evaluador_supervisor = procesar_ficha(usuario_dueño_evaluacion[0]['fichaSuperv'])
+        ficha_evaluador_par = "0"
+        ficha_subordinado = "0"
+        total_desempeño = 0
+
+    print(ficha_evaluador_supervisor)#Esta variable por alguna razon es str, por eso la comparo en int abajo
+    print(f"el par {ficha_evaluador_par}")
+    if ficha != ficha_get and ficha== int(ficha_evaluador_supervisor):
+        estado_evaluacion = "supervisorEvaluacion"
+    elif ficha != ficha_get and ficha== int(ficha_evaluador_par):
+        estado_evaluacion = "parEvaluacion"
+    elif ficha != ficha_get and ficha== int(ficha_subordinado):
+        estado_evaluacion = "subordinadoEvaluacion"
+    elif ficha == ficha_get:
+        estado_evaluacion = "Autoevaluacion"
+    else:
+        flash("No puedes evaluar a este usuario" , "Error")
+        return redirect(url_for('.menu'))
+
+
+
+    print(f"asdasdasd {subordinado_eval}")
+    usuario_dueño_indicador = usuario_dueño_evaluacion
+
+    return render_template('/gdd/evaluacion.html',ruta_foto_personal= ruta_foto_personal,  usuario_dueño_indicador= usuario_dueño_indicador,  par_evaluaciones= par_evaluaciones, subordinado_eval= subordinado_eval,  total_desempeño = total_desempeño, desempeños= desempeños,  cumplimientos= cumplimientos, supervisor_evaluaciones= supervisor_evaluaciones,  usuario_dueño_evaluacion= usuario_dueño_evaluacion,  ficha_evaluador_supervisor=ficha_evaluador_supervisor, ficha_get= ficha_get, autoevaluaciones=autoevaluaciones, estado_evaluacion = estado_evaluacion, habilitacion_supervisor= habilitacion_supervisor, consultar_cargo= consultar_cargo, titulo ="Formulario de evaluación", usuario = usuario, rest=rest, ficha=ficha)
 
 #---------------------------------------ENDPOINTS PARA JS-------------------------------------
 """
@@ -684,20 +909,33 @@ def rutaSap():
         imagen_existe = False
         ruta_imagen = None
         
-        for ext in extensiones:
+        departamento_final = None
+        plstx_valor = rest[0]['plstx']
+        if len(plstx_valor) >= 24:
+            resultado_cargo = consultar_cargo(ficha)
+            print(f" asdasdas {resultado_cargo}")
+            departamento_final = resultado_cargo.departamento
+        else:
+            departamento_final = plstx_valor
+        
+        if departamento_final:
+            rest[0]['plstx'] = departamento_final
+            
+            
+        """for ext in extensiones:
             nombre_imagen = f"{ficha}.{ext}"
             ruta_absoluta = os.path.join(adj_imagenes, nombre_imagen)
             
             if os.path.exists(ruta_absoluta):
                 imagen_existe = True
                 ruta_imagen = url_for('static', filename=f'img/fotos_personal/{nombre_imagen}')
-                break 
+                break """
 
         return jsonify({
             "success": True if rest else False,
             "response_json": rest if rest else None,
             "imagen_disponible": imagen_existe,
-            "ruta_imagen": ruta_imagen
+            #"ruta_imagen": ruta_imagen
         }), 200 if rest else 404
 
     except Exception as e:
@@ -753,6 +991,81 @@ def insertar_indicador():
     except Exception as e:
         flash("Hubo un error Registrando el Indicador", "error")
         print(f"Error: {str(e)}")
+        return jsonify({"success": False, "message": f"Error inesperado: {str(e)}"}), 500
+    
+
+@page.route('/app_crm/evaluacion', methods=['POST'])
+@login_required
+def evaluacion():
+    data = request.get_json()
+    print(data)
+    
+    try:
+        lista_evaluaciones = data['data']
+        ficha_dueño = data['ficha_del_dueño_del_indicador']
+        if ficha_dueño =="":
+            ficha_dueño = current_user.ficha
+        año= "AF26"
+        resultados = []
+        total = 0
+        rest = consultar_sap(ficha_dueño)
+        ficha_supervisor = procesar_ficha(rest[0]['fichaSuperv'])     
+        Evaluacion.asignar_supervisor(
+            ficha_usuario=ficha_dueño,
+            año_fiscal='AF26',
+            ficha_supervisor=ficha_supervisor
+        )
+        for evaluacion_individual in lista_evaluaciones:
+            competencia = evaluacion_individual.get('competencia')
+            valor_autoeval = evaluacion_individual.get('autoEvaluacion')
+            valor_supervisor = evaluacion_individual.get('supervisorEvaluacion', '')
+            valor_par = evaluacion_individual.get('parEvaluacion', '')
+            valor_subordinado = evaluacion_individual.get('subordinadoEvaluacion', '')
+            valor_cumplomiento = evaluacion_individual.get('cumplimiento', '')
+            valor_desempeno = evaluacion_individual.get('desempeno', '')
+            valor_cumplomiento = 0 if valor_cumplomiento == "" else valor_cumplomiento
+            total= valor_cumplomiento+ total
+            print(f" Competencia: {competencia} | AutoEval: {valor_autoeval} | Supervisor: {valor_supervisor} | par: {valor_par}, subordinado {valor_subordinado}, cumplimiento {valor_cumplomiento} desempeno {valor_desempeno}")
+
+            resultado = Evaluacion.registrar_dato(
+                ficha_usuario=ficha_dueño,
+                año_fiscal=año,
+                nombre_competencia=competencia,
+                datos_a_registrar={
+                    'autoeval': valor_autoeval,
+                    'superv_eval': valor_supervisor,
+                    'par_eval': valor_par,
+                    'subordinado_eval': valor_subordinado,
+                    'cumplimiento_eval': valor_cumplomiento,
+                    'desempeno_eval':  valor_desempeno
+                }
+            )
+
+            if resultado:
+                resultados.append(resultado.id)
+
+            
+        Evaluacion.actualizar_total(
+        ficha_usuario=ficha_dueño,
+        año_fiscal=año,
+        nuevo_total=total
+        )
+
+        if resultados:
+            return jsonify({
+                'success': True,
+                'mensaje': 'Todos los datos fueron registrados correctamente.',
+                'ids_resultados': resultados
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'mensaje': 'No se registraron datos (ningún resultado fue exitoso).'
+            }), 400
+
+    except Exception as e:
+        flash("Hubo un error registrando la evaluación", "error")
+        print(f"❌ Error en el backend: {str(e)}")
         return jsonify({"success": False, "message": f"Error inesperado: {str(e)}"}), 500
     
     
@@ -950,6 +1263,51 @@ def agregarCronograma():
         flash("Ocurrió un error", "error")
         print(f"Error: {str(e)}")
         return jsonify({"success": False, "message": f"Error inesperado: {str(e)}"}), 500
+    
+    
+    
+    
+    
+    
+@page.route('/app_crm/establecer_evaluadores', methods=['POST'])
+def establecer_evaluadores():
+    datos = request.get_json()
+    
+    try:
+        par = datos.get('idPar')
+        subordinado = datos.get('idSubordinado')
+        fichaUsuarioEvaluar = datos.get('fichaUsuarioEvaluar')
+        
+        if par or par != "":
+            Evaluacion.asignar_par_evaluador(
+                ficha_usuario=fichaUsuarioEvaluar,
+                año_fiscal='AF26',
+                ficha_par=par
+            )
+        
+        if subordinado or subordinado != "":
+            Evaluacion.asignar_subordinado_evaluador(
+                ficha_usuario=fichaUsuarioEvaluar,
+                año_fiscal='AF26',
+                ficha_subordinado=subordinado
+            )
+        
+        
+        print('todo bien mi rey')
+        flash("Evaluadores agregados Exitosamente", "success")
+        return jsonify({"success": True, "message": "Evaluadores enviado"}), 200
+
+    except Exception as e:
+        flash("Ocurrió un error", "error")
+        print(f"Error: {str(e)}")
+        return jsonify({"success": False, "message": f"Error inesperado: {str(e)}"}), 500
+    
+    
+    
+    
+    
+    
+    
 """
 def encontrar_subordinados_recursivo(participantes, ficha_superior,equipo=None):
     if equipo is None:

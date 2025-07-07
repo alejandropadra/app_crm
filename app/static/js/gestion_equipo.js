@@ -4,6 +4,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const botonDropDown = document.getElementById('dropdown-button-2');
     const tarjetas = document.querySelectorAll('.flex.flex-col.col-span-3');
 
+
+
+
+
+
+
+
+
+
+
+
+
     let valorFilialSeleccionada = 'ALL'; // Default: mostrar todo
     let activeTimeouts = [];
 
@@ -77,3 +89,5 @@ document.addEventListener('DOMContentLoaded', function () {
     `;
     document.head.appendChild(style);
 });
+
+

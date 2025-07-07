@@ -2,10 +2,25 @@
 {% from 'helpers/_forms.html' import render_field %}
 
 {% block body %}
+
+
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <input type="hidden" value={{ficha_get}} id="ficha_get">
 <input type="hidden" value={{usuario.habilitacion_gdd}} name="" id="status_actual">
-
+<div class="hidden" id="colaboradores-data"> {{colaboradores_json}}</div>
+<div class="hidden" id="subordinados-data"> {{equipo_json}}</div>
+<style>
+    .dropdown-open {
+            max-height: 300px;
+            opacity: 1;
+            visibility: visible;
+        }
+        .dropdown-closed {
+            max-height: 0;
+            opacity: 0;
+            visibility: hidden;
+        }
+</style>
 
 <div class="flex w-full justify-start my-7 mx-7 items-center gap-3">
 
@@ -21,11 +36,12 @@
 
 
 
+
 <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 mb-5">
     {% include "components/tarjeta_perfil.html" %}
 
 
-    <div class="opado flex flex-col gap-5 max-w-80 bg-white rounded-xl shadow-custom p-4 items-center justify-center" >
+    <div class="opado flex flex-col gap-5 max-w-80 bg-white rounded-[30px] shadow-custom p-4 items-center justify-center" >
         <h3 class=" !text-[15px] text-center">Habilitar / bloquear proceso de GDD  </h3>
         <div>Estdao actual: <span id="estadoActual" class=" font-bold {%if usuario.habilitacion_gdd == 'Abierto' or usuario.habilitacion_gdd=='AFACTIVO' %} text-[#047c54] {%else%} text-[#e32c24] {%endif%}"> {%if usuario.habilitacion_gdd == 'Abierto' or usuario.habilitacion_gdd == 'AFACTIVO'%} Abierto {%else%} Cerrado {%endif%}  </span></div>
         <input id="inpLock" type="checkbox"  >
@@ -48,7 +64,7 @@
         <div class="rounded-t mb-0 px-4 py-3 border-0 flex flex-col sm:flex-row justify-between items-center gap-3">
             <!-- Contenedor del título con flex-grow para ocupar el espacio a la izquierda -->
             <div class="relative px-0 md:px-4 flex-grow flex gap-5">
-                <h3 class="text-left opado">aprobacion de Indicadores Funcionales</h3>
+                <h3 class="text-left opado">Aprobacion de Indicadores Funcionales</h3>
                 <!--<button id="autoayuda" type="button" class=" opado absolute md:static top-[-30px] right-[-35px] autoayuda bg-slate-600 flex justify-center  w-8 h-8 rounded-[50%] items-center text-white hover:bg-slate-400 p-4  outline-none focus:outline-none ease-linear transition-all duration-150" type="button">
                     <span class="">
                         <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#fff" stroke-width="2.5" viewBox="0 0 256 256"><path d="M192,96c0,28.51-24.47,52.11-56,55.56V160a8,8,0,0,1-16,0V144a8,8,0,0,1,8-8c26.47,0,48-17.94,48-40s-21.53-40-48-40S80,73.94,80,96a8,8,0,0,1-16,0c0-30.88,28.71-56,64-56S192,65.12,192,96Zm-64,96a16,16,0,1,0,16,16A16,16,0,0,0,128,192Z"></path></svg>
@@ -175,10 +191,8 @@
                                             {% elif indicador.status_aprobacion == 'C'%} bg-blue-300 
                                             {%endif%} font-bold  text-[#333]" >{{indicador.status_aprobacion}}</span> 
                             {%else%}
-N/A
+                                N/A
                             {%endif%}
-
-
 
                         </td>
 
@@ -265,9 +279,222 @@ N/A
             </table>
         </div>
 
+    </form>
+</div>
+
+
+
+
+<div class=" w-full  py-5 gap-6">
+    <form enctype="multipart/form-data" action="{{ url_for('.establecer_evaluadores') }}" method="post" id="formEstablecerEvaluadores">
+        <div class=" bg-white opado shadow-custom p-5 rounded-2xl  ">
+            <h3 class=" ml-8">Evaluadores</h3>
+
+            <div class="grid grid-cols-3 gap-2 py-4">
+                <div class="blanco p-3 rounded-xl shadow-sm border border-gray-200 flex flex-col gap-4">
+                    <div class="flex items-center flex-col gap-3">
+                        <h4 class=" text-base text-center">Supervisor</h4>
+                        <!-- Input de búsqueda -->
+                        <div class="relative"> 
+                            <input disabled placeholder="Establecido por defecto"  class="input shadow-lg focus:border-2 border-gray-300 px-5 py-2 pr-12 rounded-xl w-full transition-all focus:w-[102%] outline-none"  name="search"  type="search"  autocomplete="off" />
+
+                        </div>
+                    </div>
+
+                    <!--Supervisor inmediato-->
+                    <div class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3 bg-[--verde]"> 
+                        <div class="w-[20%]  aspect-square">
+                            {%set ficha_seupervisor = recortarFicha(usuario_dueño_indicador[0].fichaSuperv)%}
+                            {% set ruta = ruta_foto_personal(ficha_seupervisor) %}
+                                <img src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
+                                        class="w-full h-full object-cover rounded-full border border-solid  " 
+                                        alt="User Image">
+                        </div>
+                        <div  class=" flex flex-col gap-1">
+                            <h5 class=" text-base font-normal">{{usuario_dueño_indicador[0].nombreSuperv |title}}</h5>
+                            <h6 class=" small "> Evaluador Supervisor</h6>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="blanco p-3 rounded-xl shadow-sm border border-gray-200 flex flex-col gap-4">
+                    <div class=" flex items-center flex-col gap-3 w-full justify-between ">
+                        <h4 class=" text-base text-center ">Evaluador Par</h4>
+                        <div class="relative">
+                            <!-- Input de búsqueda -->
+                            <div class="relative"> 
+                                <input  id="searchInput" placeholder="Buscar"  class="input shadow-lg focus:border-2 border-gray-300 px-5 py-2 pr-12 rounded-xl w-full transition-all focus:w-[102%] outline-none"  name="search"  type="search"  autocomplete="off" />
+                                <svg class="size-5 absolute top-3 right-3 text-gray-500 pointer-events-none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" >
+                                    <path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" stroke-linejoin="round" stroke-linecap="round"></path>
+                                </svg>
+                            </div>
+
+                            <!-- Dropdown Menu -->
+                            <div id="dropdown" class="dropdown-closed absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg mt-1 z-10 overflow-hidden transition-all duration-200" >
+                                <div class="max-h-60 overflow-y-auto">
+                                    <div id="dropdownContent">
+                                    </div>
+                                    <div id="noResults" class="hidden px-4 py-3 text-gray-500 text-center">
+                                        No se encontraron colaboradores
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Campo oculto para almacenar el colaborador seleccionado -->
+                            <input type="hidden" id="selectedColaborador" name="colaborador_id" />
+                        </div>
+                    </div>
+                    <!--Evaluador par-->
+                    {%if registro_evaluacion.par_evaluador or registro_evaluacion.par_evaluador != None %}
+                        <div class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3 bg-[--verde]"> 
+                            <div class="w-[20%]  aspect-square">
+                                {%set ficha_par_evaluador = recortarFicha(registro_evaluacion.par_evaluador)%}
+                                {% set ruta = ruta_foto_personal(ficha_par_evaluador) %}
+                                <img  id="selectedImage" src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
+                                            class="w-full h-full object-cover rounded-full border border-solid  " 
+                                            alt="User Image">
+                            </div>
+                            <div  class=" flex flex-col gap-1">
+                                <h5 id="selectedName" class=" text-base font-normal ">
+
+                                    {%if not usuario_par %}
+                                        {{nombre_apellido_usuario_par | title}}
+                                    {%else%}
+                                        {{usuario_par.apellido|title }}, {{usuario_par.nombre |title}}
+                                    {%endif%}
+                                
+                                </h5>
+                                <h6 class=" small "> Evaluador Par</h6>
+                            </div>
+                        </div>
+                    
+                    {%else%}
+                        <div id="selectedPar" class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3">
+                            <div class="w-[20%]  aspect-square">
+                                <img id="selectedImage" src="{{ url_for('static', filename='img/notfoundUser.png') }}" 
+                                    class="w-full h-full object-cover rounded-full border border-solid  " 
+                                    alt="User Image">
+                            </div>
+                            <div  class=" flex flex-col gap-1">
+                                <h5 id="selectedName" class=" text-base font-normal">No agregado</h5>
+                                <h6 class=" small "> Evaluador Par</h6>
+                            </div>
+                        </div>
+                    {%endif%}
+                </div>
+
+
+
+
+                <div class="blanco p-3 rounded-xl shadow-sm border border-gray-200 flex flex-col gap-4">
+                    <div class=" flex items-center gap-3 flex-col w-full justify-between ">
+                        <h4 class=" text-base text-center ">Evaluador subordinado</h4>
+                            <div class="relative">
+                                <!-- Input de búsqueda -->
+                                <div class="relative">
+                                    <input id="searchInputSubordinado" placeholder="Buscar "  
+                                        class="input shadow-lg focus:border-2 border-gray-300 px-5 py-2 pr-12 rounded-xl w-full transition-all focus:w-[102%] outline-none"  
+                                        name="search"  
+                                        type="search"  
+                                        autocomplete="off" />
+                                    <svg class="size-5 absolute top-3 right-3 text-gray-500 pointer-events-none" 
+                                        stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none" 
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" 
+                                            stroke-linejoin="round" stroke-linecap="round"></path>
+                                    </svg>
+                                </div>
+
+                                <!-- Dropdown Menu para subordinados -->
+                                <div id="dropdownSubordinado" class="dropdown-closed absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg mt-1 z-10 overflow-hidden transition-all duration-200">
+                                    <div class="max-h-60 overflow-y-auto">
+                                        <div id="dropdownContentSubordinado">
+                                        </div>
+                                        <div id="noResultsSubordinado" class="hidden px-4 py-3 text-gray-500 text-center">
+                                            No se encontraron colaboradores
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Campo oculto para almacenar el colaborador subordinado seleccionado -->
+                                <input type="hidden" id="selectedColaboradorSubordinado" name="colaborador_subordinado" />
+                            </div>
+                    </div>
+                    <!--Evaluador par-->
+                    {%if registro_evaluacion.subordinado_evaluador or registro_evaluacion.subordinado_evaluador != None %}
+
+                        <div id="selectedPar" class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3">
+                            <div class="w-[20%]  aspect-square">
+                                {%set ficha_subordinado_evaluador = recortarFicha(registro_evaluacion.subordinado_evaluador)%}
+                                    {% set ruta = ruta_foto_personal(ficha_subordinado_evaluador) %}
+                                        <img  id="selectedImageSubordinado" src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
+                                                class="w-full h-full object-cover rounded-full border border-solid  " 
+                                                alt="User Image">
+                            </div>
+                            <div class=" flex flex-col gap-1">
+                                <h5 id="selectedNameSubordinado" class=" text-base font-normal">
+                                    {%if not usuario_subordinado %}
+                                        {{nombre_apellido_usuario_subordinado | title}}
+                                    {%else%}
+                                        {{usuario_subordinado.apellido|title }}, {{usuario_subordinado.nombre |title}}
+                                    {%endif%}
+                                
+                                </h5>
+                                <h6 class=" small "> Evaluador subordinado</h6>
+                            </div>
+                        </div>
+
+                    {%else%}
+
+    
+                        <div id="selectedPar" class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3">
+                            <div class="w-[20%]  aspect-square">
+                                <img id="selectedImageSubordinado" src="{{ url_for('static', filename='img/notfoundUser.png') }}" 
+                                    class="w-full h-full object-cover rounded-full border border-solid  " 
+                                    alt="User Image">
+                            </div>
+                            <div  class=" flex flex-col gap-1">
+                                <h5 id="selectedNameSubordinado" class=" text-base font-normal">No agregado</h5>
+                                <h6 class=" small "> Evaluador Par</h6>
+                            </div>
+                        </div>
+                
+                {%endif%}
+
+                </div>
+            </div>
+
+
+
+            <div class=" flex justify-end items-center">
+                <button type="button" class=" mt-3 cursor-pointer text-zinc-200 flex gap-2 items-center bg-valor-azul px-4 py-2 rounded-lg font-medium text-sm hover:bg-azul-dark transition-all ease-in duration-200" id="enviarEvaluadores">
+                    Guardar evaluadores
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+
+                </button>
+            </div>
+        </div>
+
 
     </form>
 </div>
+
+
+    
+
+    <!-- 
+    <div class=" col-span-2 bg-white opado shadow-custom p-5 rounded-2xl">
+        {%if usuario_dueño_indicador[0].nivel == 'II'%}
+        <h3>Evaluación 180</h3>
+        <p>El usuario es evaluado por su supervisor</p>
+        {%endif%}
+    </div>-->
+
+</div>
+
+
 
 
 
@@ -309,5 +536,6 @@ N/A
 {% endblock %}
 
 {% block js%}
+
 <script src="{{ url_for('static', filename='js/detalles_list_user.js') }}"></script>
 {% endblock %}

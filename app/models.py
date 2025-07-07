@@ -23,7 +23,9 @@ class User(db.Model, UserMixin):
     habilitacion_gdd = db.Column(db.String(30)) #Activo, bloqueado, evaluando
     # Relación uno-a-muchos con Indicador
     indicadores = db.relationship('Indicadores', back_populates='usuario', cascade='all, delete-orphan')
-
+    # Relación con Evaluaciones: Un usuario puede tener muchas evaluaciones (una por cada año fiscal).
+    # Esta es la "colección de carpetas" de un usuario.
+    evaluaciones = db.relationship('Evaluacion', back_populates='usuario', lazy='dynamic', cascade='all, delete-orphan')
     def get_id(self):
         return str(self.ficha)
 
@@ -584,7 +586,358 @@ class Cronograma(db.Model):
         
         db.session.delete(actividades)
         db.session.commit()
+
+
+#======== Tabla de EVALUACION (La "Carpeta") =================================
+class Evaluacion(db.Model):
+    __tablename__ = 'evaluaciones'
+
+    id = db.Column(db.Integer, primary_key=True)
+    año_fiscal = db.Column(db.String(50), nullable=False)
+    estado = db.Column(db.String(50), nullable=False, default='Abierta') 
+    fecha_creacion = db.Column(db.DateTime, default=datetime.datetime.now)
+    fecha_cierre = db.Column(db.DateTime)
+    ficha_usuario = db.Column(db.Integer, db.ForeignKey('users.ficha'), nullable=False)
+    supervisor_evaluador = db.Column(db.String(50), nullable=False)
+    par_evaluador = db.Column(db.String(50), nullable=True)
+    subordinado_evaluador = db.Column(db.String(50), nullable=True)
+    total = db.Column(db.Integer)
+    
+    usuario = db.relationship('User', back_populates='evaluaciones')
+    resultados = db.relationship('evaluacion_competencias', back_populates='evaluacion', cascade='all, delete-orphan')
+
+    @classmethod
+    def asignar_supervisor(cls, ficha_usuario, año_fiscal, ficha_supervisor):
+        """
+        Asigna o actualiza el supervisor evaluador de una evaluación específica.
+        Crea la evaluación si no existe, pero SOLO maneja el campo supervisor_evaluador.
         
+        :param ficha_usuario: La ficha del usuario a evaluar
+        :param año_fiscal: El año fiscal de la evaluación
+        :param ficha_supervisor: La ficha del supervisor que evaluará
+        :return: El objeto Evaluacion actualizado o None si hay error
+        """
+        try:
+            print('asdas')
+            # --- Paso 1: Buscar evaluación existente ---
+            evaluacion = cls.query.filter_by(
+                ficha_usuario=ficha_usuario,
+                año_fiscal=año_fiscal
+            ).first()
+            
+            if evaluacion:
+                return None
+            else:
+                # Si no existe, creamos la evaluación CON el supervisor
+                print(f"Creando nueva evaluación con supervisor: Usuario {ficha_usuario} - {año_fiscal}")
+                evaluacion = cls(
+                    ficha_usuario=ficha_usuario,
+                    año_fiscal=año_fiscal,
+                    supervisor_evaluador=str(ficha_supervisor)
+                )
+                db.session.add(evaluacion)
+                print(f"Nueva evaluación creada con supervisor: {ficha_supervisor}")
+            
+            # --- Paso 2: Guardar cambios ---
+            db.session.commit()
+            return evaluacion
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al asignar supervisor: {e}")
+            return None
+    
+    @classmethod
+    def asignar_par_evaluador(cls, ficha_usuario, año_fiscal, ficha_par):
+        """
+        Asigna o actualiza el par evaluador de una evaluación específica.
+        
+        :param ficha_usuario: La ficha del usuario a evaluar
+        :param año_fiscal: El año fiscal de la evaluación
+        :param ficha_par: La ficha del par que evaluará
+        :return: El objeto Evaluacion actualizado o None si hay error
+        """
+        try:
+            evaluacion = cls.query.filter_by(
+                ficha_usuario=ficha_usuario,
+                año_fiscal=año_fiscal
+            ).first()
+            
+            if not evaluacion:
+                print(f"No se encontró evaluación para asignar par: Usuario {ficha_usuario} - {año_fiscal}")
+                return None
+            
+            evaluacion.par_evaluador = str(ficha_par) if ficha_par else None
+            print(f"Par evaluador asignado: {ficha_par} para Usuario {ficha_usuario}")
+            
+            db.session.commit()
+            return evaluacion
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al asignar par evaluador: {e}")
+            return None
+    
+    @classmethod
+    def asignar_subordinado_evaluador(cls, ficha_usuario, año_fiscal, ficha_subordinado):
+        """
+        Asigna o actualiza el subordinado evaluador de una evaluación específica.
+        
+        :param ficha_usuario: La ficha del usuario a evaluar
+        :param año_fiscal: El año fiscal de la evaluación
+        :param ficha_subordinado: La ficha del subordinado que evaluará
+        :return: El objeto Evaluacion actualizado o None si hay error
+        """
+        try:
+            evaluacion = cls.query.filter_by(
+                ficha_usuario=ficha_usuario,
+                año_fiscal=año_fiscal
+            ).first()
+        
+            if not evaluacion:
+                print(f" No se encontró evaluación para asignar subordinado: Usuario {ficha_usuario} - {año_fiscal}")
+                return None
+            
+            evaluacion.subordinado_evaluador = str(ficha_subordinado) if ficha_subordinado else None
+            print(f"Subordinado evaluador asignado: {ficha_subordinado} para Usuario {ficha_usuario}")
+            
+            db.session.commit()
+            return evaluacion
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al asignar subordinado evaluador: {e}")
+            return None
+
+    @classmethod
+    def registrar_dato(cls, ficha_usuario, año_fiscal, nombre_competencia, datos_a_registrar):
+        """
+        Registra un dato en una evaluación, creando la estructura si no existe.
+        Este es el método principal para cualquier CUD (Crear, Actualizar, Borrar) en la evaluación.
+        
+        NOTA: Este método REQUIERE que ya exista una evaluación con supervisor_evaluador asignado,
+        o que se pase el supervisor_evaluador en datos_a_registrar para nuevas evaluaciones.
+
+        :param ficha_usuario: La ficha del usuario a evaluar.
+        :param año_fiscal: El año fiscal de la evaluación.
+        :param nombre_competencia: El nombre de la competencia específica a modificar.
+        :param datos_a_registrar: Un diccionario con los campos y valores a guardar. 
+        :return: El objeto 'evaluacion_competencias' actualizado o None si hay un error.
+        """
+        try:
+            # --- Paso 1: Obtener o Crear la "Carpeta" (Evaluacion) ---
+            evaluacion = cls.query.filter_by(
+                ficha_usuario=ficha_usuario, 
+                año_fiscal=año_fiscal
+            ).first()
+
+            if not evaluacion:
+                # Si no existe, verificamos si tenemos supervisor en los datos
+                supervisor_req = datos_a_registrar.get('supervisor_evaluador')
+                if not supervisor_req:
+                    print(f"Error: Se requiere supervisor_evaluador para crear nueva evaluación")
+                    print(f" Sugerencia: Use primero Evaluacion.asignar_supervisor() o incluya 'supervisor_evaluador' en datos_a_registrar")
+                    return None
+                
+                print(f"No se encontró evaluación para {ficha_usuario} en {año_fiscal}. Creando una nueva.")
+                evaluacion = cls(
+                    ficha_usuario=ficha_usuario,
+                    año_fiscal=año_fiscal,
+                    supervisor_evaluador=str(supervisor_req)
+                )
+                db.session.add(evaluacion)
+                db.session.flush()
+
+            # --- Paso 2: Obtener o Crear el "Documento" (evaluacion_competencias) ---
+            resultado = evaluacion_competencias.query.filter_by(
+                evaluacion_id=evaluacion.id,
+                nombre_competencia=nombre_competencia
+            ).first()
+
+            if not resultado:
+                print(f"No se encontró la competencia '{nombre_competencia}'. Creando una nueva.")
+                resultado = evaluacion_competencias(
+                    evaluacion_id=evaluacion.id,
+                    nombre_competencia=nombre_competencia
+                )
+                db.session.add(resultado)
+
+            # --- Paso 3: Actualizar los campos del "Documento" ---
+            # Filtramos los campos que pertenecen a evaluacion_competencias
+            campos_competencia = {'autoeval', 'superv_eval', 'par_eval', 'subordinado_eval', 
+                                'cumplimiento_eval', 'desempeno_eval', 'peso'}
+            
+            for campo, valor in datos_a_registrar.items():
+                if campo in campos_competencia and hasattr(resultado, campo):
+                    setattr(resultado, campo, valor)
+                    print(f"Registrando en competencia '{nombre_competencia}': {campo} = {valor}")
+
+            # --- Paso 4: Commit final ---
+            db.session.commit()
+            return resultado
+
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al registrar dato en la evaluación: {e}")
+            return None
+    
+    @classmethod
+    def actualizar_total(cls, ficha_usuario, año_fiscal, nuevo_total):
+        """
+        Actualiza el campo 'total' de una evaluación existente.
+
+        :param ficha_usuario: La ficha del usuario evaluado
+        :param año_fiscal: Año fiscal
+        :param nuevo_total: El nuevo valor a asignar a total
+        :return: True si fue exitoso, False si no
+        """
+        try:
+            evaluacion = cls.query.filter_by(
+                ficha_usuario=ficha_usuario,
+                año_fiscal=año_fiscal
+            ).first()
+
+            if not evaluacion:
+                print(f"No se encontró evaluación para actualizar el total.")
+                return False
+
+            evaluacion.total = nuevo_total
+            db.session.commit()
+            print(f"Total actualizado a {nuevo_total} para {ficha_usuario} ({año_fiscal})")
+            return True
+        except Exception as e:
+            db.session.rollback()
+            print(f" Error actualizando total: {e}")
+            return False
+        
+        
+    @classmethod
+    def obtener_resultados(cls, ficha_usuario, año_fiscal):
+        """
+        Retorna todos los resultados de competencias para una ficha y año fiscal dado.
+
+        :param ficha_usuario: Número de ficha del usuario evaluado.
+        :param año_fiscal: Año fiscal.
+        :return: Lista de diccionarios con los resultados de competencias.
+        """
+        evaluacion = cls.query.filter_by(
+            ficha_usuario=ficha_usuario,
+            año_fiscal=año_fiscal
+        ).first()
+
+        if not evaluacion:
+            return []
+
+        resultados = []
+        for resultado in evaluacion.resultados:
+            resultados.append({
+                'competencia': resultado.nombre_competencia,
+                'peso': resultado.peso,
+                'autoeval': resultado.autoeval,
+                'superv_eval': resultado.superv_eval,
+                'par_eval': resultado.par_eval,
+                'subordinado_eval': resultado.subordinado_eval,
+                'cumplimiento_eval': resultado.cumplimiento_eval,
+                'desempeno_eval': resultado.desempeno_eval
+            })
+
+        return resultados
+    
+    @classmethod
+    def obtener_evaluaciones_por_usuario(cls, ficha_usuario):
+        """
+        Obtiene todas las evaluaciones asociadas a una ficha de usuario específica.
+
+        :param ficha_usuario: La ficha del usuario cuyas evaluaciones se desean obtener.
+        :return: Una lista de objetos Evaluacion o una lista vacía si no se encuentran evaluaciones.
+        """
+        try:
+            evaluaciones = cls.query.filter_by(ficha_usuario=ficha_usuario).first()
+            if not evaluaciones:
+                print(f"No se encontraron evaluaciones para la ficha de usuario: {ficha_usuario}")
+            return evaluaciones
+        except Exception as e:
+            print(f"Error al obtener evaluaciones para el usuario {ficha_usuario}: {e}")
+            return []
+    
+    @classmethod
+    def obtener_evaluaciones_como_evaluador(cls, ficha_evaluador):
+        """
+        Versión más detallada que retorna información completa de las evaluaciones
+        donde una ficha específica aparece como evaluador.
+        
+        :param ficha_evaluador: La ficha del usuario que actúa como evaluador
+        :return: Lista de diccionarios con información detallada de las evaluaciones
+        """
+        try:
+            ficha_str = str(ficha_evaluador)
+            
+            evaluaciones = cls.query.filter(
+                db.or_(
+                    cls.supervisor_evaluador == ficha_str,
+                    cls.par_evaluador == ficha_str,
+                    cls.subordinado_evaluador == ficha_str
+                )
+            ).all()
+            
+            resultado = []
+            for evaluacion in evaluaciones:
+                # Determinar el rol del evaluador
+                roles = []
+                if evaluacion.supervisor_evaluador == ficha_str:
+                    roles.append('supervisor')
+                if evaluacion.par_evaluador == ficha_str:
+                    roles.append('par')
+                if evaluacion.subordinado_evaluador == ficha_str:
+                    roles.append('subordinado')
+                
+                resultado.append({
+                    'ficha_evaluado': evaluacion.ficha_usuario,
+                    'año_fiscal': evaluacion.año_fiscal,
+                    'estado': evaluacion.estado,
+                    'rol_evaluador': roles,
+                    'evaluacion_id': evaluacion.id
+                })
+            
+            return resultado
+            
+        except Exception as e:
+            print(f"Error al obtener evaluaciones detalladas como evaluador: {e}")
+            return []
+
+
+# Tabla del resultado de las evaluaciones
+class evaluacion_competencias(db.Model):
+    __tablename__ = 'evaluacion_competencias'
+
+    id = db.Column(db.Integer, primary_key=True)
+    nombre_competencia = db.Column(db.String(100), nullable=False)
+    peso= db.Column(db.Integer)
+    autoeval= db.Column(db.String(50))
+    superv_eval= db.Column(db.String(50))
+    par_eval= db.Column(db.String(50))
+    subordinado_eval =db.Column(db.String(50))
+    cumplimiento_eval= db.Column(db.String(50))
+    desempeno_eval = db.Column(db.String(50))
+    # Llave foránea que conecta este resultado con su "carpeta" de evaluación.
+    evaluacion_id = db.Column(db.Integer, db.ForeignKey('evaluaciones.id'), nullable=False)
+    evaluacion = db.relationship('Evaluacion', back_populates='resultados')
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
         
 class Cargos(db.Model):

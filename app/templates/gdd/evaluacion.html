@@ -1,0 +1,1742 @@
+{% extends 'layout.html' %}
+{% from 'helpers/_forms.html' import render_field %}
+
+{% block body %}
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<input type="hidden" id="idIndicador" value={{indicador}}>
+<input type="hidden" id="ficha_del_dueño_del_indicador" value={{ficha_get}}> 
+<input type="hidden" id="ficha_usuario_actual" value={{ficha}}> 
+<input type="hidden" id="ficha_evaluador_supervisor" value={{ficha_evaluador_supervisor}}> 
+<input type="hidden" id="habilitacion_supervisor" value="{{habilitacion_supervisor}}">
+<input type="hidden" id="estado_evaluacion" value="{{estado_evaluacion}}">
+
+<div class="flex w-full justify-start my-7 mx-7 items-center gap-3">
+    <a onclick="window.history.back()" class="tarjeta-base h-4 w-4 flex justify-center items-center cursor-pointer bg-slate-600 !transform-none hover:bg-slate-300 ">
+        <span class="material-symbols-rounded text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        </span>
+    </a>
+    <h3>Gestión del Desempeño /</h3> <h3 class=" text-[--coral]"> Evaluación de Competencias</h3>
+</div>
+
+
+{%if estado_evaluacion !=  'supervisorEvaluacion' and estado_evaluacion !=  'parEvaluacion' and estado_evaluacion !=  'subordinadoEvaluacion' %}
+
+
+{%else%}
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 mb-5">
+        {% include "components/tarjeta_perfil.html" %}
+    </div>
+
+{%endif%}
+
+
+<div class="tarjeta-base bg-white overflow-x-auto sombra w-[97%] mx-auto z-0">
+    <form action="" class="py-3 relative" id="cronogramaForm">
+        <table class="table-auto w-full border-collapse" id="tabla-HV">
+            <thead>
+                <tr>
+                    <td class="w-1/4 px-3 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                        
+                    </td>
+                    <td class="w-1/12 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">
+                        Peso %
+                    </td>
+                    <td class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">
+                        Auto Evaluación
+                    </td>
+                    <td class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">
+                        Supervisor
+                    </td>
+                    {%if usuario_dueño_evaluacion[0].nivel == 'I' %}
+                        <td class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">
+                            Par
+                        </td>
+                        <td class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">
+                            Colaborador
+                        </td>
+                    {%endif%}
+
+                    <td class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">
+                        Cumplimiento
+                    </td>
+                    <td class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">
+                        Desempeño
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+            <tr class="!h-[90px]">
+                <td class="border border-solid h-full p-0">
+                    <div class=" p-4  relative">
+                        <h4 class=" font-normal text-[#000000] ">Demostración Valores Corporativos</h4>
+                        <!-- 
+                        <div class=" absolute top-0 bg-blue-600 p-1 m-0 flex items-center justify-center rounded-full" >
+                            <span class="material-symbols-rounded m-0 p-0 text-white text-[15px]">
+                                info
+                                </span>
+                        </div>
+                    -->
+                    </div>
+                </td>
+                <td class="border border-solid h-full p-0 ">
+                    <input type="text"  name="Peso" required class="w-full peso h-full p-2 border-none " placeholder="%" value="4%" readonly>
+                </td>
+
+                <!--AUTOEVALUACION DE LA PRIMERA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+ 
+                    {%if autoevaluaciones.numero_1 != None and autoevaluaciones.numero_1 != '' %}
+
+                        <button data-tooltip-target="tooltip-edit1" id="editarStatus" type="button" class="AutoevalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                        </button>
+
+                        <div id="tooltip-edit1" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                    Editar
+                            <div class="tooltip-arrow" data-popper-arrow></div>
+                        </div>
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if autoevaluaciones.numero_1 == 'UP' %} bg-red-300 
+                            {%elif autoevaluaciones.numero_1 == 'FP-' %} bg-yellow-300 
+                            {%elif autoevaluaciones.numero_1 == 'FP' %} bg-slate-300 
+                            {%elif autoevaluaciones.numero_1 == 'FP+' %} bg-green-300
+                            {%elif autoevaluaciones.numero_1 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_autoevaluacion" > {{autoevaluaciones.numero_1}}</span>
+
+                        <div class="dropdownFull hidden">
+                            <div class="custom-dropdown relative w-full h-full">
+                                <input type="hidden" class="hidden-supervisor-eval autoeval" name="supervisorEval" value="{{autoevaluaciones.numero_1}}">
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+                            </div>
+                        </div>
+                            
+                    {%else%}
+
+                        <div class="custom-dropdown autoevaluacionDropDown relative w-full h-full">
+                            <input type="hidden" class="hidden-supervisor-eval autoeval" name="supervisorEval">
+                            <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                <span>Seleccionar</span>
+                                <div class="dropdown-arrow"></div>
+                            </div>
+                            <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                <li data-value="UP">UP</li>
+                                <li data-value="FP-">FP-</li>
+                                <li data-value="FP">FP</li>
+                                <li data-value="FP+">FP+</li>
+                                <li data-value="O">O</li>
+                            </ul>
+                        </div>
+                    {%endif%}
+                </td> <!--FIN DE LA AUTOEVALUACION DE LA PRIMERA FILA-->
+
+
+                <!--EVALUACION SUPERVISOR DE LA PRIMERA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if supervisor_evaluaciones.numero_1 and supervisor_evaluaciones.numero_1  != None and supervisor_evaluaciones.numero_1 != '' %}
+                        <button data-tooltip-target="tooltip-edit-superv1" id="editarStatus" type="button" class="superviEvalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                        </button>
+
+                        <div id="tooltip-edit-superv1" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                    Editar
+                            <div class="tooltip-arrow" data-popper-arrow></div>
+                        </div>
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if supervisor_evaluaciones.numero_1 == 'UP' %} bg-red-300 
+                            {%elif supervisor_evaluaciones.numero_1 == 'FP-' %} bg-yellow-300 
+                            {%elif supervisor_evaluaciones.numero_1 == 'FP' %} bg-slate-300 
+                            {%elif supervisor_evaluaciones.numero_1 == 'FP+' %} bg-green-300
+                            {%elif supervisor_evaluaciones.numero_1 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_supervisorEvaluacion"> {{supervisor_evaluaciones.numero_1}}</span>
+
+                        <div class="dropdownFull hidden">
+                            <div class="custom-dropdown relative w-full h-full">
+
+                                <input type="hidden" class="hidden-supervisor-eval supervisorEval" name="supervisorEval" value="{{supervisor_evaluaciones.numero_1}}">
+
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+
+                            </div>
+                        </div>
+                            
+                    {%else%}
+                        <div class="custom-dropdown supervisor relative w-full h-full">
+
+                            <input type="hidden" class="hidden-supervisor-eval supervisorEval" name="supervisorEval">
+
+                            <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                <span>Seleccionar</span>
+                                <div class="dropdown-arrow"></div>
+                            </div>
+
+                            <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                <li data-value="UP">UP</li>
+                                <li data-value="FP-">FP-</li>
+                                <li data-value="FP">FP</li>
+                                <li data-value="FP+">FP+</li>
+                                <li data-value="O">O</li>
+                            </ul>
+
+                        </div>
+                    {%endif%}
+                </td> <!--FIN DE LA EVALUACION SUPERVISOR DE LA PRIMERA FILA-->
+
+                {%if usuario_dueño_evaluacion[0].nivel == 'I' %}
+
+
+
+                    <!--EVALUACION PAR DE LA PRIMERA FILA-->
+                    <td class="border border-solid h-full p-0 text-center relative ">
+
+                        {%if par_evaluaciones.numero_1 and par_evaluaciones.numero_1  != None and par_evaluaciones.numero_1  != "" %}
+                            <button data-tooltip-target="tooltip-edit-par-1" id="editarStatus" type="button" class="parEvalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                            </button>
+
+                            <div id="tooltip-edit-par-1" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                        Editar
+                                <div class="tooltip-arrow" data-popper-arrow></div>
+                            </div>
+
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                                {%if par_evaluaciones.numero_1 == 'UP' %} bg-red-300 
+                                {%elif par_evaluaciones.numero_1 == 'FP-' %} bg-yellow-300 
+                                {%elif par_evaluaciones.numero_1 == 'FP' %} bg-slate-300 
+                                {%elif par_evaluaciones.numero_1 == 'FP+' %} bg-green-300
+                                {%elif par_evaluaciones.numero_1 == 'O' %} bg-blue-300 
+                                {%endif%} resultado_span_par"> {{par_evaluaciones.numero_1}}</span>
+
+                            <div class="dropdownFull hidden">
+                                <div class="custom-dropdown relative w-full h-full">
+
+                                    <input type="hidden" class="hidden-supervisor-eval parEval" name="supervisorEval" value="{{par_evaluaciones.numero_1}}">
+
+                                    <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                        <span>Seleccionar</span>
+                                        <div class="dropdown-arrow"></div>
+                                    </div>
+
+                                    <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                        <li data-value="UP">UP</li>
+                                        <li data-value="FP-">FP-</li>
+                                        <li data-value="FP">FP</li>
+                                        <li data-value="FP+">FP+</li>
+                                        <li data-value="O">O</li>
+                                    </ul>
+
+                                </div>
+                            </div>
+                                
+                        {%else%}
+                            <div class="custom-dropdown parEvaluacion relative w-full h-full">
+
+                                <input type="hidden" class="hidden-supervisor-eval parEval" name="parEval">
+
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+
+                            </div>
+                        {%endif%}
+                    </td> <!--FIN DE LA EVALUACION PAR DE LA PRIMERA FILA-->
+
+
+
+
+
+                    <!--EVALUACION COLABORADOR DE LA PRIMERA FILA-->
+                    <td class="border border-solid h-full p-0 text-center relative ">
+
+                        {%if subordinado_eval.numero_1 and subordinado_eval.numero_1  != None and subordinado_eval.numero_1  != "" %}
+                            <button data-tooltip-target="tooltip-edit-subord-1" id="editarStatus" type="button" class="suborDevalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                            </button>
+
+                            <div id="tooltip-edit-subord-1" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                        Editar
+                                <div class="tooltip-arrow" data-popper-arrow></div>
+                            </div>
+
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                                {%if subordinado_eval.numero_1 == 'UP' %} bg-red-300 
+                                {%elif subordinado_eval.numero_1 == 'FP-' %} bg-yellow-300 
+                                {%elif subordinado_eval.numero_1 == 'FP' %} bg-slate-300 
+                                {%elif subordinado_eval.numero_1 == 'FP+' %} bg-green-300
+                                {%elif subordinado_eval.numero_1 == 'O' %} bg-blue-300 
+                                {%endif%} resultado_span_subordinado"> {{subordinado_eval.numero_1}}</span>
+
+                            <div class="dropdownFull hidden">
+                                <div class="custom-dropdown relative w-full h-full">
+
+                                    <input type="hidden" class="hidden-supervisor-eval subordinadoEval" name="supervisorEval" value="{{subordinado_eval.numero_1}}">
+
+                                    <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                        <span>Seleccionar</span>
+                                        <div class="dropdown-arrow"></div>
+                                    </div>
+
+                                    <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                        <li data-value="UP">UP</li>
+                                        <li data-value="FP-">FP-</li>
+                                        <li data-value="FP">FP</li>
+                                        <li data-value="FP+">FP+</li>
+                                        <li data-value="O">O</li>
+                                    </ul>
+
+                                </div>
+                            </div>
+                                
+                        {%else%}
+                            <div class="custom-dropdown subordinadoEvaluacion relative w-full h-full">
+
+                                <input type="hidden" class="hidden-supervisor-eval subordinadoEval" name="parEval">
+
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+
+                            </div>
+                        {%endif%}
+                    </td> <!--FIN DE LA EVALUACION COLABORADOR DE LA PRIMERA FILA-->
+
+                {%endif%}
+                <!--CUMPLIMIENTO DE LA PRIMERA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if cumplimientos.numero_1 and cumplimientos.numero_1  != None%}
+
+
+                        <input type="hidden" id="Cumplimiento" name="Cumplimiento" required readonly class=" cumplimiento w-full h-full p-2 border-none " placeholder="%">
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if cumplimientos.numero_1 == 'UP' %} bg-red-300 
+                            {%elif cumplimientos.numero_1 == 'FP-' %} bg-yellow-300 
+                            {%elif cumplimientos.numero_1 == 'FP' %} bg-slate-300 
+                            {%elif cumplimientos.numero_1 == 'FP+' %} bg-green-300
+                            {%elif cumplimientos.numero_1 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_cumplimiento"> {{cumplimientos.numero_1}}</span>
+
+                    {%else%}
+                        <input type="number" id="Cumplimiento" name="Cumplimiento" required readonly class=" cumplimiento w-full h-full p-2 border-none " placeholder="%">
+                    {%endif%}
+                </td> <!--FIN DE CUMPLIMIENTO DE LA PRIMERA FILA-->
+
+                <!--DESEMPEÑO DE LA PRIMERA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if desempeños.numero_1 and desempeños.numero_1  != None%}
+
+                        <input type="hidden" id="Desempeño" name="Desempeño" required  disabled class="w-full h-full p-2 border-none desempeno">
+                    
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if desempeños.numero_1 == 'UP' %} bg-red-300 
+                            {%elif desempeños.numero_1 == 'FP-' %} bg-yellow-300 
+                            {%elif desempeños.numero_1 == 'FP' %} bg-slate-300 
+                            {%elif desempeños.numero_1 == 'FP+' %} bg-green-300
+                            {%elif desempeños.numero_1 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_desempeño"> {{desempeños.numero_1}}</span>
+
+                    {%else%}
+                        <input type="text" id="Desempeño" name="Desempeño" required  disabled class="w-full h-full p-2 border-none desempeno">
+                    {%endif%}
+                </td> <!--FIN DE DESEMPEÑO DE LA PRIMERA FILA-->
+
+
+            </tr>
+
+            <tr class="!h-[90px]">
+                <td class="border border-solid h-full p-0">
+                    <div class=" p-4 ">
+                        <h4 class=" font-normal text-[#000000] ">Foco en Resultados <br></h4>
+                    </div>
+                </td>
+                <td class="border border-solid h-full p-0 ">
+                    <input type="text" id="Peso" name="Peso" required class="w-full peso h-full p-2 border-none " placeholder="%" value="4%" readonly>
+                </td>
+                
+
+                <!--AUTOEVALUACIÓN DE SEGUNDA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if autoevaluaciones.numero_2 != None and autoevaluaciones.numero_2 != ""%}
+                        <button data-tooltip-target="tooltip-edit2" id="editarStatus" type="button" class="AutoevalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                        </button>
+
+                        <div id="tooltip-edit2" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                    Editar
+                            <div class="tooltip-arrow" data-popper-arrow></div>
+                        </div>
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if autoevaluaciones.numero_2 == 'UP' %} bg-red-300 
+                            {%elif autoevaluaciones.numero_2 == 'FP-' %} bg-yellow-300 
+                            {%elif autoevaluaciones.numero_2 == 'FP' %} bg-slate-300 
+                            {%elif autoevaluaciones.numero_2 == 'FP+' %} bg-green-300
+                            {%elif autoevaluaciones.numero_2 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_autoevaluacion" > {{autoevaluaciones.numero_2}}</span>
+
+                        
+                        <div class="dropdownFull hidden">
+                            <div class="custom-dropdown relative w-full h-full">
+                                <input type="hidden" class="hidden-supervisor-eval autoeval" name="supervisorEval" value="{{autoevaluaciones.numero_2}}">
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+                            </div>
+                        </div>
+
+
+                            
+                    {%else%}
+                        <div class="custom-dropdown autoevaluacionDropDown relative w-full h-full">
+
+                            <input type="hidden" class="hidden-supervisor-eval autoeval" name="supervisorEval">
+
+                            <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                <span>Seleccionar</span>
+                                <div class="dropdown-arrow"></div>
+                            </div>
+
+                            <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                <li data-value="UP">UP</li>
+                                <li data-value="FP-">FP-</li>
+                                <li data-value="FP">FP</li>
+                                <li data-value="FP+">FP+</li>
+                                <li data-value="O">O</li>
+                            </ul>
+
+                        </div>
+                    {%endif%}
+                </td><!--FIN DE LA AUTOEVALUACION DE LA SEGUNDA FILA-->
+
+
+                <!--EVALUACION SUPERVISOR DE LA SEGUNDA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if supervisor_evaluaciones.numero_2 and supervisor_evaluaciones.numero_2  != None%}
+                        <button data-tooltip-target="tooltip-edit-super-2" id="editarStatus" type="button" class="superviEvalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                        </button>
+
+                        <div id="tooltip-edit-super-2" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                    Editar
+                            <div class="tooltip-arrow" data-popper-arrow></div>
+                        </div>
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if supervisor_evaluaciones.numero_2 == 'UP' %} bg-red-300 
+                            {%elif supervisor_evaluaciones.numero_2 == 'FP-' %} bg-yellow-300 
+                            {%elif supervisor_evaluaciones.numero_2 == 'FP' %} bg-slate-300 
+                            {%elif supervisor_evaluaciones.numero_2 == 'FP+' %} bg-green-300
+                            {%elif supervisor_evaluaciones.numero_2 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_supervisorEvaluacion"> {{supervisor_evaluaciones.numero_2}}</span>
+
+                        <div class="dropdownFull hidden">
+                            <div class="custom-dropdown relative w-full h-full">
+
+                                <input type="hidden" class="hidden-supervisor-eval supervisorEval" name="supervisorEval" value={{supervisor_evaluaciones.numero_2}}>
+
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+
+                            </div>
+                        </div>
+                            
+                    {%else%}
+                        <div class="custom-dropdown supervisor relative w-full h-full">
+
+                            <input type="hidden" class="hidden-supervisor-eval supervisorEval" name="supervisorEval">
+
+                            <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                <span>Seleccionar</span>
+                                <div class="dropdown-arrow"></div>
+                            </div>
+
+                            <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                <li data-value="UP">UP</li>
+                                <li data-value="FP-">FP-</li>
+                                <li data-value="FP">FP</li>
+                                <li data-value="FP+">FP+</li>
+                                <li data-value="O">O</li>
+                            </ul>
+
+                        </div>
+                    {%endif%}
+                </td> <!--FIN DE LA EVALUACION SUPERVISOR DE LA SEGUNDA FILA-->
+
+
+
+                {%if usuario_dueño_evaluacion[0].nivel == 'I' %}
+
+                <!--EVALUACION PAR DE LA SEGUNDA FILA-->
+                    <td class="border border-solid h-full p-0 text-center relative ">
+
+                        {%if par_evaluaciones.numero_2 and par_evaluaciones.numero_2  != None%}
+                            <button data-tooltip-target="tooltip-par-2" id="editarStatus" type="button" class="parEvalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                            </button>
+
+                            <div id="tooltip-par-2" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                        Editar
+                                <div class="tooltip-arrow" data-popper-arrow></div>
+                            </div>
+
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                                {%if par_evaluaciones.numero_2 == 'UP' %} bg-red-300 
+                                {%elif par_evaluaciones.numero_2 == 'FP-' %} bg-yellow-300 
+                                {%elif par_evaluaciones.numero_2 == 'FP' %} bg-slate-300 
+                                {%elif par_evaluaciones.numero_2 == 'FP+' %} bg-green-300
+                                {%elif par_evaluaciones.numero_2 == 'O' %} bg-blue-300 
+                                {%endif%} resultado_span_par"> {{par_evaluaciones.numero_2}}</span>
+
+                            <div class="dropdownFull hidden">
+                                <div class="custom-dropdown relative w-full h-full">
+
+                                    <input type="hidden" class="hidden-supervisor-eval parEval" name="supervisorEval" value="{{par_evaluaciones.numero_2}}">
+
+                                    <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                        <span>Seleccionar</span>
+                                        <div class="dropdown-arrow"></div>
+                                    </div>
+
+                                    <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                        <li data-value="UP">UP</li>
+                                        <li data-value="FP-">FP-</li>
+                                        <li data-value="FP">FP</li>
+                                        <li data-value="FP+">FP+</li>
+                                        <li data-value="O">O</li>
+                                    </ul>
+
+                                </div>
+                            </div>
+                                
+                        {%else%}
+                            <div class="custom-dropdown parEvaluacion relative w-full h-full">
+
+                                <input type="hidden" class="hidden-supervisor-eval parEval" name="parEval">
+
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+
+                            </div>
+                        {%endif%}
+                    </td> <!--FIN DE LA EVALUACION PAR DE LA SEGUNDA FILA-->
+
+
+
+
+                    <!--EVALUACION COLABORADOR DE LA SEGUNDA FILA-->
+                    <td class="border border-solid h-full p-0 text-center relative ">
+
+                        {%if subordinado_eval.numero_2 and subordinado_eval.numero_2  != None and subordinado_eval.numero_2  != "" %}
+                            <button data-tooltip-target="tooltip-colab-2" id="editarStatus" type="button" class="suborDevalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                            </button>
+
+                            <div id="tooltip-colab-2" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                        Editar
+                                <div class="tooltip-arrow" data-popper-arrow></div>
+                            </div>
+
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                                {%if subordinado_eval.numero_2 == 'UP' %} bg-red-300 
+                                {%elif subordinado_eval.numero_2 == 'FP-' %} bg-yellow-300 
+                                {%elif subordinado_eval.numero_2 == 'FP' %} bg-slate-300 
+                                {%elif subordinado_eval.numero_2 == 'FP+' %} bg-green-300
+                                {%elif subordinado_eval.numero_2 == 'O' %} bg-blue-300 
+                                {%endif%} resultado_span_subordinado"> {{subordinado_eval.numero_2}}</span>
+
+                            <div class="dropdownFull hidden">
+                                <div class="custom-dropdown relative w-full h-full">
+
+                                    <input type="hidden" class="hidden-supervisor-eval subordinadoEval" name="supervisorEval" value="{{subordinado_eval.numero_2}}">
+
+                                    <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                        <span>Seleccionar</span>
+                                        <div class="dropdown-arrow"></div>
+                                    </div>
+
+                                    <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                        <li data-value="UP">UP</li>
+                                        <li data-value="FP-">FP-</li>
+                                        <li data-value="FP">FP</li>
+                                        <li data-value="FP+">FP+</li>
+                                        <li data-value="O">O</li>
+                                    </ul>
+
+                                </div>
+                            </div>
+                                
+                        {%else%}
+                            <div class="custom-dropdown subordinadoEvaluacion relative w-full h-full">
+
+                                <input type="hidden" class="hidden-supervisor-eval subordinadoEval" name="parEval">
+
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+
+                            </div>
+                        {%endif%}
+                    </td> <!--FIN DE LA EVALUACION COLABORADOR DE LA SEGUNDA FILA-->
+
+
+
+
+
+
+
+                {%endif%}
+                <!--CUMPLIMIENTO DE LA SEGUNDA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if cumplimientos.numero_2 and cumplimientos.numero_2  != None%}
+
+
+                        <input type="hidden" id="Cumplimiento" name="Cumplimiento" required readonly class=" cumplimiento w-full h-full p-2 border-none " placeholder="%">
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if cumplimientos.numero_2 == 'UP' %} bg-red-300 
+                            {%elif cumplimientos.numero_2 == 'FP-' %} bg-yellow-300 
+                            {%elif cumplimientos.numero_2 == 'FP' %} bg-slate-300 
+                            {%elif cumplimientos.numero_2 == 'FP+' %} bg-green-300
+                            {%elif cumplimientos.numero_2 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_cumplimiento"> {{cumplimientos.numero_2}}</span>
+
+                    {%else%}
+                        <input type="number" id="Cumplimiento" name="Cumplimiento" required readonly class=" cumplimiento w-full h-full p-2 border-none " placeholder="%">
+                    {%endif%}
+                </td> <!--FIN DE CUMPLIMIENTO DE LA SEGUNDA FILA-->
+
+
+
+                <!--DESEMPEÑO DE LA SEGUNDA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if desempeños.numero_2 and desempeños.numero_2  != None%}
+
+                        <input type="hidden" id="Desempeño" name="Desempeño" required  disabled class="w-full h-full p-2 border-none desempeno">
+                    
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if desempeños.numero_2 == 'UP' %} bg-red-300 
+                            {%elif desempeños.numero_2 == 'FP-' %} bg-yellow-300 
+                            {%elif desempeños.numero_2 == 'FP' %} bg-slate-300 
+                            {%elif desempeños.numero_2 == 'FP+' %} bg-green-300
+                            {%elif desempeños.numero_2 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_desempeño"> {{desempeños.numero_2}}</span>
+
+                    {%else%}
+                        <input type="text" id="Desempeño" name="Desempeño" required  disabled class="w-full h-full p-2 border-none desempeno">
+                    {%endif%}
+                </td> <!--FIN DE DESEMPEÑO DE LA SEGUNDA FILA-->
+            </tr>
+
+            <tr class="!h-[90px]">
+                <td class="border border-solid h-full p-0">
+                    <div class=" p-4 ">
+                        <h4 class=" font-normal text-[#000000] ">Influencia Organizacional <br></h4>
+                    </div>
+                </td>
+                <td class="border border-solid h-full p-0 ">
+                    <input type="text" id="Peso" name="Peso" required class="w-full peso h-full p-2 border-none " placeholder="%" value="4%" readonly>
+                </td>
+
+                <!--AUTOEVALUACIÓN DE TECERA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if autoevaluaciones.numero_3 != None and  autoevaluaciones.numero_3 !=""%}
+                        <button data-tooltip-target="tooltip-edit3" id="editarStatus" type="button" class="AutoevalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                        </button>
+
+                        <div id="tooltip-edit3" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                    Editar
+                            <div class="tooltip-arrow" data-popper-arrow></div>
+                        </div>
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if autoevaluaciones.numero_3 == 'UP' %} bg-red-300 
+                            {%elif autoevaluaciones.numero_3 == 'FP-' %} bg-yellow-300 
+                            {%elif autoevaluaciones.numero_3 == 'FP' %} bg-slate-300 
+                            {%elif autoevaluaciones.numero_3 == 'FP+' %} bg-green-300
+                            {%elif autoevaluaciones.numero_3 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_autoevaluacion" > {{autoevaluaciones.numero_3}}</span>
+                        
+                        <div class="dropdownFull hidden">
+                            <div class="custom-dropdown relative w-full h-full">
+                                <input type="hidden" class="hidden-supervisor-eval autoeval" name="supervisorEval" value="{{autoevaluaciones.numero_3}}">
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    {%else%}
+                        <div class="custom-dropdown autoevaluacionDropDown relative w-full h-full">
+
+                            <input type="hidden" class="hidden-supervisor-eval autoeval" name="supervisorEval">
+
+                            <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                <span>Seleccionar</span>
+                                <div class="dropdown-arrow"></div>
+                            </div>
+
+                            <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                <li data-value="UP">UP</li>
+                                <li data-value="FP-">FP-</li>
+                                <li data-value="FP">FP</li>
+                                <li data-value="FP+">FP+</li>
+                                <li data-value="O">O</li>
+                            </ul>
+
+                        </div>
+                    {%endif%}
+                </td><!--FIN DE LA AUTOEVALUACION DE LA TERCERA FILA-->
+
+
+                <!--EVALUACION SUPERVISOR DE LA TERCERA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if supervisor_evaluaciones.numero_3 and supervisor_evaluaciones.numero_3  != None%}
+                        <button data-tooltip-target="tooltip-edit-super-3" id="editarStatus" type="button" class="superviEvalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                        </button>
+
+                        <div id="tooltip-edit-super-3" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                    Editar
+                            <div class="tooltip-arrow" data-popper-arrow></div>
+                        </div>
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if supervisor_evaluaciones.numero_3 == 'UP' %} bg-red-300 
+                            {%elif supervisor_evaluaciones.numero_3 == 'FP-' %} bg-yellow-300 
+                            {%elif supervisor_evaluaciones.numero_3 == 'FP' %} bg-slate-300 
+                            {%elif supervisor_evaluaciones.numero_3 == 'FP+' %} bg-green-300
+                            {%elif supervisor_evaluaciones.numero_3 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_supervisorEvaluacion"> {{supervisor_evaluaciones.numero_3}}</span>
+
+                        <div class="dropdownFull hidden">
+                            <div class="custom-dropdown relative w-full h-full">
+
+                                <input type="hidden" class="hidden-supervisor-eval supervisorEval" name="supervisorEval" value={{supervisor_evaluaciones.numero_3}}>
+
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+
+                            </div>
+                        </div>
+                            
+                    {%else%}
+                        <div class="custom-dropdown supervisor relative w-full h-full">
+
+                            <input type="hidden" class="hidden-supervisor-eval supervisorEval" name="supervisorEval">
+
+                            <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                <span>Seleccionar</span>
+                                <div class="dropdown-arrow"></div>
+                            </div>
+
+                            <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                <li data-value="UP">UP</li>
+                                <li data-value="FP-">FP-</li>
+                                <li data-value="FP">FP</li>
+                                <li data-value="FP+">FP+</li>
+                                <li data-value="O">O</li>
+                            </ul>
+
+                        </div>
+                    {%endif%}
+                </td> <!--FIN DE LA EVALUACION SUPERVISOR DE LA TERCERA FILA-->
+
+
+
+                {%if usuario_dueño_evaluacion[0].nivel == 'I' %}
+
+                    <!--EVALUACION PAR DE LA TERCERA FILA-->
+                    <td class="border border-solid h-full p-0 text-center relative ">
+
+                        {%if par_evaluaciones.numero_3 and par_evaluaciones.numero_3  != None%}
+                            <button data-tooltip-target="tooltip-par-3" id="editarStatus" type="button" class="parEvalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                            </button>
+
+                            <div id="tooltip-par-3" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                        Editar
+                                <div class="tooltip-arrow" data-popper-arrow></div>
+                            </div>
+
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                                {%if par_evaluaciones.numero_3 == 'UP' %} bg-red-300 
+                                {%elif par_evaluaciones.numero_3 == 'FP-' %} bg-yellow-300 
+                                {%elif par_evaluaciones.numero_3 == 'FP' %} bg-slate-300 
+                                {%elif par_evaluaciones.numero_3 == 'FP+' %} bg-green-300
+                                {%elif par_evaluaciones.numero_3 == 'O' %} bg-blue-300 
+                                {%endif%} resultado_span_par"> {{par_evaluaciones.numero_3}}</span>
+
+                            <div class="dropdownFull hidden">
+                                <div class="custom-dropdown relative w-full h-full">
+
+                                    <input type="hidden" class="hidden-supervisor-eval parEval" name="supervisorEval" value="{{par_evaluaciones.numero_3}}">
+
+                                    <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                        <span>Seleccionar</span>
+                                        <div class="dropdown-arrow"></div>
+                                    </div>
+
+                                    <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                        <li data-value="UP">UP</li>
+                                        <li data-value="FP-">FP-</li>
+                                        <li data-value="FP">FP</li>
+                                        <li data-value="FP+">FP+</li>
+                                        <li data-value="O">O</li>
+                                    </ul>
+
+                                </div>
+                            </div>
+                                
+                        {%else%}
+                            <div class="custom-dropdown parEvaluacion relative w-full h-full">
+
+                                <input type="hidden" class="hidden-supervisor-eval parEval" name="parEval">
+
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+
+                            </div>
+                        {%endif%}
+                    </td> <!--FIN DE LA EVALUACION PAR DE LA TERCERA FILA-->
+
+
+                    
+                    <!--EVALUACION COLABORADOR DE LA TERCERA FILA-->
+                    <td class="border border-solid h-full p-0 text-center relative ">
+
+                        {%if subordinado_eval.numero_3 and subordinado_eval.numero_3  != None and subordinado_eval.numero_3  != "" %}
+                            <button data-tooltip-target="tooltip-colab-3" id="editarStatus" type="button" class="suborDevalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                            </button>
+
+                            <div id="tooltip-colab-3" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                        Editar
+                                <div class="tooltip-arrow" data-popper-arrow></div>
+                            </div>
+
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                                {%if subordinado_eval.numero_3 == 'UP' %} bg-red-300 
+                                {%elif subordinado_eval.numero_3 == 'FP-' %} bg-yellow-300 
+                                {%elif subordinado_eval.numero_3 == 'FP' %} bg-slate-300 
+                                {%elif subordinado_eval.numero_3 == 'FP+' %} bg-green-300
+                                {%elif subordinado_eval.numero_3 == 'O' %} bg-blue-300 
+                                {%endif%} resultado_span_subordinado"> {{subordinado_eval.numero_3}}</span>
+
+                            <div class="dropdownFull hidden">
+                                <div class="custom-dropdown relative w-full h-full">
+
+                                    <input type="hidden" class="hidden-supervisor-eval subordinadoEval" name="supervisorEval" value="{{subordinado_eval.numero_3}}">
+
+                                    <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                        <span>Seleccionar</span>
+                                        <div class="dropdown-arrow"></div>
+                                    </div>
+
+                                    <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                        <li data-value="UP">UP</li>
+                                        <li data-value="FP-">FP-</li>
+                                        <li data-value="FP">FP</li>
+                                        <li data-value="FP+">FP+</li>
+                                        <li data-value="O">O</li>
+                                    </ul>
+
+                                </div>
+                            </div>
+                                
+                        {%else%}
+                            <div class="custom-dropdown subordinadoEvaluacion relative w-full h-full">
+
+                                <input type="hidden" class="hidden-supervisor-eval subordinadoEval" name="parEval">
+
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+
+                            </div>
+                        {%endif%}
+                    </td> <!--FIN DE LA EVALUACION COLABORADOR DE LA TERCERA FILA-->
+
+
+                {%endif%}
+                <!--CUMPLIMIENTO DE LA TERCERA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if cumplimientos.numero_3 and cumplimientos.numero_3  != None%}
+
+
+                        <input type="hidden" id="Cumplimiento" name="Cumplimiento" required readonly class=" cumplimiento w-full h-full p-2 border-none " placeholder="%">
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if cumplimientos.numero_3 == 'UP' %} bg-red-300 
+                            {%elif cumplimientos.numero_3 == 'FP-' %} bg-yellow-300 
+                            {%elif cumplimientos.numero_3 == 'FP' %} bg-slate-300 
+                            {%elif cumplimientos.numero_3 == 'FP+' %} bg-green-300
+                            {%elif cumplimientos.numero_3 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_cumplimiento"> {{cumplimientos.numero_3}}</span>
+
+                    {%else%}
+                        <input type="number" id="Cumplimiento" name="Cumplimiento" required readonly class=" cumplimiento w-full h-full p-2 border-none " placeholder="%">
+                    {%endif%}
+                </td> <!--FIN DE CUMPLIMIENTO DE LA TERCERA FILA-->
+
+
+                <!--DESEMPEÑO DE LA TERCERA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if desempeños.numero_3 and desempeños.numero_3  != None%}
+
+                        <input type="hidden" id="Desempeño" name="Desempeño" required  disabled class="w-full h-full p-2 border-none desempeno">
+                    
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if desempeños.numero_3 == 'UP' %} bg-red-300 
+                            {%elif desempeños.numero_3 == 'FP-' %} bg-yellow-300 
+                            {%elif desempeños.numero_3 == 'FP' %} bg-slate-300 
+                            {%elif desempeños.numero_3 == 'FP+' %} bg-green-300
+                            {%elif desempeños.numero_3 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_desempeño"> {{desempeños.numero_3}}</span>
+
+                    {%else%}
+                        <input type="text" id="Desempeño" name="Desempeño" required  disabled class="w-full h-full p-2 border-none desempeno">
+                    {%endif%}
+                </td> <!--FIN DE DESEMPEÑO DE LA TERCERA FILA-->
+
+            </tr>
+
+            <tr class="!h-[90px]">
+                <td class="border border-solid h-full p-0">
+                    <div class=" p-4 ">
+                        <h4 class=" font-normal text-[#000000] ">Liderazgo <br></h4>
+                    </div>
+                </td>
+                <td class="border border-solid h-full p-0 ">
+                    <input type="text" id="Peso" name="Peso" required class="w-full peso h-full p-2 border-none " placeholder="%" value="4%" readonly>
+                </td>
+
+                <!--AUTOEVALUACIÓN DE CUARTA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if autoevaluaciones.numero_4 != None and autoevaluaciones.numero_4 != ""%}
+
+                        <button data-tooltip-target="tooltip-edit4" id="editarStatus" type="button" class="AutoevalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                        </button>
+
+                        <div id="tooltip-edit4" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                    Editar
+                            <div class="tooltip-arrow" data-popper-arrow></div>
+                        </div>
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if autoevaluaciones.numero_4 == 'UP' %} bg-red-300 
+                            {%elif autoevaluaciones.numero_4 == 'FP-' %} bg-yellow-300 
+                            {%elif autoevaluaciones.numero_4 == 'FP' %} bg-slate-300 
+                            {%elif autoevaluaciones.numero_4 == 'FP+' %} bg-green-300
+                            {%elif autoevaluaciones.numero_4 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_autoevaluacion" > {{autoevaluaciones.numero_4}}</span>
+                        
+                        <div class="dropdownFull hidden">
+                            <div class="custom-dropdown relative w-full h-full">
+                                <input type="hidden" class="hidden-supervisor-eval autoeval" name="supervisorEval" value="{{autoevaluaciones.numero_4}}">
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    {%else%}
+                        <div class="custom-dropdown autoevaluacionDropDown relative w-full h-full">
+
+                            <input type="hidden" class="hidden-supervisor-eval autoeval" name="supervisorEval">
+
+                            <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                <span>Seleccionar</span>
+                                <div class="dropdown-arrow"></div>
+                            </div>
+
+                            <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                <li data-value="UP">UP</li>
+                                <li data-value="FP-">FP-</li>
+                                <li data-value="FP">FP</li>
+                                <li data-value="FP+">FP+</li>
+                                <li data-value="O">O</li>
+                            </ul>
+
+                        </div>
+                    {%endif%}
+                </td><!--FIN DE LA AUTOEVALUACION DE LA CUARTA FILA-->
+
+
+
+                <!--EVALUACION SUPERVISOR DE LA CUARTA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if supervisor_evaluaciones.numero_4 and supervisor_evaluaciones.numero_4  != None%}
+                        <button data-tooltip-target="tooltip-edit-super-4" id="editarStatus" type="button" class="superviEvalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                        </button>
+
+                        <div id="tooltip-edit-super-4" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                            Editar
+                            <div class="tooltip-arrow" data-popper-arrow></div>
+                        </div>
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if supervisor_evaluaciones.numero_4 == 'UP' %} bg-red-300 
+                            {%elif supervisor_evaluaciones.numero_4 == 'FP-' %} bg-yellow-300 
+                            {%elif supervisor_evaluaciones.numero_4 == 'FP' %} bg-slate-300 
+                            {%elif supervisor_evaluaciones.numero_4 == 'FP+' %} bg-green-300
+                            {%elif supervisor_evaluaciones.numero_4 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_supervisorEvaluacion"> {{supervisor_evaluaciones.numero_4}}</span>
+
+                        <div class="dropdownFull hidden">
+                            <div class="custom-dropdown relative w-full h-full">
+
+                                <input type="hidden" class="hidden-supervisor-eval supervisorEval" name="supervisorEval" value={{supervisor_evaluaciones.numero_4}}>
+
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+
+                            </div>
+                        </div>
+                            
+                    {%else%}
+                        <div class="custom-dropdown supervisor relative w-full h-full">
+
+                            <input type="hidden" class="hidden-supervisor-eval supervisorEval" name="supervisorEval">
+
+                            <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                <span>Seleccionar</span>
+                                <div class="dropdown-arrow"></div>
+                            </div>
+
+                            <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                <li data-value="UP">UP</li>
+                                <li data-value="FP-">FP-</li>
+                                <li data-value="FP">FP</li>
+                                <li data-value="FP+">FP+</li>
+                                <li data-value="O">O</li>
+                            </ul>
+
+                        </div>
+                    {%endif%}
+                </td> <!--FIN DE LA EVALUACION SUPERVISOR DE LA SEGUNDA FILA-->
+
+
+
+
+
+                {%if usuario_dueño_evaluacion[0].nivel == 'I' %}
+
+
+
+                    <!--EVALUACION PAR DE LA CUARTA FILA-->
+                    <td class="border border-solid h-full p-0 text-center relative ">
+
+                        {%if par_evaluaciones.numero_4 and par_evaluaciones.numero_4  != None%}
+                            <button data-tooltip-target="tooltip-par-4" id="editarStatus" type="button" class="parEvalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                            </button>
+
+                            <div id="tooltip-par-4" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                        Editar
+                                <div class="tooltip-arrow" data-popper-arrow></div>
+                            </div>
+
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                                {%if par_evaluaciones.numero_4 == 'UP' %} bg-red-300 
+                                {%elif par_evaluaciones.numero_4 == 'FP-' %} bg-yellow-300 
+                                {%elif par_evaluaciones.numero_4 == 'FP' %} bg-slate-300 
+                                {%elif par_evaluaciones.numero_4 == 'FP+' %} bg-green-300
+                                {%elif par_evaluaciones.numero_4 == 'O' %} bg-blue-300 
+                                {%endif%} resultado_span_par"> {{par_evaluaciones.numero_4}}</span>
+
+                            <div class="dropdownFull hidden">
+                                <div class="custom-dropdown relative w-full h-full">
+
+                                    <input type="hidden" class="hidden-supervisor-eval parEval" name="supervisorEval" value="{{par_evaluaciones.numero_4}}">
+
+                                    <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                        <span>Seleccionar</span>
+                                        <div class="dropdown-arrow"></div>
+                                    </div>
+
+                                    <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                        <li data-value="UP">UP</li>
+                                        <li data-value="FP-">FP-</li>
+                                        <li data-value="FP">FP</li>
+                                        <li data-value="FP+">FP+</li>
+                                        <li data-value="O">O</li>
+                                    </ul>
+
+                                </div>
+                            </div>
+                                
+                        {%else%}
+                            <div class="custom-dropdown parEvaluacion relative w-full h-full">
+
+                                <input type="hidden" class="hidden-supervisor-eval parEval" name="parEval">
+
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+
+                            </div>
+                        {%endif%}
+                    </td> <!--FIN DE LA EVALUACION PAR DE LA CUARTA FILA-->
+                
+
+                    <!--EVALUACION COLABORADOR DE LA CUARTA FILA-->
+                    <td class="border border-solid h-full p-0 text-center relative ">
+
+                        {%if subordinado_eval.numero_4 and subordinado_eval.numero_4  != None and subordinado_eval.numero_4  != "" %}
+                            <button data-tooltip-target="tooltip-colab-4" id="editarStatus" type="button" class="suborDevalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                            </button>
+
+                            <div id="tooltip-colab-4" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                        Editar
+                                <div class="tooltip-arrow" data-popper-arrow></div>
+                            </div>
+
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                                {%if subordinado_eval.numero_4 == 'UP' %} bg-red-300 
+                                {%elif subordinado_eval.numero_4 == 'FP-' %} bg-yellow-300 
+                                {%elif subordinado_eval.numero_4 == 'FP' %} bg-slate-300 
+                                {%elif subordinado_eval.numero_4 == 'FP+' %} bg-green-300
+                                {%elif subordinado_eval.numero_4 == 'O' %} bg-blue-300 
+                                {%endif%} resultado_span_subordinado"> {{subordinado_eval.numero_4}}</span>
+
+                            <div class="dropdownFull hidden">
+                                <div class="custom-dropdown relative w-full h-full">
+
+                                    <input type="hidden" class="hidden-supervisor-eval subordinadoEval" name="supervisorEval" value="{{subordinado_eval.numero_4}}">
+
+                                    <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                        <span>Seleccionar</span>
+                                        <div class="dropdown-arrow"></div>
+                                    </div>
+
+                                    <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                        <li data-value="UP">UP</li>
+                                        <li data-value="FP-">FP-</li>
+                                        <li data-value="FP">FP</li>
+                                        <li data-value="FP+">FP+</li>
+                                        <li data-value="O">O</li>
+                                    </ul>
+
+                                </div>
+                            </div>
+                                
+                        {%else%}
+                            <div class="custom-dropdown subordinadoEvaluacion relative w-full h-full">
+
+                                <input type="hidden" class="hidden-supervisor-eval subordinadoEval" name="parEval">
+
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+
+                            </div>
+                        {%endif%}
+                    </td> <!--FIN DE LA EVALUACION COLABORADOR DE LA CUARTA FILA-->
+
+                {%endif%}
+                <!--CUMPLIMIENTO DE LA CUARTA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if cumplimientos.numero_4 and cumplimientos.numero_4  != None%}
+
+
+                        <input type="hidden" id="Cumplimiento" name="Cumplimiento" required readonly class=" cumplimiento w-full h-full p-2 border-none " placeholder="%">
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if cumplimientos.numero_4 == 'UP' %} bg-red-300 
+                            {%elif cumplimientos.numero_4 == 'FP-' %} bg-yellow-300 
+                            {%elif cumplimientos.numero_4 == 'FP' %} bg-slate-300 
+                            {%elif cumplimientos.numero_4 == 'FP+' %} bg-green-300
+                            {%elif cumplimientos.numero_4 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_cumplimiento"> {{cumplimientos.numero_4}}</span>
+
+                    {%else%}
+                        <input type="number" id="Cumplimiento" name="Cumplimiento" required readonly class=" cumplimiento w-full h-full p-2 border-none " placeholder="%">
+                    {%endif%}
+                </td> <!--FIN DE CUMPLIMIENTO DE LA CUARTA FILA-->
+
+
+
+
+                <!--DESEMPEÑO DE LA CUARTA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if desempeños.numero_4 and desempeños.numero_4  != None%}
+
+                        <input type="hidden" id="Desempeño" name="Desempeño" required  disabled class="w-full h-full p-2 border-none desempeno">
+                    
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if desempeños.numero_4 == 'UP' %} bg-red-300 
+                            {%elif desempeños.numero_4 == 'FP-' %} bg-yellow-300 
+                            {%elif desempeños.numero_4 == 'FP' %} bg-slate-300 
+                            {%elif desempeños.numero_4 == 'FP+' %} bg-green-300
+                            {%elif desempeños.numero_4 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_desempeño"> {{desempeños.numero_4}}</span>
+
+                    {%else%}
+                        <input type="text" id="Desempeño" name="Desempeño" required  disabled class="w-full h-full p-2 border-none desempeno">
+                    {%endif%}
+                </td> <!--FIN DE DESEMPEÑO DE LA CUARTA FILA-->
+            </tr>
+
+            <tr class="!h-[90px]">
+                <td class="border border-solid h-full p-0">
+                    <div class=" p-4 ">
+                        <h4 class=" font-normal text-[#000000] ">Desarrollo del Equipo de Trabajo</h4>
+                    </div>
+                </td>
+                <td class="border border-solid h-full p-0 ">
+                    <input type="text" id="Peso" name="Peso" required class="w-full peso h-full p-2 border-none " placeholder="%" value="4%">
+                </td>
+                
+                <!--AUTOEVALUACIÓN DE QUINTA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if autoevaluaciones.numero_5 != None and autoevaluaciones.numero_5 != ""%}
+                        <button data-tooltip-target="tooltip-edit5" id="editarStatus" type="button" class="AutoevalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                        </button>
+
+                        <div id="tooltip-edit5" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                    Editar
+                            <div class="tooltip-arrow" data-popper-arrow></div>
+                        </div>
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if autoevaluaciones.numero_5 == 'UP' %} bg-red-300 
+                            {%elif autoevaluaciones.numero_5 == 'FP-' %} bg-yellow-300 
+                            {%elif autoevaluaciones.numero_5 == 'FP' %} bg-slate-300 
+                            {%elif autoevaluaciones.numero_5 == 'FP+' %} bg-green-300
+                            {%elif autoevaluaciones.numero_5 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_autoevaluacion" > {{autoevaluaciones.numero_5}}</span>
+                        
+
+                        <div class="dropdownFull hidden">
+                            <div class="custom-dropdown relative w-full h-full">
+                                <input type="hidden" class="hidden-supervisor-eval autoeval" name="supervisorEval" value="{{autoevaluaciones.numero_5}}">
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    {%else%}
+                        <div class="custom-dropdown autoevaluacionDropDown relative w-full h-full">
+
+                            <input type="hidden" class="hidden-supervisor-eval autoeval" name="supervisorEval">
+
+                            <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                <span>Seleccionar</span>
+                                <div class="dropdown-arrow"></div>
+                            </div>
+
+                            <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                <li data-value="UP">UP</li>
+                                <li data-value="FP-">FP-</li>
+                                <li data-value="FP">FP</li>
+                                <li data-value="FP+">FP+</li>
+                                <li data-value="O">O</li>
+                            </ul>
+
+                        </div>
+                    {%endif%}
+                </td><!--FIN DE LA AUTOEVALUACION DE LA QUINTA FILA-->
+
+
+
+                <!--EVALUACION SUPERVISOR DE LA QUINTA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if supervisor_evaluaciones.numero_5 and supervisor_evaluaciones.numero_5  != None%}
+                        <button data-tooltip-target="tooltip-edit-super-5" id="editarStatus" type="button" class="superviEvalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                        </button>
+
+                        <div id="tooltip-edit-super-5" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                    Editar
+                            <div class="tooltip-arrow" data-popper-arrow></div>
+                        </div>
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if supervisor_evaluaciones.numero_5 == 'UP' %} bg-red-300 
+                            {%elif supervisor_evaluaciones.numero_5 == 'FP-' %} bg-yellow-300 
+                            {%elif supervisor_evaluaciones.numero_5 == 'FP' %} bg-slate-300 
+                            {%elif supervisor_evaluaciones.numero_5 == 'FP+' %} bg-green-300
+                            {%elif supervisor_evaluaciones.numero_5 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_supervisorEvaluacion"> {{supervisor_evaluaciones.numero_5}}</span>
+
+                        <div class="dropdownFull hidden">
+                            <div class="custom-dropdown relative w-full h-full">
+
+                                <input type="hidden" class="hidden-supervisor-eval supervisorEval" name="supervisorEval" value={{supervisor_evaluaciones.numero_5}}>
+
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+
+                            </div>
+                        </div>
+                            
+                    {%else%}
+                        <div class="custom-dropdown supervisor relative w-full h-full">
+
+                            <input type="hidden" class="hidden-supervisor-eval supervisorEval" name="supervisorEval">
+
+                            <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                <span>Seleccionar</span>
+                                <div class="dropdown-arrow"></div>
+                            </div>
+
+                            <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                <li data-value="UP">UP</li>
+                                <li data-value="FP-">FP-</li>
+                                <li data-value="FP">FP</li>
+                                <li data-value="FP+">FP+</li>
+                                <li data-value="O">O</li>
+                            </ul>
+
+                        </div>
+                    {%endif%}
+                </td> <!--FIN DE LA EVALUACION SUPERVISOR DE LA QUINTA FILA-->
+
+
+
+
+
+
+
+
+
+
+
+                {%if usuario_dueño_evaluacion[0].nivel == 'I' %}
+
+                    <!--EVALUACION PAR DE LA QUINTA FILA-->
+                    <td class="border border-solid h-full p-0 text-center relative ">
+
+                        {%if par_evaluaciones.numero_5 and par_evaluaciones.numero_5  != None%}
+                            <button data-tooltip-target="tooltip-par-5" id="editarStatus" type="button" class="parEvalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                            </button>
+
+                            <div id="tooltip-par-5" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                        Editar
+                                <div class="tooltip-arrow" data-popper-arrow></div>
+                            </div>
+
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                                {%if par_evaluaciones.numero_5 == 'UP' %} bg-red-300 
+                                {%elif par_evaluaciones.numero_5 == 'FP-' %} bg-yellow-300 
+                                {%elif par_evaluaciones.numero_5 == 'FP' %} bg-slate-300 
+                                {%elif par_evaluaciones.numero_5 == 'FP+' %} bg-green-300
+                                {%elif par_evaluaciones.numero_5 == 'O' %} bg-blue-300 
+                                {%endif%} resultado_span_par"> {{par_evaluaciones.numero_5}}</span>
+
+                            <div class="dropdownFull hidden">
+                                <div class="custom-dropdown relative w-full h-full">
+
+                                    <input type="hidden" class="hidden-supervisor-eval parEval" name="supervisorEval" value="{{par_evaluaciones.numero_5}}">
+
+                                    <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                        <span>Seleccionar</span>
+                                        <div class="dropdown-arrow"></div>
+                                    </div>
+
+                                    <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                        <li data-value="UP">UP</li>
+                                        <li data-value="FP-">FP-</li>
+                                        <li data-value="FP">FP</li>
+                                        <li data-value="FP+">FP+</li>
+                                        <li data-value="O">O</li>
+                                    </ul>
+
+                                </div>
+                            </div>
+                                
+                        {%else%}
+                            <div class="custom-dropdown parEvaluacion relative w-full h-full">
+
+                                <input type="hidden" class="hidden-supervisor-eval parEval" name="parEval">
+
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+
+                            </div>
+                        {%endif%}
+                    </td> <!--FIN DE LA EVALUACION PAR DE LA QUINTA FILA-->
+
+                    
+
+
+
+                    <!--EVALUACION COLABORADOR DE LA CUARTA FILA-->
+                    <td class="border border-solid h-full p-0 text-center relative ">
+
+                        {%if subordinado_eval.numero_5 and subordinado_eval.numero_5  != None and subordinado_eval.numero_5  != "" %}
+                            <button data-tooltip-target="tooltip-colab-5" id="editarStatus" type="button" class="suborDevalEditar absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                            </button>
+
+                            <div id="tooltip-colab-5" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                        Editar
+                                <div class="tooltip-arrow" data-popper-arrow></div>
+                            </div>
+
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                                {%if subordinado_eval.numero_5 == 'UP' %} bg-red-300 
+                                {%elif subordinado_eval.numero_5 == 'FP-' %} bg-yellow-300 
+                                {%elif subordinado_eval.numero_5 == 'FP' %} bg-slate-300 
+                                {%elif subordinado_eval.numero_5 == 'FP+' %} bg-green-300
+                                {%elif subordinado_eval.numero_5 == 'O' %} bg-blue-300 
+                                {%endif%} resultado_span_subordinado"> {{subordinado_eval.numero_5}}</span>
+
+                            <div class="dropdownFull hidden">
+                                <div class="custom-dropdown relative w-full h-full">
+
+                                    <input type="hidden" class="hidden-supervisor-eval subordinadoEval" name="supervisorEval" value="{{subordinado_eval.numero_5}}">
+
+                                    <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                        <span>Seleccionar</span>
+                                        <div class="dropdown-arrow"></div>
+                                    </div>
+
+                                    <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                        <li data-value="UP">UP</li>
+                                        <li data-value="FP-">FP-</li>
+                                        <li data-value="FP">FP</li>
+                                        <li data-value="FP+">FP+</li>
+                                        <li data-value="O">O</li>
+                                    </ul>
+
+                                </div>
+                            </div>
+                                
+                        {%else%}
+                            <div class="custom-dropdown subordinadoEvaluacion relative w-full h-full">
+
+                                <input type="hidden" class="hidden-supervisor-eval subordinadoEval" name="parEval">
+
+                                <div class="dropdown-selected w-full h-full p-2 flex items-center justify-between cursor-pointer rounded-xl">
+                                    <span>Seleccionar</span>
+                                    <div class="dropdown-arrow"></div>
+                                </div>
+
+                                <ul class="dropdown-options hidden absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 overflow-hidden">
+                                    <li data-value="UP">UP</li>
+                                    <li data-value="FP-">FP-</li>
+                                    <li data-value="FP">FP</li>
+                                    <li data-value="FP+">FP+</li>
+                                    <li data-value="O">O</li>
+                                </ul>
+
+                            </div>
+                        {%endif%}
+                    </td> <!--FIN DE LA EVALUACION COLABORADOR DE LA CUARTA FILA-->
+
+
+
+
+
+                {%endif%}
+
+
+                <!--CUMPLIMIENTO DE LA QUINTA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if cumplimientos.numero_5 and cumplimientos.numero_5  != None%}
+
+
+                        <input type="hidden" id="Cumplimiento" name="Cumplimiento" required readonly class=" cumplimiento w-full h-full p-2 border-none " placeholder="%">
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if cumplimientos.numero_5 == 'UP' %} bg-red-300 
+                            {%elif cumplimientos.numero_5 == 'FP-' %} bg-yellow-300 
+                            {%elif cumplimientos.numero_5 == 'FP' %} bg-slate-300 
+                            {%elif cumplimientos.numero_5 == 'FP+' %} bg-green-300
+                            {%elif cumplimientos.numero_5 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_cumplimiento"> {{cumplimientos.numero_5}}</span>
+
+                    {%else%}
+                        <input type="number" id="Cumplimiento" name="Cumplimiento" required readonly class=" cumplimiento w-full h-full p-2 border-none " placeholder="%">
+                    {%endif%}
+                </td> <!--FIN DE CUMPLIMIENTO DE LA QUINTA FILA-->
+
+                <!--DESEMPEÑO DE LA QUINTA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if desempeños.numero_5 and desempeños.numero_5  != None%}
+
+                        <input type="hidden" id="Desempeño" name="Desempeño" required  disabled class="w-full h-full p-2 border-none desempeno">
+                    
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if desempeños.numero_5 == 'UP' %} bg-red-300 
+                            {%elif desempeños.numero_5 == 'FP-' %} bg-yellow-300 
+                            {%elif desempeños.numero_5 == 'FP' %} bg-slate-300 
+                            {%elif desempeños.numero_5 == 'FP+' %} bg-green-300
+                            {%elif desempeños.numero_5 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_desempeño"> {{desempeños.numero_5}}</span>
+
+                    {%else%}
+                        <input type="text" id="Desempeño" name="Desempeño" required  disabled class="w-full h-full p-2 border-none desempeno">
+                    {%endif%}
+                </td> <!--FIN DE DESEMPEÑO DE LA QUINTA FILA-->
+            </tr>
+
+
+            {%if usuario_dueño_evaluacion[0].nivel != 'I' %}
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="border border-solid h-full p-0 text-center">
+                    {%if total_desempeño or total_desempeño != None %}
+                        <span class="p-3 rounded-2xl  h-full text-center font-bold text-[#333] ">{{total_desempeño}}% </span>
+                        <input type="hidden" id="total" class="w-full h-full p-2 border-none text-center" value={{total_desempeño}}>
+                    {%else%}
+                        <input type="number" id="total" class="w-full h-full p-2 border-none text-center">
+                    {%endif%}
+                </td>
+                <td></td>
+            </tr>
+            {%else%}
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="border border-solid h-full p-0 text-center">
+                    {%if total_desempeño or  total_desempeño != None %}
+
+                        <span class="resultado_span_desempeño p-3 rounded-2xl  h-full text-center font-bold text-[#333]">{{total_desempeño}} % </span>
+                        <input type="hidden" id="total" class="w-full h-full p-2 border-none text-center" value={{total_desempeño}}>
+                    {%else%}
+                        <input type="number" id="total" class="w-full h-full p-2 border-none">
+                    {%endif%}
+                </td>
+                <td></td>
+            </tr>
+            {%endif%}
+
+        </tbody>
+    </table>
+
+    <div class="flex items-center w-full justify-end p-3 gap-3">
+
+<div class=" flex justify-end items-center ">
+    <button type="button" class=" mt-3 cursor-pointer text-zinc-200 flex gap-2 items-center bg-valor-azul px-4 py-2 rounded-lg font-medium text-sm hover:bg-azul-dark transition-all ease-in duration-200" id="enviar">
+        Enviar
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        </svg>
+
+    </button>
+</div>
+
+
+    </div>
+    
+</form>
+</div>
+    
+{% endblock %}
+
+{% block js%}
+    <script src="{{ url_for('static', filename='js/evaluacion_competencias.js') }}"></script>
+{% endblock %}   
+

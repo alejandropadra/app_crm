@@ -1,0 +1,183 @@
+{% extends 'layout.html' %}
+{% from 'helpers/_forms.html' import render_field %}
+
+{% block body %}
+<style>
+  
+
+
+</style>
+<input type="hidden" name="" id="datosEvaluando" value='{{ fichas_a_evaluar_json|safe }}'>
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
+
+<div class=" p-5 flex flex-col gap-4 " >
+    <h3 class="text-xl bold text-gray-800 mb-4">Seleccione el trabajador a evaluar</h3>
+    <div class=" flex flex-col border border-gray-200 p-5 rounded-2xl bg-white gap-2">
+        <h4 class=" text-lg font-medium ">Evaluar Colaboradores</h4> 
+        <div class="grid grid-cols-4 gap-4 ">
+            {%for evaluador in equipo%}
+                <div class="  blanco rounded-xl  p-4 flex flex-col items-center justify-center shadow gap-3">
+                    {%set ficha = procesar_ficha(evaluador['pernr'])%}
+                    {% set ruta = ruta_foto_personal(ficha) %}
+                    <div class=" w-[30%] 2xl:w-[20%] ">
+                        <img  id="selectedImage" src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
+                                class="w-full  object-cover rounded-full border border-solid  " 
+                                alt="User Image">
+                    </div>
+                    <div class=" text-center">
+                        <h3 class=" font-medium text-[16px]">{{evaluador['ename'] | title}} </h3>
+                        <p class=" small !text-sm">{{evaluador['plstx']}}</p>
+                    </div>
+
+                    <a class=" botonEvaluar" href="{{ url_for('.evaluacion_competencias', ficha_get=ficha) }}" >Evaluar</a>
+
+                </div>
+            {%endfor%}
+        </div>
+    </div>
+
+
+    {% if rest[0]['nivel'] == "I" %}
+
+    <div class=" flex flex-col border border-gray-200 p-5 rounded-2xl bg-white gap-2">
+        <h4 class=" text-lg font-medium ">Evaluar Pares</h4> 
+        <div class="grid grid-cols-4 gap-4 ">
+            {%for evaluador in fichas_a_evaluar%}
+                {%if evaluador.rol_evaluador[0] == "par"%}
+
+                    {%set respuesta= consultar_sap(evaluador.ficha_evaluado)%}
+                    <div class="  blanco rounded-xl  p-4 flex flex-col items-center justify-center shadow gap-3">
+                        {%set ficha = procesar_ficha(respuesta[0]['pernr'])%}
+                        {% set ruta = ruta_foto_personal(ficha) %}
+                        <div class=" w-[30%] 2xl:w-[20%] ">
+                            <img  id="selectedImage" src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
+                                    class="w-full  object-cover rounded-full border border-solid  " 
+                                    alt="User Image">
+                        </div>
+                        <div class=" text-center">
+                            <h3 class=" font-medium text-[16px]">{{respuesta[0]['ename'] | title}} </h3>
+                            <p class=" small !text-sm">{{respuesta[0]['plstx']}}</p>
+                        </div>
+
+                        <a class=" botonEvaluar" href="{{ url_for('.evaluacion_competencias', ficha_get=ficha) }}" >Evaluar</a>
+
+                    </div>
+
+                    {%else%}
+
+                    <div class=" flex items-center justify-start col-span-full gap-3">
+
+                        <h1 class=" small font-medium !text-sm">No tienes Usuarios Pares por evaluar</h1>
+                        
+                        <svg class=" fill-gray-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-thumbs-up-icon lucide-thumbs-up"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>
+
+                    </div>
+
+                    {%endif%}
+                
+            {%endfor%}
+        </div>
+    </div>
+
+    {%endif%}
+
+
+
+    <div class=" flex flex-col border border-gray-200 p-5 rounded-2xl bg-white gap-2">
+        <h4 class=" text-lg font-medium ">Evaluar Supervisor</h4> 
+        <div class="grid grid-cols-4 gap-4 ">
+            {%for evaluador in fichas_a_evaluar%}
+                {%if evaluador.rol_evaluador[0] == "subordinado"%}
+
+                    {%set respuesta= consultar_sap(evaluador.ficha_evaluado)%}
+                    <div class="  blanco rounded-xl  p-4 flex flex-col items-center justify-center shadow gap-3">
+                        {%set ficha = procesar_ficha(respuesta[0]['pernr'])%}
+                        {% set ruta = ruta_foto_personal(ficha) %}
+                        <div class=" w-[30%] 2xl:w-[20%] ">
+                            <img  id="selectedImage" src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
+                                    class="w-full  object-cover rounded-full border border-solid  " 
+                                    alt="User Image">
+                        </div>
+                        <div class=" text-center">
+                            <h3 class=" font-medium text-[16px]">{{respuesta[0]['ename'] | title}} </h3>
+                            <p class=" small !text-sm">{{respuesta[0]['plstx']}}</p>
+                        </div>
+
+                        <a class=" botonEvaluar" href="{{ url_for('.evaluacion_competencias', ficha_get=ficha) }}" >Evaluar</a>
+
+                    </div>
+
+                    {%else%}
+
+                    <div class=" flex items-center justify-start col-span-full gap-3 ">
+
+                        <h1 class=" small font-medium !text-sm">No tienes superiores por evaluar</h1>
+                        
+                        <svg class=" fill-gray-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-thumbs-up-icon lucide-thumbs-up"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>
+
+                    </div>
+
+                    {%endif%}
+                
+            {%endfor%}
+        </div>
+    </div>
+
+
+    
+
+
+    <!--<div class=" grid grid-cols-3 gap-4">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                     <section class=" subordinados  blanco directos bg flex flex-col gap-3 py-4 w-full rounded-xl shadow-custom">
+            <h3 class=" text-lg text-center">Evaluación Como Superior</h3>
+            {%for evaluador in equipo%}
+
+
+
+                <div class=" flex items-center gap-4 borde px-5 border border-gray-200 py-4 bg-white">
+                    <div class="w-[17%] aspect-square">
+                        <img src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
+                                class="w-full h-full object-cover rounded-full border border-solid  " 
+                                alt="User Image">
+                    </div>
+
+                    <div class="">
+                        <h5>{{evaluador.ename |title}} </h5>
+                        <p class=" small"> {{evaluador.plstx}}</p>
+                    </div>
+                </div>
+            {%endfor%}
+        </section>
+        
+    </div>-->
+
+
+
+
+</div>
+
+
+
+
+
+{% endblock %}
+
+{% block js%}
+    <script src="{{ url_for('static', filename='js/seleccionar_evaluar.js') }}"></script>
+{% endblock %} 

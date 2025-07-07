@@ -108,6 +108,17 @@
                             </button>
                         </li>
                         <li>
+                            <button type="button" data-filial-button="TMO" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                <div class="inline-flex items-center">
+                                    <div class=" w-8">
+                                        <img src="{{ url_for('static', filename='img/tiendasMontana.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                    </div>
+                                    
+                                    <P class="">Tiendas Montana</P>
+                                </div>
+                            </button>
+                        </li>
+                        <li>
                             <button type="button" data-filial-button="ALL" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
                                 <div class="inline-flex items-center">
                                     <div class=" w-8">
@@ -150,7 +161,7 @@
                 {%set resultado_autocompletar = consultar_cargo(participante['pernr'].lstrip('0'))%}
             {%endif%}
                 {% set indicadores = obtener_indicador_usuario(participante['pernr'].lstrip('0'))%}
-                <a href="http://10.10.0.33/app_crm/gdd/gestion_equipo/{{(participante['pernr'].lstrip('0'))}}" class="flex flex-col col-span-3 2xl:col-span-2  p-2 bg-white shadow-custom rounded-2xl hover:bg-slate-200 relative  cursor-pointer " >
+                <a href="{{ url_for('.gestion_equipo_detalles', ficha_get=(participante['pernr'].lstrip('0'))) }}" class="flex flex-col col-span-3 2xl:col-span-2  p-2 bg-white shadow-custom rounded-2xl hover:bg-slate-200 relative  cursor-pointer " >
 
 
                     <div class=" p-3 gap-3 flex">
