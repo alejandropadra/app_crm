@@ -40,14 +40,14 @@ function createDropdown(toggleSelector, dropdownSelector) {
             }
         });
     } else {
-        console.warn(`No se encontró el selector: ${toggleSelector} o ${dropdownSelector}`);
+
     }
 }
 
 
 createDropdown('#drop', '#down');
 createDropdown('#noti', '#ficacion');
-
+createDropdown('#evaluacion', '#select-evaluacion');
 
 
 
