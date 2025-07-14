@@ -12,12 +12,13 @@ document.addEventListener("DOMContentLoaded", () => {
             elementos.forEach(el => el.disabled = true);
     }
 
+    /*
     if (indicadorStatus != 'Abierto'){
         showAlert("Todos los Inputs estan bloqueados, solo puede visualizar", "success");
 
         const elementos = document.querySelectorAll('#formulario input, #formulario textarea, #formulario select, #formulario button');
             elementos.forEach(el => el.disabled = true);
-    }
+    }*/
 
 
 });
