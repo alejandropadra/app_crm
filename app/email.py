@@ -7,6 +7,10 @@ from flask import current_app, render_template
 from flask_mail import Message
 import sys
 
+from concurrent.futures import ThreadPoolExecutor
+
+import logging
+
 
 from . import mail
 
@@ -116,25 +120,58 @@ def indicadores_cargados(user, supervisor):
     message.html = render_template('email/indicadores_cargados.html', user=user)
     thread = Thread(target=send_async_mail, args=[app, message])
     thread.start()
+
+def Seleccionado_evaluador(subordinado, supervisor):
+    app = current_app._get_current_object()
+    message = Message(f'Notificación de evaluación a supervisor {supervisor.nombre} {supervisor.apellido} ',
+                    sender=app.config['MAIL_USERNAME'],
+                    recipients=[subordinado.email,'eliezergach1508@gmail.com' ])
+    message.html = render_template('email/seleccionado_evaluador.html', subordinado=subordinado, supervisor=supervisor)
+    thread = Thread(target=send_async_mail, args=[app, message])
+    thread.start()
     
+def seleccionado_par(par, a_quien_evaluar):
+    app = current_app._get_current_object()
+    message = Message(f'Notificación de evaluación a par: {a_quien_evaluar.nombre} {a_quien_evaluar.apellido} ',
+                    sender=app.config['MAIL_USERNAME'],
+                    recipients=[par.email,'eliezergach1508@gmail.com' ])
+    message.html = render_template('email/seleccionado_par.html', a_quien_evaluar=a_quien_evaluar, par=par)
+    thread = Thread(target=send_async_mail, args=[app, message])
+    thread.start()
+    
+"""def Notificar_a_supervisor_evaluar_colaboradores(user, equipo):
+    app = current_app._get_current_object()
+    message = Message(f'Notificación de evaluación a colaboradores ',
+                    sender=app.config['MAIL_USERNAME'],
+                    recipients=[user.email,'eliezergach1508@gmail.com' ])
+    message.html = render_template('email/notificacion_evaluar_colaboradores.html', equipo=equipo)
+    thread = Thread(target=send_async_mail, args=[app, message])
+    thread.start()"""
     
 
 
 # EN ESTAS FUNCIONES SON LOS CORREOS MASIVOS
 ##↓EN ESTA FUNCION ACUERDATE DE PASAR LITERALMENTE LA VARIABLE TEXTO AL JINJA↓
-async def inicio_gdd(users, texto ):
+async def inicio_gdd(users, texto):
     """Notificación masiva de inicio de periodo"""
     if isinstance(users, list):
-        await enviar_correo_masivo_async(users, "Inicio de periodo de carga de indicadores funcionales", "email/inicio_gdd.html", texto=texto)
+        return await enviar_correo_masivo_async(users, "Inicio de periodo de carga de indicadores funcionales", "email/inicio_gdd.html", texto=texto)
     else:
-        await enviar_correo_masivo_async(users, "Inicio de periodo de carga de indicadores funcionales", "email/inicio_gdd.html", texto=texto)
-        
-async def cierre_gdd(users, texto ):
+        return await enviar_correo_masivo_async([users], "Inicio de periodo de carga de indicadores funcionales", "email/inicio_gdd.html", texto=texto)
+
+async def cierre_gdd(users, texto):
     """Notificación masiva de cierre de periodo"""
     if isinstance(users, list):
-        await enviar_correo_masivo_async(users, 'Cierre periodo de carga indicadores funcionales', "email/cierre_carga.html", texto=texto)
+        return await enviar_correo_masivo_async(users, 'Cierre periodo de carga indicadores funcionales', "email/cierre_carga.html", texto=texto)
     else:
-        await enviar_correo_masivo_async(users, 'Cierre periodo de carga indicadores funcionales', "email/cierre_carga.html", texto=texto)
+        return await enviar_correo_masivo_async([users], 'Cierre periodo de carga indicadores funcionales', "email/cierre_carga.html", texto=texto)
+    
+async def inicio_periodo_evaluacion(users):
+    """Notificación masiva de cierre de periodo"""
+    if isinstance(users, list):
+        return await enviar_correo_masivo_async(users, 'Cierre periodo de carga indicadores funcionales', "email/notificacion_evaluacion_general.html")
+    else:
+        return await enviar_correo_masivo_async([users], 'Cierre periodo de carga indicadores funcionales', "email/notificacion_evaluacion_general.html")
 
 # ↑↑EN ESTAS FUNCIONES SON LOS CORREOS MASIVOS↑↑
 
@@ -176,33 +213,54 @@ def aprobacion_indicadores(user):
     """
 
 
+MAX_CONCURRENT = 2  # Reducido para evitar saturar el servidor
+BATCH_SIZE = 15     # Procesar en lotes de 15 emails
+DELAY_BETWEEN_BATCHES = 0.8  # Pausa de 0.8 segundos entre lotes
 
-
-MAX_CONCURRENT = 3
 
 async def send_email(user_email, subject, html_content, smtp_user, smtp_pass, semaphore):
+    """Envía un email individual con reintentos"""
     async with semaphore:
-        try:
-            message = EmailMessage()
-            message["From"] = smtp_user
-            message["To"] = user_email
-            message["Subject"] = subject
-            message.set_content("Este mensaje requiere un cliente compatible con HTML.")
-            message.add_alternative(html_content, subtype='html')
-
-            smtp = SMTP(
-                hostname=current_app.config['MAIL_SERVER'],
-                port=current_app.config['MAIL_PORT'],
-                start_tls=True  # ✅ Automáticamente usa STARTTLS después de conectar
-            )
-            await smtp.connect()
-            await smtp.login(smtp_user, smtp_pass)
-            await smtp.send_message(message)
-            await smtp.quit()
-
-            print(f"✅ Enviado a {user_email}")
-        except Exception as e:
-            print(f"❌ Error con {user_email}: {str(e)}")
+        max_retries = 3
+        for attempt in range(max_retries):
+            smtp = None
+            try:
+                message = EmailMessage()
+                message["From"] = smtp_user
+                message["To"] = user_email
+                message["Subject"] = subject
+                message.set_content("Este mensaje requiere un cliente compatible con HTML.")
+                message.add_alternative(html_content, subtype='html')
+                
+                smtp = SMTP(
+                    hostname=current_app.config['MAIL_SERVER'],
+                    port=current_app.config['MAIL_PORT'],
+                    start_tls=True,
+                    timeout=20  
+                )
+                
+                await smtp.connect()
+                await smtp.login(smtp_user, smtp_pass)
+                await smtp.send_message(message)
+                await smtp.quit()
+                
+                print(f"✅ Enviado a {user_email}")
+                return True
+                
+            except Exception as e:
+                if smtp:
+                    try:
+                        await smtp.quit()
+                    except:
+                        pass
+                
+                if attempt < max_retries - 1:
+                    wait_time = (attempt + 1) * 2  # Backoff: 2s, 4s, 6s
+                    print(f"⚠️ Reintento {attempt + 1}/{max_retries} para {user_email} en {wait_time}s")
+                    await asyncio.sleep(wait_time)
+                else:
+                    print(f"❌ Error definitivo con {user_email}: {str(e)}")
+                    return False
 
 async def enviar_correo_masivo_async(users, subject, template, **template_vars):
     """
@@ -211,22 +269,126 @@ async def enviar_correo_masivo_async(users, subject, template, **template_vars):
     """
     if not users:
         raise ValueError("Debe haber al menos un destinatario.")
-
+    
+    start_time = time.time()
+    total_users = len(users)
+    successful_sends = 0
+    failed_sends = 0
+    
+    print(f"Iniciando envío masivo a {total_users} destinatarios")
+    
     app = current_app._get_current_object()
     smtp_user = app.config['MAIL_USERNAME']
     smtp_pass = app.config['MAIL_PASSWORD']
+    
+    # Renderizar template una sola vez 
     html_content = render_template(template, **template_vars)
+    
+    # Procesar en lotes para evitar saturar el servidor
+    for i in range(0, total_users, BATCH_SIZE):
+        batch = users[i:i + BATCH_SIZE]
+        batch_num = (i // BATCH_SIZE) + 1
+        total_batches = (total_users + BATCH_SIZE - 1) // BATCH_SIZE
+        
+        print(f"📦 Procesando lote {batch_num}/{total_batches} ({len(batch)} emails)")
+        
+        # Crear semáforo para este lote
+        semaphore = asyncio.Semaphore(MAX_CONCURRENT)
+        
+        # Crear tareas para el lote actual
+        tasks = [
+            asyncio.create_task(send_email(user.email, subject, html_content, smtp_user, smtp_pass, semaphore))
+            for user in batch
+        ]
+        
+        # Ejecutar lote y contar resultados
+        batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Contar éxitos y fallos
+        for result in batch_results:
+            if result is True:
+                successful_sends += 1
+            else:
+                failed_sends += 1
+        
+        # Pausa entre lotes (excepto en el último)
+        if i + BATCH_SIZE < total_users:
+            print(f"⏸️ Pausa de {DELAY_BETWEEN_BATCHES}s antes del siguiente lote")
+            await asyncio.sleep(DELAY_BETWEEN_BATCHES)
+    
+    # Estadísticas finales
+    end_time = time.time()
+    duration = end_time - start_time
+    success_rate = (successful_sends / total_users * 100) if total_users > 0 else 0
+    
+    print(f"Completado en {duration:.2f}s:")
+    print(f" Enviados: {successful_sends}")
+    print(f" Fallidos: {failed_sends}")
+    print(f"Tasa de éxito: {success_rate:.1f}%")
+    
+    return {
+        'total_sent': successful_sends,
+        'total_failed': failed_sends,
+        'success_rate': success_rate,
+        'duration': duration
+    }
 
-    semaphore = asyncio.Semaphore(MAX_CONCURRENT)
-
-    tasks = [
-        asyncio.create_task(send_email(user.email, subject, html_content, smtp_user, smtp_pass, semaphore))
-        for user in users
-    ]
-
-    await asyncio.gather(*tasks)
 
 
+
+
+
+
+def enviar_notificacion_individual_mejorada(app, user, equipo, delay=0):
+    """
+    Envía notificación individual con datos específicos del usuario, usando el contexto correcto de Flask.
+    """
+    try:
+        if delay > 0:
+            time.sleep(delay)
+
+        with app.app_context():  
+            message = Message(
+                'Notificación de evaluación a colaboradores',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[user.email]  
+            )
+            message.html = render_template('email/notificacion_evaluar_colaboradores.html', 
+                                            user=user, equipo=equipo)
+            mail.send(message)
+
+        print(f"✅ Correo enviado a {user.email}")
+        return {"success": True, "email": user.email}
+
+    except Exception as e:
+        print(f"❌ Error enviando a {user.email}: {str(e)}")
+        return {"success": False, "email": user.email, "error": str(e)}
+
+def procesar_notificaciones_individuales(app, users_data):
+    resultados = {"enviados": 0, "fallidos": 0, "errores": []}
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        futures = {}
+        
+        for i, (user, equipo) in enumerate(users_data):
+            delay = i * 1.0
+            future = executor.submit(enviar_notificacion_individual_mejorada, app, user, equipo, delay)
+            futures[future] = user.email
+
+        for future in futures:
+            try:
+                resultado = future.result(timeout=45)
+                if resultado["success"]:
+                    resultados["enviados"] += 1
+                else:
+                    resultados["fallidos"] += 1
+                    resultados["errores"].append(f"{futures[future]}: {resultado.get('error')}")
+            except Exception as e:
+                resultados["fallidos"] += 1
+                resultados["errores"].append(f"{futures[future]}: {str(e)}")
+
+    print(f"Proceso completado: {resultados['enviados']} enviados, {resultados['fallidos']} fallidos")
+    return resultados
 
 
 

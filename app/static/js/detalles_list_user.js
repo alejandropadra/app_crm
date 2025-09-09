@@ -690,40 +690,43 @@ document.addEventListener('DOMContentLoaded', function() {
     const botonEnviar = document.getElementById("enviarEvaluadores");
     const formulario = document.getElementById("formEstablecerEvaluadores");
 
-    botonEnviar.addEventListener("click", function () {
-        const colaboradorId = document.getElementById("selectedColaborador").value;
-        const subordinadoId = document.getElementById("selectedColaboradorSubordinado").value 
-        const ficha_get = document.getElementById("ficha_get").value
+    if (botonEnviar){
+            botonEnviar.addEventListener("click", function () {
+            const colaboradorId = document.getElementById("selectedColaborador").value;
+            const subordinadoId = document.getElementById("selectedColaboradorSubordinado").value 
+            const ficha_get = document.getElementById("ficha_get").value
 
-        let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
-        fetch('/app_crm/establecer_evaluadores', {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": csrfToken 
-            },
-            body: JSON.stringify({
-                fichaUsuarioEvaluar: ficha_get,
-                idPar: colaboradorId,
-                idSubordinado : subordinadoId
+            let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+            fetch('/app_crm/establecer_evaluadores', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken 
+                },
+                body: JSON.stringify({
+                    fichaUsuarioEvaluar: ficha_get,
+                    idPar: colaboradorId,
+                    idSubordinado : subordinadoId
+                })
             })
-        })
-        .then(res => {
-            if (!res.ok) throw new Error("Respuesta del servidor no OK");
-            return res.json();
-        })
-        .then(data => {
-            console.log("Respuesta:", data);
-            if (data.success) {
-                window.location.reload();
-            } else {
-                alert("Error: " + data.message);
-            }
-        })
-        .catch(err => {
-            console.error('Fetch error:', err);
+            .then(res => {
+                if (!res.ok) throw new Error("Respuesta del servidor no OK");
+                return res.json();
+            })
+            .then(data => {
+                console.log("Respuesta:", data);
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(err => {
+                console.error('Fetch error:', err);
+            });
         });
-    });
+    }
+
 });
 
 

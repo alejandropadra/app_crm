@@ -227,6 +227,7 @@
                                         {% elif participante['bukrs']=='1400' %}RES
                                         {% elif participante['bukrs']=='1500' %}TMO
                                         {% elif participante['bukrs']=='1600' %}PPV
+                                        {% elif participante['bukrs']=='1900' %}EEE
                                         {% endif %}" data-tooltip-target="tooltip-default-cr{{loop.index0}}" class="border-b border-gray-200 hover:bg-blue-50 transition-colors duration-200 group cursor-pointer" onclick="window.location.href='{{ url_for('.detalles_usuarios', ficha_get=ficha_get) }}'">
                                         <td class="py-3 px-4">{{participante['pernr'].lstrip('0')}}</td>
                                         <td class="py-3 px-4">{{participante['ename']}}</td>
@@ -321,7 +322,7 @@
                 </div>
                 
                 
-                <div class=" grid grid-cols-4 gap-4">
+                <div class=" grid grid-cols-5 gap-4">
 
                     <div class=" col-span-1 dropdown-container flex items-center"><!--Filtro de la filial-->
                         <div class="flex items-center justify-between w-full">
@@ -441,7 +442,7 @@
 
                     <div class="col-span-1 dropdown-container flex items-center">
                         <button id="dropdown-status-button" data-dropdown-toggle="dropdown-status-list" class="rounded-xl w-full shrink-0 z-10 inline-flex items-center justify-between py-2.5 px-4 text-sm font-medium text-center text-gray-500 border border-gray-300 bg-gray-50 focus:ring-blue-500 focus:border-blue-500" type="button">
-                            Filtro por Estado
+                            Proceso de indicadores
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
                         </button>
                         <div id="dropdown-status-list" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44">
@@ -454,7 +455,7 @@
                                 </li>
                                 <li>
                                     <button type="button" data-status-button="espera" class="status-filter-button  w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center flex justify-between" role="menuitem">
-                                        🕒 En Espera <span class="spanCantidadEspera bg-gray-200 text-gray-600 p-1 rounded-full"> </span>
+                                        🕒 En Espera <span class="spanCantidadEspera bg-[#feefc7] text-[#c5863c] p-1 rounded-full"> </span>
                                     </button>
                                 </li>
                                 <li>
@@ -468,10 +469,112 @@
                                     </button>
                                 </li>
                             </ul>
+                        
                         </div>
                     </div>
+
+                    <div class="col-span-1 dropdown-container flex items-center">
+                        <button id="dropdown-status-button-evaluacion" data-dropdown-toggle="dropdown-status-list-evaluacion" 
+                                class="rounded-xl w-full shrink-0 z-10 inline-flex items-center justify-between py-2.5 px-4 text-sm font-medium text-center text-gray-500 border border-gray-300 bg-gray-50 focus:ring-blue-500 focus:border-blue-500" 
+                                type="button">
+                            Proceso Evaluación
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down">
+                                <path d="m6 9 6 6 6-6"/>
+                            </svg>
+                        </button>
+                        
+                        <div id="dropdown-status-list-evaluacion" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44">
+                            <ul class="py-2 text-sm text-gray-700" aria-labelledby="dropdown-status-button-evaluacion">
+                                <li class="flex items-center">
+                                    <button type="button" 
+                                            data-status-evaluacion-button="True" 
+                                            class="evaluacion-filter-button flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center justify-between" 
+                                            role="menuitem">
+                                        ✅ Completado
+                                        <span class="spanCantidadEvaluacionCompleta bg-green-200 text-green-600 p-1 rounded-full"></span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" 
+                                            data-status-evaluacion-button="False" 
+                                            class="evaluacion-filter-button flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center justify-between" 
+                                            role="menuitem">
+                                        ❌ Incompleto
+                                        <span class="spanCantidadEvaluacionIncompleta bg-red-200 text-red-600 p-1 rounded-full"></span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" 
+                                            data-status-evaluacion-button="todos" 
+                                            class="evaluacion-filter-button inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" 
+                                            role="menuitem">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-fullscreen-icon lucide-fullscreen">
+                                            <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+                                            <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+                                            <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+                                            <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+                                            <rect width="10" height="8" x="7" y="8" rx="1"/>
+                                        </svg>
+                                        Todos
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+
+                    <div class="col-span-1 dropdown-container flex items-center">
+                        <button id="dropdown-status-button-retroalimentacion" data-dropdown-toggle="dropdown-status-retroalimentacion" 
+                                class="rounded-xl w-full shrink-0 z-10 inline-flex items-center justify-between py-2.5 px-4 text-sm font-medium text-center text-gray-500 border border-gray-300 bg-gray-50 focus:ring-blue-500 focus:border-blue-500" 
+                                type="button">
+                            Retroalimentacion
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down">
+                                <path d="m6 9 6 6 6-6"/>
+                            </svg>
+                        </button>
+                        
+                        <div id="dropdown-status-retroalimentacion" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44">
+                            <ul class="py-2 text-sm text-gray-700" aria-labelledby="dropdown-status-button-evaluacion">
+                                <li class="flex items-center">
+                                    <button type="button" 
+                                            data-status-evaluacion-button="True" 
+                                            class="evaluacion-filter-button flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center justify-between" 
+                                            role="menuitem">
+                                        ✅ Completado
+                                        <span class="spanCantidadRetroalimentacionTerminada bg-green-200 text-green-600 p-1 rounded-full"></span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" 
+                                            data-status-evaluacion-button="False" 
+                                            class="evaluacion-filter-button flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center justify-between" 
+                                            role="menuitem">
+                                        ❌ Incompleto
+                                        <span class="spanCantidadRetroalimentacionIncopmpleta bg-red-200 text-red-600 p-1 rounded-full"></span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" 
+                                            data-status-evaluacion-button="todos" 
+                                            class="evaluacion-filter-button inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" 
+                                            role="menuitem">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-fullscreen-icon lucide-fullscreen">
+                                            <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+                                            <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+                                            <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+                                            <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+                                            <rect width="10" height="8" x="7" y="8" rx="1"/>
+                                        </svg>
+                                        Todos
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+
                     <div class=" flex items-center  rounded-2xl">
-                        <form class=" min-w-72">   
+                        <form class=" w-auto">   
                             <label for="default-searchDos" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -490,114 +593,234 @@
             </div>
 
 
-            
+
 
 
             <div class="grid grid-cols-1 lg:grid-cols-6  gap-3  rounded-2xl p-2">
-                {% for participante in participantes%}
-                    {% if participante['plstx'] |length >= 24 or participante['orgtx'] |length>= 24   %}
-                        {%set resultado_autocompletar = consultar_cargo(participante['pernr'].lstrip('0'))%}
+                {% set na = namespace(contador=0) %}
+                {% for participante in participantes_procesados%}
+                    {%set resultado_autocompletarDos = ""%}
+                    {% if participante['plstx'] |length >= 24  or participante['orgtx'] |length >= 24 %}
+                        {%set resultado_autocompletarDos = consultar_cargo(participante.ficha_participante)%}
                     {%endif%}
-                        {%set ficha_get = (participante['pernr'].lstrip('0')) %}
-                        {% set indicadores = obtener_indicador_usuario(participante['pernr'].lstrip('0'))%}
-                        {% set ns = namespace(contador=0) %}
+
+
+                    <div data-status="{{participante.data_status}}" data-status-evaluacion="{{participante.evaluacion_completada}}"
+                        {%if participante.comentarios_supervisor and participante.comentarios_colaborador%} data-retroalimentacion="Abierta"{%else%} data-retroalimentacion="Cerrada" {%endif%} 
+                        class="participant-card col-span-3 2xl:col-span-2 grid  grid-cols-[183px_1fr] gap-3 p-3 bg-white shadow-custom rounded-xl relative">
                         
-                        {% for indicador in indicadores %}
 
-                            {% if indicador.status_aprobacion == 'A' %}
-                                {% set ns.contador = ns.contador + 1 %}
-                            {% endif %}
-                        {% endfor %}
-                        
-                        <a href="{{ url_for('.gestion_equipo_detalles', ficha_get=(participante['pernr'].lstrip('0'))) }}"
-                            class="participant-card flex flex-col col-span-3 2xl:col-span-2  p-2 bg-white shadow-custom rounded-2xl hover:bg-slate-200 relative  cursor-pointer "
-                            data-status="{% if indicadores|length < 3 %}incompleto{% elif indicadores|length == 3 and ns.contador == 3 %}aprobado{% elif indicadores|length == 3 and ns.contador < 3 %}espera{% endif %}">
+                        <div class=" flex flex-col items-center justify-center gap-3">
 
-                            <div class=" p-3 gap-3 flex">
-                                <div class="w-[27%] aspect-square flex justify-center items-center">
-                                    {% set ruta = ruta_foto_personal(participante['pernr'].lstrip('0')) %}
-                                    <img src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
-                                            class="w-full h-full object-cover rounded-full border border-solid  " 
-                                            alt="User Image">
-                                </div>
+                            {% set ruta = ruta_foto_personal(participante.ficha_participante) %}
+                            <img src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
+                            class=" w-[100px] h-[100px] object-cover rounded-full border border-solid" 
+                            alt="User Image">
 
-                                <div class=" flex flex-col  p-3 w-[73%]">
-                                    <div class="texto flex gap-2 ">
-                                        <h5 class=" font-bold text-sm text-[#333]">Nombre:</h5>
-                                        <h5 class=" text-sm text-[#333]">{{ participante['ename'] | title }} </h5>
-                                    </div>
-                                    <hr class="border-t bg-[--azul-dark] w-full my-1 border-orange-300">
-                                    <div class="texto flex gap-2 ">
-                                        <h5 class=" font-bold text-sm text-[#333]">Cargo:</h5>
-                                        {% if participante['plstx'] |length >= 24 %}
-                                            <h3 class="text-[12px]">{{resultado_autocompletar.cargo}}</h3>
-                                            {%else%}
-                                            <h3 class="text-[12px]">{{participante['plstx']}}</h3>
-                                        {%endif%}
-                                    </div>
-                                    <hr class="border-t bg-[--azul-dark] w-full my-1 border-green-300">
-                                    <div class="texto flex gap-2 ">
-                                        <h5 class=" font-bold text-sm text-[#333]">Ficha:</h5>
-                                        <h5 class=" text-sm text-[#333]">{{participante['pernr'].lstrip('0')}}</h5>
-                                    </div>
-                                    <hr class="border-t bg-[--azul-dark] w-full my-1 border-valor-azul">
-                                    <div class="texto flex gap-2 " data-filial="{% if participante['bukrs']=='1000' %}CRM{% elif participante['bukrs']=='1100' %}CER{% elif participante['bukrs']=='1200' %}CRP{% elif participante['bukrs']=='1300' %}MGR{% elif participante['bukrs']=='1400' %}RES{% elif participante['bukrs']=='1500' %}TMO{% elif participante['bukrs']=='1600' %}PPV{% endif %}">
-                                        <h5 class=" font-bold text-sm text-[#333]">Filial:</h5>
-                                        <h5 class=" text-sm text-[#333]">
-                                            {% if  participante['bukrs']=='1000' %}CRM
-                                                    {% elif  participante['bukrs']=='1100' %}CER
-                                                    {% elif  participante['bukrs']=='1200' %}CRP 
-                                                    {% elif  participante['bukrs']=='1300' %}MGR
-                                                    {% elif  participante['bukrs']=='1400' %}RES
-                                                    {% elif  participante['bukrs']=='1500' %}TMO
-                                                    {% elif  participante['bukrs']=='1600' %}PPV
-                                                    {% endif %}
-                                        </h5>
-                                    </div>
-                                    <hr class="border-t bg-[--morado] w-full my-1 border-purple-300">
-                                    <div class="texto flex gap-2 ">
-                                        <h5 class=" font-bold text-sm text-[#333]">Departamento:</h5>
-                                        {% if participante['orgtx'] |length >= 24 %}
-                                            <h3 class="text-[12px]">{{resultado_autocompletar.departamento}}</h3>
-                                            {%else%}
-                                            <h3 class="text-[12px]">{{participante['orgtx']}}</h3>
-                                        {%endif%}
-                                    </div>
-                                    <hr class="border-t bg-[--azul-dark] w-full my-1 border-orange-300">
-                                    <div class="texto flex gap-2 items-center ">
+                            <div data-tooltip-target="tooltip-animation{{na.contador}}" 
+                                data-tooltip-placement="top"
+                                class="py-1 px-3 rounded-full text-sm w-full text-center border  flex flex-col
+                                    {%if participante.data_status == 'incompleto'%}
+                                    bg-red-50 text-red-700 border-red-100
+                                    {%elif participante.data_status == 'aprobado' %}
+                                    bg-green-50 text-green-700 border-green-100
+                                    {%elif participante.data_status == 'espera' %}
+                                    bg-[#feefc7] text-[#c5863c] border-[#feefc7]
+                                    {%endif%}
+                                    ">
+                                    
+                                <p class="text-[12px] font-semibold flex items-center gap-1
+                                    {%if participante.data_status == 'incompleto'%}
+                                        text-red-700 
+                                    {%elif participante.data_status == 'aprobado' %}
+                                        text-green-700
+                                    {%elif participante.data_status == 'espera' %}
+                                        text-[#c5863c] 
+                                    {%endif%}
+                                    ">
+                                    {%if participante.data_status == 'incompleto'%}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-meh-icon lucide-meh">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <line x1="8" x2="16" y1="15" y2="15"/>
+                                            <line x1="9" x2="9.01" y1="9" y2="9"/>
+                                            <line x1="15" x2="15.01" y1="9" y2="9"/>
+                                        </svg>
+                                        Indicadores no cargados
 
+                                    {%elif participante.data_status == 'aprobado' %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-laugh-icon lucide-laugh"><circle cx="12" cy="12" r="10"/><path d="M18 13a6 6 0 0 1-6 5 6 6 0 0 1-6-5h12Z"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></svg>
+                                        Indicadores Aprobados
+                                    {%elif participante.data_status == 'espera' %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alarm-clock-icon lucide-alarm-clock"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/></svg>
+                                        Indicadores en Espera
+                                    {%endif%}
 
-                                        <h5 class=" font-bold text-sm text-[#333]">Indicadores:</h5>
-                                        
-                                        {%if indicadores|length < 3%}
-                                            <div class=" p-2 bg-red-200 text-red-600 rounded-xl  text-[10px] border border-red-600">
-                                                Cantidad de Indicadores Cargados: {{indicadores|length}}
-                                            </div>
-                                        
-                                        {% elif indicadores|length == 3 and ns.contador == 3 %}
-                                            <div class=" p-2 bg-green-200 text-green-600 rounded-xl  text-[10px] border border-green-600">
-                                                Indicadores aprobados
-                                            </div>
-
-                                        {%elif indicadores|length ==3 and ns.contador <3  %}
-                                            <div class=" p-2 bg-yellow-200 text-yellow-600 rounded-xl  text-[10px] border border-yellow-600">
-                                                Indicadores Cargados: En espera de Aprobación
-                                            </div>
-                                        {%endif%}
-
-
-
-                                    </div>
-                                </div>
+                                    
+                                </p>
                             </div>
-                        </a>
 
-                {%endfor%}
+                            <div id="tooltip-animation{{na.contador}}" role="tooltip" class=" max-w-[250px] solute z-10 invisible inline-block px-3 py-2 text-[12px] font-medium  transition-opacity duration-300 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700
+                                    bg-gray-800 text-white
+                            ">
+                                    <div class="font-semibold mb-2">Proceso de Indicadores:</div>
+                                    <ul class="list-disc list-inside space-y-1">
+                                        
+                                        <li>Estado: {%if participante.data_status == 'espera' %}Tiene indicadores esperando por aprobación del supervisor {%else%}  {{participante.data_status|title}} {%endif%}</li>
+                                        <li>Cantidad de indicadores cargados:{{participante.indicadores_count}} </li>
+                                        <li>Cantidad de indicadores Aprobados: {{participante.aprobados_count}}  </li>
+                                    </ul>
+                                <div class="tooltip-arrow" data-popper-arrow></div>
+                            </div>
 
-                </div>
-                </div>
+                            <div data-tooltip-target="tooltip-evaluacion{{na.contador}}" 
+                                data-tooltip-placement="top"
+                                class="py-1 px-3 rounded-full text-sm w-full text-center border flex flex-col
+                                    {% if participante.evaluacion_completada %}
+                                        bg-green-50 text-green-700 border-green-100
+                                    {% else %}
+                                        bg-[#feefc7] text-[#c5863c] border-[#feefc7]
+                                    {% endif %}">
+                                <p class="text-[12px] font-semibold flex items-center gap-1
+                                    {% if participante.evaluacion_completada %}
+                                        text-green-700
+                                    {% else %}
+                                        text-[#c5863c]
+                                    {% endif %}">
+                                    {% if participante.evaluacion_completada %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle">
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                            <polyline points="22 4 12 14.01 9 11.01"/>
+                                        </svg>
+                                        Evaluación completa
+                                    {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-meh-icon lucide-meh">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <line x1="8" x2="16" y1="15" y2="15"/>
+                                            <line x1="9" x2="9.01" y1="9" y2="9"/>
+                                            <line x1="15" x2="15.01" y1="9" y2="9"/>
+                                        </svg>
+                                        Evaluación sin terminar
+                                    {% endif %}
+                                </p>
+                            </div>
 
+                            <div id="tooltip-evaluacion{{na.contador}}" role="tooltip" class=" bg-gray-800 text-white  absolute z-10 invisible inline-block px-3 py-2 text-[12px] font-medium transition-opacity duration-300 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700">
+                                {% if participante.evaluaciones_pendientes %}
+                                    <div class="font-semibold mb-2">Para terminar el proceso falta:</div>
+                                    <ul class="list-disc list-inside space-y-1">
+                                        {% for pendiente in participante.evaluaciones_pendientes %}
+                                            <li>{{ pendiente }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <div class="font-semibold">✅ Todas las evaluaciones completadas</div>
+                                {% endif %}
+                                
+                            
+                                <div class="tooltip-arrow" data-popper-arrow></div>
+                            </div>
+
+                        </div>
+
+                        <div class="flex flex-col justify-center">
+                            <div class=" text-md font-semibold p-2">
+                                {{ participante['ename'] | title }}
+                            </div>
+                            <div class=" text-[12px] font-normal p-2 b">
+                                <strong> Cargo:</strong>    
+                                {% if participante['plstx'] |length >= 24 %}
+                                    {{resultado_autocompletarDos.cargo}}
+                                        {%else%}
+                                    {{participante['plstx']}}
+                                {%endif%}
+                            </div>
+                            <hr class="border-t bg-[--azul-dark] w-full border-purple-800">
+                            <div class=" text-[12px] font-normal p-2 b">
+                                <strong> Supervisor: </strong> {{participante['nombreSuperv']|title}}
+                            </div>
+                            <hr class="border-t bg-[--azul-dark] w-full border-valor-azul">
+                            <div class=" text-[12px] font-normal p-2 b">
+                                <strong> Departamento: </strong> 
+                                    {% if participante['orgtx'] |length >= 24 %}
+                                        {{resultado_autocompletarDos.departamento}}
+                                    {%else%}
+                                        {{participante['orgtx']}}
+                                    {%endif%}
+                            </div>
+                            <hr class="border-t bg-[--azul-dark] w-full border-green-300">
+                            <div class="flex gap-2 items-center justify-between py-2">
+                                <div data-tooltip-target="tooltip-retroalimentacion{{na.contador}}" 
+                                data-tooltip-placement="top" {%if participante.comentarios_supervisor and participante.comentarios_colaborador%} data-retroalimentacion="Abierta"{%else%} data-retroalimentacion="Cerrada" {%endif%} 
+                                class="py-2 px-3 rounded-full text-sm  text-center border  flex flex-col w-auto
+                                    {%if participante.comentarios_supervisor and participante.comentarios_colaborador %}
+                                    bg-green-50 text-green-700 border-green-100
+                                    {%else%}
+                                    bg-red-50 text-red-700 border-red-100
+                                    {%endif%}
+                                    ">
+                                {%if participante.comentarios_supervisor and participante.comentarios_colaborador %}
+                                    <p class="text-[12px] font-semibold flex items-center  text-green-700 gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-circle-x-icon lucide-message-circle-x"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                                        Feedback
+                                    </p>
+                                {%else%}
+                                    <p class="text-[12px] font-semibold flex items-center text-red-700  gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-messages-square-icon lucide-messages-square"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></svg>
+                                        Feedback
+                                    </p>
+                                {%endif%}
+                                    
+                            </div>
+
+                            
+                            <div id="tooltip-retroalimentacion{{na.contador}}" role="tooltip" class=" max-w-[250px] solute z-10 invisible inline-block px-3 py-2 text-[12px] font-medium  transition-opacity duration-300 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700
+                                    bg-gray-800 text-white
+                            ">
+                                    <div class="font-semibold mb-2">Estatus del Feedback:</div>
+                                    <ul class="list-disc list-inside space-y-2">
+                                        
+                                        <li>Comentario del supervisor: {%if participante.comentarios_supervisor %} <span class=" bg-green-50 text-green-700 py-1 px-2 rounded-full w-auto">Si</span> 
+                                                                        {%else%} <span class=" bg-red-50 py-1 px-2  text-red-700 p-1 rounded-full w-auto">No</span> 
+                                                                    {%endif%}
+                                        </li>
+
+                                                                                
+                                        <li>Comentario Colaborador: {%if participante.comentarios_colaborador %} <span class=" bg-green-50 text-green-700 py-1 px-2 rounded-full w-auto">Si</span> 
+                                                                        {%else%} <span class=" bg-red-50 py-1 px-2  text-red-700 p-1 rounded-full w-auto">No</span> 
+                                                                    {%endif%}
+                                        </li>
+                                        
+                                    </ul>
+                                <div class="tooltip-arrow" data-popper-arrow></div>
+                            </div>
+
+
+
+                                <div class=" rounded-2xl p-2  bg-valor-azul text-[12px] text-white"><strong>Ficha: </strong>{{participante.ficha_participante}}</div>
+                                <div data-filial="{% if participante['bukrs']=='1000' %}CRM{% elif participante['bukrs']=='1100' %}CER{% elif participante['bukrs']=='1200' %}CRP{% elif participante['bukrs']=='1300' %}MGR{% elif participante['bukrs']=='1400' %}RES{% elif participante['bukrs']=='1500' %}TMO{% elif participante['bukrs']=='1600' %}PPV{% endif %}"
+                                    class=" rounded-2xl p-2 bg-azul-dark text-[12px] text-white"><strong>Filial:</strong>
+                                    {% if  participante['bukrs']=='1000' %}CRM
+                                    {% elif  participante['bukrs']=='1100' %}CER
+                                    {% elif  participante['bukrs']=='1200' %}CRP 
+                                    {% elif  participante['bukrs']=='1300' %}MGR
+                                    {% elif  participante['bukrs']=='1400' %}RES
+                                    {% elif  participante['bukrs']=='1500' %}TMO
+                                    {% elif  participante['bukrs']=='1600' %}PPV
+                                    {% endif %}
+                                </div>
+
+
+
+                                
+                            </div>
+                        </div>
+                    </div>
+                    {% set na.contador = na.contador + 1 %}
+                    {%endfor%}
                 </div>
+            </div>
+
+        </div>
 
 
 

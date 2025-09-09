@@ -1,4 +1,4 @@
-
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
 document.addEventListener("DOMContentLoaded", async function () {
 
 
@@ -309,7 +309,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 document.addEventListener("DOMContentLoaded", async function () {
     const enviarStartDos = document.getElementById('enviarStartDos');
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+
     const modal = document.getElementById("popup-modalTres");
     const modalLoading = document.getElementById("popup-cargando");
     const modalInstanceLoading = new Modal(modalLoading, {
@@ -389,6 +389,255 @@ document.addEventListener("DOMContentLoaded", async function () {
     
 
 
+});
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", async function () {
+    // Variables globales dentro del scope del DOMContentLoaded
+    const etapa_general = parseInt(document.getElementById('etapa_general').value.trim());
+    const steps = document.querySelectorAll('.step-container');
+    const progress = document.getElementById('progress'); 
+    const circles = document.querySelectorAll('.circle'); 
+    const labels = document.querySelectorAll('.step-label');
+    const prev = document.getElementById('prev');
+    const next = document.getElementById('next');
+    const modalStep = document.getElementById("popup-modalStep");
+    const modalInstance = new Modal(modalStep);
+
+    const modalStepFinTodo = document.getElementById("popup-modalFinTodo");
+    const modalInstanceFintodo = new Modal(modalStepFinTodo);
+    const cancelButtons = document.querySelectorAll('#cancelButtons, .cancelButtons');
+    const seguroStep = document.getElementById('seguroStep');
+    const seguroFinTodo = document.getElementById('SeguroFinTodo');
+
+
+    const modalLoading = document.getElementById("popup-cargando");
+    const modalInstanceLoading = new Modal(modalLoading, {
+        backdrop: 'static',  
+        closable: false     
+    });
+
+    let currentActive = etapa_general;
+
+    
+
+    // Inicialización del estado visual
+    steps.forEach((paso, indice) => {
+        const circulo = paso.querySelector('.circle');
+        const progreso = paso.querySelector('.step-label');
+        
+        circulo.classList.remove('active');
+        progreso.classList.remove('active');
+
+        if ((indice + 1) <= etapa_general) { 
+            circulo.classList.add('active');
+            progreso.classList.add('active');
+        }
+    });
+
+    const activeCircles = document.querySelectorAll('.circle.active');
+    if (circles.length > 1) {
+        progress.style.width = (activeCircles.length - 1) / (circles.length - 1) * 100 + '%';
+    }
+
+    updateButtons();
+
+    // Event listeners para los botones de cancelar
+    cancelButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            btn.blur();
+            document.activeElement.blur();
+
+            const modales = [
+                { elemento: modalStep, instancia: modalInstance },
+                { elemento: modalStepFinTodo, instancia: modalInstanceFintodo }
+            ];
+
+            modales.forEach(({ elemento, instancia }) => {
+                if (!elemento.hasAttribute("aria-hidden")) {
+                    elemento.setAttribute("aria-hidden", "true");
+                    elemento.setAttribute("inert", "");
+                    instancia.hide();
+                }
+            });
+
+            const backdrop = document.querySelector('[modal-backdrop]');
+            if (backdrop) backdrop.remove();
+        });
+    });
+
+
+    // Event listener para el botón "next"
+    next.addEventListener('click', () => {
+        currentActive++;
+        if (currentActive > circles.length) {
+            currentActive = circles.length;
+        }
+        if (currentActive <3){
+            CambioModal(currentActive)
+            modalStep.removeAttribute("aria-hidden");
+            modalStep.removeAttribute("inert");
+            modalInstance.show();
+        }else{
+            modalStepFinTodo.removeAttribute("aria-hidden");
+            modalStepFinTodo.removeAttribute("inert");
+            modalInstanceFintodo.show();
+
+        }
+
+    });
+
+    
+    // Event listener para el botón "prev"
+    prev.addEventListener("click", async function () {
+        currentActive--;
+        if (currentActive < 1) {
+            currentActive = 1;
+        }
+
+        CambioModal(currentActive)
+        modalStep.removeAttribute("aria-hidden");
+        modalStep.removeAttribute("inert");
+        modalInstance.show();
+        
+
+    });
+
+    seguroStep.addEventListener("click", async function () {
+        modalInstance.hide();
+        const backdrop = document.querySelector('[modal-backdrop]');
+        if (backdrop) backdrop.remove();
+        const textoLoading= document.getElementById('textoLoading');
+        textoLoading.textContent = "Realizando el Proceso...";
+        modalLoading.removeAttribute("aria-hidden");
+        modalLoading.removeAttribute("inert");
+        modalInstanceLoading.show();
+        try {
+            enviarAlBackendEtapaAño('MoverEtapa', currentActive);
+        } catch (error) {
+            console.error('Error al enviar nuevo estado:', error);
+            alert('Ocurrió un error al actualizar el estado.');
+        } finally {
+            setTimeout(() => {
+            
+                modalInstanceLoading.hide();
+                const backdrop = document.querySelector('[modal-backdrop]');
+                if (backdrop) backdrop.remove();
+            }, 1500); 
+
+            update();
+            
+        }
+
+    })
+
+    seguroFinTodo.addEventListener("click", async function() {
+        const Afconfig = document.getElementById('Afconfig').value.trim();
+        if( !Afconfig || Afconfig == ""){
+            showAlert("Ingrese el valor del proximo Año Fiscal", 'error');
+            return;
+        }
+        const textoLoading= document.getElementById('textoLoading');
+        textoLoading.textContent = "Realizando el Proceso...";
+        try {
+            modalInstanceFintodo.hide();
+            enviarAlBackendEtapaAño('actualizarAF', Afconfig)
+            enviarAlBackendEtapaAño('MoverEtapa', currentActive);
+            modalLoading.removeAttribute("aria-hidden");
+            modalLoading.removeAttribute("inert");
+            modalInstanceLoading.show();
+
+        } catch (error) {
+            console.error('Error al enviar nuevo estado:', error);
+            alert('Ocurrió un error al actualizar el estado.');
+        } finally {
+            setTimeout(() => {
+                
+                modalInstanceLoading.hide();
+                const backdrop = document.querySelector('[modal-backdrop]');
+                if (backdrop) backdrop.remove();
+                update();
+                window.location.reload()
+            }, 1500); 
+
+        }
+
+
+    })
+
+    
+    function update() {
+        circles.forEach((circle, idx) => {
+            if (idx < currentActive) {
+                circle.classList.add('active');
+                labels[idx].classList.add('active');
+            } else {
+                circle.classList.remove('active');
+                labels[idx].classList.remove('active');
+            }
+        });
+
+        const activeCircles = document.querySelectorAll('.circle.active');
+        progress.style.width = (activeCircles.length - 1) / (circles.length - 1) * 100 + '%';
+
+        updateButtons();
+
+    }
+
+    function updateButtons() {
+        console.log(currentActive);
+
+        prev.disabled = currentActive === 1;
+        next.disabled = currentActive === circles.length;
+    }
+
+    async function enviarAlBackendEtapaAño(sufijo_ruta, currentActive){
+
+        try {
+            const response = await fetch(`/app_crm/configuracionGDD/${sufijo_ruta}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken
+                },
+                body: JSON.stringify({currentActive})
+            });
+
+            if (!response.ok) throw new Error('Error en la solicitud');
+
+            const result = await response.json();
+            console.log('Respuesta del servidor:', result);
+            showAlert("Etapa Modificada Exitosamente", "Success")
+            } catch (error) {
+                console.error('Error al enviar nuevo estado:', error);
+                alert('Ocurrió un error al actualizar el estado.');
+            } 
+    }
+
+    function CambioModal(currentActive){
+        const etapaActual = document.getElementById('etapaActual');
+        console.log(typeof(currentActive))
+        const modalStepTextoSmall = document.getElementById('modalStepTextoSmall');
+        etapaActual.textContent= currentActive
+
+        if (currentActive== 2){
+            texto= 'En estado 2, se le habilitará el proceso de Evalución de Competencias a los usuarios'
+        }else if (currentActive == 1){
+            texto= 'En Estado 1, los usuarios solo podrán realizar su proceso de Gestion de Indicadores, por lo tanto el modulo de evaluaciones no estará disponible'
+        }
+
+        modalStepTextoSmall.textContent = texto
+
+    }
 });
 
 

@@ -304,7 +304,7 @@
                     <!--Supervisor inmediato-->
                     <div class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3 bg-[--verde]"> 
                         <div class="w-[20%]  aspect-square">
-                            {%set ficha_seupervisor = recortarFicha(usuario_dueño_indicador[0].fichaSuperv)%}
+                            {%set ficha_seupervisor = recortar_ficha(usuario_dueño_indicador[0].fichaSuperv)%}
                             {% set ruta = ruta_foto_personal(ficha_seupervisor) %}
                                 <img src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
                                         class="w-full h-full object-cover rounded-full border border-solid  " 
@@ -317,164 +317,166 @@
                     </div>
                 </div>
 
-
-                <div class="blanco p-3 rounded-xl shadow-sm border border-gray-200 flex flex-col gap-4">
-                    <div class=" flex items-center flex-col gap-3 w-full justify-between ">
-                        <h4 class=" text-base text-center ">Evaluador Par</h4>
-                        <div class="relative">
-                            <!-- Input de búsqueda -->
-                            <div class="relative"> 
-                                <input  id="searchInput" placeholder="Buscar"  class="input shadow-lg focus:border-2 border-gray-300 px-5 py-2 pr-12 rounded-xl w-full transition-all focus:w-[102%] outline-none"  name="search"  type="search"  autocomplete="off" />
-                                <svg class="size-5 absolute top-3 right-3 text-gray-500 pointer-events-none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" >
-                                    <path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" stroke-linejoin="round" stroke-linecap="round"></path>
-                                </svg>
-                            </div>
-
-                            <!-- Dropdown Menu -->
-                            <div id="dropdown" class="dropdown-closed absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg mt-1 z-10 overflow-hidden transition-all duration-200" >
-                                <div class="max-h-60 overflow-y-auto">
-                                    <div id="dropdownContent">
-                                    </div>
-                                    <div id="noResults" class="hidden px-4 py-3 text-gray-500 text-center">
-                                        No se encontraron colaboradores
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Campo oculto para almacenar el colaborador seleccionado -->
-                            <input type="hidden" id="selectedColaborador" name="colaborador_id" />
-                        </div>
-                    </div>
-                    <!--Evaluador par-->
-                    {%if registro_evaluacion.par_evaluador or registro_evaluacion.par_evaluador != None %}
-                        <div class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3 bg-[--verde]"> 
-                            <div class="w-[20%]  aspect-square">
-                                {%set ficha_par_evaluador = recortarFicha(registro_evaluacion.par_evaluador)%}
-                                {% set ruta = ruta_foto_personal(ficha_par_evaluador) %}
-                                <img  id="selectedImage" src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
-                                            class="w-full h-full object-cover rounded-full border border-solid  " 
-                                            alt="User Image">
-                            </div>
-                            <div  class=" flex flex-col gap-1">
-                                <h5 id="selectedName" class=" text-base font-normal ">
-
-                                    {%if not usuario_par %}
-                                        {{nombre_apellido_usuario_par | title}}
-                                    {%else%}
-                                        {{usuario_par.apellido|title }}, {{usuario_par.nombre |title}}
-                                    {%endif%}
-                                
-                                </h5>
-                                <h6 class=" small "> Evaluador Par</h6>
-                            </div>
-                        </div>
-                    
-                    {%else%}
-                        <div id="selectedPar" class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3">
-                            <div class="w-[20%]  aspect-square">
-                                <img id="selectedImage" src="{{ url_for('static', filename='img/notfoundUser.png') }}" 
-                                    class="w-full h-full object-cover rounded-full border border-solid  " 
-                                    alt="User Image">
-                            </div>
-                            <div  class=" flex flex-col gap-1">
-                                <h5 id="selectedName" class=" text-base font-normal">No agregado</h5>
-                                <h6 class=" small "> Evaluador Par</h6>
-                            </div>
-                        </div>
-                    {%endif%}
-                </div>
-
-
-
-
-                <div class="blanco p-3 rounded-xl shadow-sm border border-gray-200 flex flex-col gap-4">
-                    <div class=" flex items-center gap-3 flex-col w-full justify-between ">
-                        <h4 class=" text-base text-center ">Evaluador subordinado</h4>
+                
+                {%if usuario_dueño_indicador[0].nivel == 'I'%}
+                    <div class="blanco p-3 rounded-xl shadow-sm border border-gray-200 flex flex-col gap-4">
+                        <div class=" flex items-center flex-col gap-3 w-full justify-between ">
+                            <h4 class=" text-base text-center ">Evaluador Par</h4>
                             <div class="relative">
                                 <!-- Input de búsqueda -->
-                                <div class="relative">
-                                    <input id="searchInputSubordinado" placeholder="Buscar "  
-                                        class="input shadow-lg focus:border-2 border-gray-300 px-5 py-2 pr-12 rounded-xl w-full transition-all focus:w-[102%] outline-none"  
-                                        name="search"  
-                                        type="search"  
-                                        autocomplete="off" />
-                                    <svg class="size-5 absolute top-3 right-3 text-gray-500 pointer-events-none" 
-                                        stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none" 
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" 
-                                            stroke-linejoin="round" stroke-linecap="round"></path>
+                                <div class="relative"> 
+                                    <input  id="searchInput" placeholder="Buscar"  class="input shadow-lg focus:border-2 border-gray-300 px-5 py-2 pr-12 rounded-xl w-full transition-all focus:w-[102%] outline-none"  name="search"  type="search"  autocomplete="off" />
+                                    <svg class="size-5 absolute top-3 right-3 text-gray-500 pointer-events-none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" >
+                                        <path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" stroke-linejoin="round" stroke-linecap="round"></path>
                                     </svg>
                                 </div>
 
-                                <!-- Dropdown Menu para subordinados -->
-                                <div id="dropdownSubordinado" class="dropdown-closed absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg mt-1 z-10 overflow-hidden transition-all duration-200">
+                                <!-- Dropdown Menu -->
+                                <div id="dropdown" class="dropdown-closed absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg mt-1 z-10 overflow-hidden transition-all duration-200" >
                                     <div class="max-h-60 overflow-y-auto">
-                                        <div id="dropdownContentSubordinado">
+                                        <div id="dropdownContent">
                                         </div>
-                                        <div id="noResultsSubordinado" class="hidden px-4 py-3 text-gray-500 text-center">
+                                        <div id="noResults" class="hidden px-4 py-3 text-gray-500 text-center">
                                             No se encontraron colaboradores
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <!-- Campo oculto para almacenar el colaborador subordinado seleccionado -->
-                                <input type="hidden" id="selectedColaboradorSubordinado" name="colaborador_subordinado" />
+                                <!-- Campo oculto para almacenar el colaborador seleccionado -->
+                                <input type="hidden" id="selectedColaborador" name="colaborador_id" />
                             </div>
-                    </div>
-                    <!--Evaluador par-->
-                    {%if registro_evaluacion.subordinado_evaluador or registro_evaluacion.subordinado_evaluador != None %}
+                        </div>
 
-                        <div id="selectedPar" class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3">
-                            <div class="w-[20%]  aspect-square">
-                                {%set ficha_subordinado_evaluador = recortarFicha(registro_evaluacion.subordinado_evaluador)%}
-                                    {% set ruta = ruta_foto_personal(ficha_subordinado_evaluador) %}
-                                        <img  id="selectedImageSubordinado" src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
+
+                        <!--Evaluador par-->
+                        {%if registro_evaluacion.par_evaluador or registro_evaluacion.par_evaluador != None %}
+                            <div class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3 bg-[--verde]"> 
+                                <div class="w-[20%]  aspect-square">
+                                    {%set ficha_par_evaluador = recortar_ficha(registro_evaluacion.par_evaluador)%}
+                                    {% set ruta = ruta_foto_personal(ficha_par_evaluador) %}
+                                    <img  id="selectedImage" src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
                                                 class="w-full h-full object-cover rounded-full border border-solid  " 
                                                 alt="User Image">
-                            </div>
-                            <div class=" flex flex-col gap-1">
-                                <h5 id="selectedNameSubordinado" class=" text-base font-normal">
-                                    {%if not usuario_subordinado %}
-                                        {{nombre_apellido_usuario_subordinado | title}}
-                                    {%else%}
-                                        {{usuario_subordinado.apellido|title }}, {{usuario_subordinado.nombre |title}}
-                                    {%endif%}
-                                
-                                </h5>
-                                <h6 class=" small "> Evaluador subordinado</h6>
-                            </div>
-                        </div>
+                                </div>
+                                <div  class=" flex flex-col gap-1">
+                                    <h5 id="selectedName" class=" text-base font-normal ">
 
-                    {%else%}
+                                        {%if not usuario_par %}
+                                            {{nombre_apellido_usuario_par | title}}
+                                        {%else%}
+                                            {{usuario_par.apellido|title }}, {{usuario_par.nombre |title}}
+                                        {%endif%}
+                                    
+                                    </h5>
+                                    <h6 class=" small "> Evaluador Par</h6>
+                                </div>
+                            </div>
+                        
+                        {%else%}
+                            <div id="selectedPar" class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3">
+                                <div class="w-[20%]  aspect-square">
+                                    <img id="selectedImage" src="{{ url_for('static', filename='img/notfoundUser.png') }}" 
+                                        class="w-full h-full object-cover rounded-full border border-solid  " 
+                                        alt="User Image">
+                                </div>
+                                <div  class=" flex flex-col gap-1">
+                                    <h5 id="selectedName" class=" text-base font-normal">No agregado</h5>
+                                    <h6 class=" small "> Evaluador Par</h6>
+                                </div>
+                            </div>
+                        {%endif%}
+                    </div>
 
-    
-                        <div id="selectedPar" class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3">
-                            <div class="w-[20%]  aspect-square">
-                                <img id="selectedImageSubordinado" src="{{ url_for('static', filename='img/notfoundUser.png') }}" 
-                                    class="w-full h-full object-cover rounded-full border border-solid  " 
-                                    alt="User Image">
-                            </div>
-                            <div  class=" flex flex-col gap-1">
-                                <h5 id="selectedNameSubordinado" class=" text-base font-normal">No agregado</h5>
-                                <h6 class=" small "> Evaluador Par</h6>
-                            </div>
+                    <div class="blanco p-3 rounded-xl shadow-sm border border-gray-200 flex flex-col gap-4">
+                        <div class=" flex items-center gap-3 flex-col w-full justify-between ">
+                            <h4 class=" text-base text-center ">Evaluador Colaborador</h4>
+                                <div class="relative">
+                                    <!-- Input de búsqueda -->
+                                    <div class="relative">
+                                        <input id="searchInputSubordinado" placeholder="Buscar "  
+                                            class="input shadow-lg focus:border-2 border-gray-300 px-5 py-2 pr-12 rounded-xl w-full transition-all focus:w-[102%] outline-none"  
+                                            name="search"  
+                                            type="search"  
+                                            autocomplete="off" />
+                                        <svg class="size-5 absolute top-3 right-3 text-gray-500 pointer-events-none" 
+                                            stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none" 
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" 
+                                                stroke-linejoin="round" stroke-linecap="round"></path>
+                                        </svg>
+                                    </div>
+
+                                    <!-- Dropdown Menu para subordinados -->
+                                    <div id="dropdownSubordinado" class="dropdown-closed absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg mt-1 z-10 overflow-hidden transition-all duration-200">
+                                        <div class="max-h-60 overflow-y-auto">
+                                            <div id="dropdownContentSubordinado">
+                                            </div>
+                                            <div id="noResultsSubordinado" class="hidden px-4 py-3 text-gray-500 text-center">
+                                                No se encontraron colaboradores
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Campo oculto para almacenar el colaborador subordinado seleccionado -->
+                                    <input type="hidden" id="selectedColaboradorSubordinado" name="colaborador_subordinado" />
+                                </div>
                         </div>
-                
+                        <!--Evaluador par-->
+                        {%if registro_evaluacion.subordinado_evaluador or registro_evaluacion.subordinado_evaluador != None %}
+
+                            <div id="selectedPar" class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3">
+                                <div class="w-[20%]  aspect-square">
+                                    {%set ficha_subordinado_evaluador = recortar_ficha(registro_evaluacion.subordinado_evaluador)%}
+                                        {% set ruta = ruta_foto_personal(ficha_subordinado_evaluador) %}
+                                            <img  id="selectedImageSubordinado" src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
+                                                    class="w-full h-full object-cover rounded-full border border-solid  " 
+                                                    alt="User Image">
+                                </div>
+                                <div class=" flex flex-col gap-1">
+                                    <h5 id="selectedNameSubordinado" class=" text-base font-normal">
+                                        {%if not usuario_subordinado %}
+                                            {{nombre_apellido_usuario_subordinado | title}}
+                                        {%else%}
+                                            {{usuario_subordinado.apellido|title }}, {{usuario_subordinado.nombre |title}}
+                                        {%endif%}
+                                    
+                                    </h5>
+                                    <h6 class=" small "> Evaluador subordinado</h6>
+                                </div>
+                            </div>
+
+                        {%else%}
+
+        
+                            <div id="selectedPar" class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3">
+                                <div class="w-[20%]  aspect-square">
+                                    <img id="selectedImageSubordinado" src="{{ url_for('static', filename='img/notfoundUser.png') }}" 
+                                        class="w-full h-full object-cover rounded-full border border-solid  " 
+                                        alt="User Image">
+                                </div>
+                                <div  class=" flex flex-col gap-1">
+                                    <h5 id="selectedNameSubordinado" class=" text-base font-normal">No agregado</h5>
+                                    <h6 class=" small "> Evaluador Par</h6>
+                                </div>
+                            </div>
+                    
+                    {%endif%}
+
+                    </div>
                 {%endif%}
+            </div>
 
+
+            {%if usuario_dueño_indicador[0].nivel == 'I'%}
+                <div class=" flex justify-end items-center">
+                    <button type="button" class=" mt-3 cursor-pointer text-zinc-200 flex gap-2 items-center bg-valor-azul px-4 py-2 rounded-lg font-medium text-sm hover:bg-azul-dark transition-all ease-in duration-200" id="enviarEvaluadores">
+                        Guardar evaluadores
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+
+                    </button>
                 </div>
-            </div>
-
-
-
-            <div class=" flex justify-end items-center">
-                <button type="button" class=" mt-3 cursor-pointer text-zinc-200 flex gap-2 items-center bg-valor-azul px-4 py-2 rounded-lg font-medium text-sm hover:bg-azul-dark transition-all ease-in duration-200" id="enviarEvaluadores">
-                    Guardar evaluadores
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                    </svg>
-
-                </button>
-            </div>
+            {%endif%}
         </div>
 
 

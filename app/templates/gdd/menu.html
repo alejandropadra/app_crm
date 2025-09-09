@@ -85,8 +85,8 @@
 
             
             <div id="select-evaluacion" class="flex flex-col gap-2 p-3" >
-                <a  href="{{ url_for('.evaluacion_competencias', ficha_get=current_user.ficha) }}" class="p-2 rounded-[30px]   font-semibold cursor-pointer text-white hover:bg-neutral-700">Auto Evaluación</a>
-                <a href="{{ url_for('.Seleccionar_evaluar')}}" class="p-2  font-semibold cursor-pointer text-white hover:bg-neutral-700 rounded-[30px]">Evaluación a Terceros</a>
+                <a  href="{{ url_for('.evaluacion_competencias', ficha_get=current_user.ficha) }}" class="p-2 rounded-[30px]   font-semibold cursor-pointer text-white hover:bg-neutral-700" id="auto_evaluacion">Auto Evaluación</a>
+                <a href="{{ url_for('.Seleccionar_evaluar')}}" class="p-2  font-semibold cursor-pointer text-white hover:bg-neutral-700 rounded-[30px]" id="evualuacion_terceros">Evaluación a Terceros</a>
             </div>
         </div>
 
@@ -164,7 +164,7 @@
 
         
 
-        <a href="" class="bg-[--morado] relative w-full tarjeta-base cursor-pointer opado  indi sombra  hover:-translate-y-1 duration-200 ease-in-out" id="resultado">
+        <a {%if etapa_general <2 %} onclick="showAlertGrandes('Esta sección no está disponible', 'atencion')" {%else%}  href="{{ url_for('.gestion_equipo_detalles', ficha_get=current_user.ficha) }}" {%endif%} class="bg-[--morado] relative w-full tarjeta-base cursor-pointer opado  indi sombra  hover:-translate-y-1 duration-200 ease-in-out" id="resultado">
             <div class="  flex items-start justify-between mb-10 flex-col gap-3">
                 <div class=" flex items-center ">
                     <span class=" text-[#333]">

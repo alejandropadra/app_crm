@@ -26,6 +26,7 @@ class User(db.Model, UserMixin):
     # Relación con Evaluaciones: Un usuario puede tener muchas evaluaciones (una por cada año fiscal).
     # Esta es la "colección de carpetas" de un usuario.
     evaluaciones = db.relationship('Evaluacion', back_populates='usuario', lazy='dynamic', cascade='all, delete-orphan')
+    Retroalimentacion =db.relationship('Retroalimentacion', back_populates='usuario', lazy='dynamic', cascade='all, delete-orphan')
     def get_id(self):
         return str(self.ficha)
 
@@ -265,7 +266,7 @@ class Indicadores(db.Model):
     fecha_aprobacion = db.Column(db.DateTime)
     # Clave foránea que referencia al usuario
     ficha_usuario = db.Column(db.Integer, db.ForeignKey('users.ficha'), nullable=False)
-    año_fiscal = db.Column(db.Integer, nullable=False)
+    año_fiscal = db.Column(db.String(70), nullable=False)
     # Relación muchos a uno con User
     usuario = db.relationship('User', back_populates='indicadores')
     
@@ -844,17 +845,31 @@ class Evaluacion(db.Model):
         return resultados
     
     @classmethod
-    def obtener_evaluaciones_por_usuario(cls, ficha_usuario):
+    def obtener_evaluaciones_por_usuario(cls, ficha_usuario, año_fiscal=None):
         """
         Obtiene todas las evaluaciones asociadas a una ficha de usuario específica.
 
         :param ficha_usuario: La ficha del usuario cuyas evaluaciones se desean obtener.
+        :param año_fiscal: El año fiscal para filtrar las evaluaciones (opcional).
         :return: Una lista de objetos Evaluacion o una lista vacía si no se encuentran evaluaciones.
         """
         try:
-            evaluaciones = cls.query.filter_by(ficha_usuario=ficha_usuario).first()
+            # Construir la consulta base
+            query = cls.query.filter_by(ficha_usuario=ficha_usuario)
+            
+            # Agregar filtro por año fiscal si se proporciona
+            if año_fiscal:
+                query = query.filter_by(año_fiscal=año_fiscal)
+            
+            # Obtener todas las evaluaciones que coincidan con los filtros
+            evaluaciones = query.first()
+            
             if not evaluaciones:
-                print(f"No se encontraron evaluaciones para la ficha de usuario: {ficha_usuario}")
+                mensaje = f"No se encontraron evaluaciones para la ficha de usuario: {ficha_usuario}"
+                if año_fiscal:
+                    mensaje += f" en el año fiscal: {año_fiscal}"
+                print(mensaje)
+            
             return evaluaciones
         except Exception as e:
             print(f"Error al obtener evaluaciones para el usuario {ficha_usuario}: {e}")
@@ -923,6 +938,162 @@ class evaluacion_competencias(db.Model):
     evaluacion_id = db.Column(db.Integer, db.ForeignKey('evaluaciones.id'), nullable=False)
     evaluacion = db.relationship('Evaluacion', back_populates='resultados')
     
+    
+class Configuracion(db.Model):
+    __tablename__ = 'configuraciones'
+
+    id = db.Column(db.Integer, primary_key=True)  
+    año_fiscal = db.Column(db.String(20), nullable=False)
+    etapa_actual = db.Column(db.String(20), nullable=False)
+
+    @classmethod
+    def get_data(cls):
+        """
+        Retorna la única fila de la tabla 'configuraciones'.
+        Si no hay fila, retorna None.
+        """
+        return cls.query.first()
+    
+    @classmethod
+    def actualizar_configuracion(cls, año_fiscal=None, etapa_actual=None):
+        """
+        Actualiza la configuración existente. NO crea una nueva si no existe.
+        
+        Args:
+            año_fiscal (str, optional): Nuevo año fiscal
+            etapa_actual (str, optional): Nueva etapa actual
+            
+        Returns:
+            bool: True si se actualizó correctamente, False en caso de error
+        """
+        try:
+            config = cls.get_data()
+            
+            if config:
+                # Actualizar los campos que se proporcionaron
+                if año_fiscal is not None:
+                    config.año_fiscal = año_fiscal
+                if etapa_actual is not None:
+                    config.etapa_actual = etapa_actual
+                
+                db.session.commit()
+                return True
+            else:
+                # NO crear nueva configuración, solo retornar False
+                print("Error: No existe configuración para actualizar")
+                return False
+                
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al actualizar configuración: {e}")
+            return False
+    
+    @classmethod
+    def actualizar_solo_etapa(cls, nueva_etapa):
+        """
+        Actualiza solo la etapa actual.
+        
+        Args:
+            nueva_etapa (str): Nueva etapa actual
+            
+        Returns:
+            bool: True si se actualizó correctamente, False en caso de error
+        """
+        return cls.actualizar_configuracion(etapa_actual=nueva_etapa)
+
+    @classmethod
+    def actualizar_solo_año(cls, nuevo_año):
+        """
+        Actualiza solo el año fiscal.
+        
+        Args:
+            nuevo_año (str): Nuevo año fiscal
+            
+        Returns:
+            bool: True si se actualizó correctamente, False en caso de error
+        """
+        return cls.actualizar_configuracion(año_fiscal=nuevo_año)
+    
+    
+    
+class Retroalimentacion(db.Model):
+    __tablename__ = 'Retroalimentacion'
+
+    id = db.Column(db.Integer, primary_key=True)
+    año_fiscal = db.Column(db.String(50), nullable=False, unique=True)
+    ficha_usuario = db.Column(db.Integer, db.ForeignKey('users.ficha'), nullable=False)
+    comentarios_supervisor = db.Column(db.Text, nullable=True)
+    comentarios_colaborador = db.Column(db.Text, nullable=True)
+    feedback = db.Column(db.String(50), nullable = True)
+    usuario = db.relationship('User', back_populates='Retroalimentacion')
+
+    @classmethod
+    def crear_o_actualizar(cls, año_fiscal, ficha_usuario, comentarios_supervisor, comentarios_colaborador, feedback):
+        """
+        Crea una nueva retroalimentación o actualiza una existente.
+        
+        Args:
+            año_fiscal (str): Año fiscal de la retroalimentación
+            ficha_usuario (int): Ficha del usuario
+            comentarios_supervisor (str): Comentarios del supervisor
+            comentarios_colaborador (str): Comentarios del colaborador
+            
+        Returns:
+            tuple: (retroalimentacion_instance, created)
+                - retroalimentacion_instance: La instancia creada o actualizada
+                - created: True si se creó, False si se actualizó
+        """
+        try:
+            retroalimentacion = cls.query.filter_by(año_fiscal=año_fiscal).first()
+            
+            if retroalimentacion:
+                retroalimentacion.ficha_usuario = ficha_usuario
+                retroalimentacion.comentarios_supervisor = comentarios_supervisor
+                retroalimentacion.comentarios_colaborador = comentarios_colaborador
+                retroalimentacion.feedback = feedback
+                created = False
+            else:
+
+                retroalimentacion = cls(
+                    año_fiscal=año_fiscal,
+                    ficha_usuario=ficha_usuario,
+                    comentarios_supervisor=comentarios_supervisor,
+                    comentarios_colaborador=comentarios_colaborador,
+                    feedback =feedback
+                )
+                db.session.add(retroalimentacion)
+                created = True
+            
+            # Confirmar los cambios
+            db.session.commit()
+            
+            return retroalimentacion, created
+            
+        except Exception as e:
+
+            db.session.rollback()
+            raise e
+    @classmethod
+    def obtener_por_ficha_y_año(cls, ficha_usuario, año_fiscal):
+        """
+        Obtiene una retroalimentación específica por ficha de usuario y año fiscal.
+        
+        Args:
+            ficha_usuario (int): Ficha del usuario
+            año_fiscal (str): Año fiscal
+            
+        Returns:
+            Retroalimentacion or None: La retroalimentación encontrada o None si no existe
+        """
+        try:
+            retroalimentacion = cls.query.filter_by(
+                ficha_usuario=ficha_usuario,
+                año_fiscal=año_fiscal
+            ).first()
+            return retroalimentacion
+        except Exception as e:
+            raise e
+
 
 
 

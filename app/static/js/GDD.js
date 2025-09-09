@@ -610,7 +610,7 @@ function deleteSelectedRows() {
 
         });    
             
-        });
+    });
 
     }else{
         showAlert('Selecciona una fila que desees elimninar', 'error')

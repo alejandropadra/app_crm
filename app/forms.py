@@ -77,6 +77,8 @@ class RegistrarHojaVida(FlaskForm):
                                     ("Cumplimiento", "Cumplimiento")
                                 ])
     
+
+    
     
     
     

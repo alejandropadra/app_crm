@@ -31,6 +31,8 @@ function bloquearResultado(elements) {
     });
 }
 
+
+
 function bloquearResultadoLineas(elements) {
 
     elements.forEach(element => {
@@ -46,6 +48,19 @@ function ocultarBotonEditarInputs(elements) {
         element.classList.add('hidden');
     });
 }
+
+function tieneDatos(datos) {
+    try {
+        const decoded = datos.replace(/&#39;/g, "'");
+        const dict = JSON.parse(decoded);
+        return Object.values(dict).some(valor => 
+            valor !== "" && valor !== null && valor !== undefined
+        );
+    } catch (error) {
+        console.log('Error:', error);
+        return false;
+    }
+}
 document.addEventListener('DOMContentLoaded', function() {
     
     const habilitacion_supervisor = document.getElementById('habilitacion_supervisor').value;   
@@ -56,6 +71,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const inputs_autoeval = document.querySelectorAll('.custom-dropdown.autoevaluacionDropDown');
     
     
+    const supervisorNoEvaluado = document.querySelectorAll('.custom-dropdown.supervisor');
+
     
     const span_autoeval = document.querySelectorAll('.resultado_span_autoevaluacion');
     const span_supervisor = document.querySelectorAll('.resultado_span_supervisorEvaluacion');
@@ -63,6 +80,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const span_subordinado = document.querySelectorAll('.resultado_span_subordinado');
     const span_cumplimiento = document.querySelectorAll('.resultado_span_cumplimiento');
     const span_desempeño = document.querySelectorAll('.resultado_span_desempeño')
+
+
+
+    //Datos Evaluacion
+    const autoevaluaciones = document.getElementById('autoevaluaciones').textContent;
+    const supervisorEvaluacionesJson = document.getElementById('supervisorEvaluacionesJson').textContent;
+    const haySupervisorEvaluaciones = tieneDatos(supervisorEvaluacionesJson);
+    const hayautoevaluaciones = tieneDatos(autoevaluaciones);
 
     //Botones:
 
@@ -83,6 +108,20 @@ document.addEventListener('DOMContentLoaded', function() {
         superviEvalEditar.length > 0 ? ocultarBotonEditarInputs(superviEvalEditar): null;
         parEvalEditar.length > 0 ? ocultarBotonEditarInputs(parEvalEditar): null;
         subordinadoEditar.length > 0 ? ocultarBotonEditarInputs(subordinadoEditar): null;
+        botonAutoEvaluacion.length > 0 ? ocultarBotonEditarInputs(botonAutoEvaluacion): null;
+
+
+        if ( haySupervisorEvaluaciones && !hayautoevaluaciones){
+            bloquearResultado(span_supervisor)
+            bloquearResultado(span_cumplimiento)
+            bloquearResultadoLineas(span_desempeño)
+            showAlertGrandes('Has sido evaluado, sin embargo no has realizado tu autoevaluación. Para visualizar tus resultados realiza tu autoevaluación', 'atencion')
+            if(span_par.length >0 && span_subordinado.length >0){
+                bloquearResultado(span_supervisor)
+                bloquearResultado(span_subordinado)
+            }
+            
+        }
 
 
 
@@ -95,9 +134,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         //Los botones para editar
         botonAutoEvaluacion.length > 0 ? ocultarBotonEditarInputs(botonAutoEvaluacion): null;
+        superviEvalEditar.length > 0 ? ocultarBotonEditarInputs(superviEvalEditar): null;
         parEvalEditar.length > 0 ? ocultarBotonEditarInputs(parEvalEditar): null;
         subordinadoEditar.length > 0 ? ocultarBotonEditarInputs(subordinadoEditar): null;
 
+
+        if ( !hayautoevaluaciones && !haySupervisorEvaluaciones){
+            showAlertGrandes('El Colaborador no ha realizado aún su Autoevaluación. Se le recomienda comunicarse con el mismo antes de realizar su evaluación', 'atencion')
+        }
     }else if (estado_evaluacion == "parEvaluacion"){
         inputs_autoeval.length > 0 ? disableInputs(inputs_autoeval) : null;
         inputs_supervisor.length > 0 ? disableInputs(inputs_supervisor) : null;
@@ -107,6 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
         superviEvalEditar.length > 0 ? ocultarBotonEditarInputs(superviEvalEditar): null;
         botonAutoEvaluacion.length > 0 ? ocultarBotonEditarInputs(botonAutoEvaluacion): null;
         subordinadoEditar.length > 0 ? ocultarBotonEditarInputs(subordinadoEditar): null;
+        parEvalEditar.length > 0 ? ocultarBotonEditarInputs(parEvalEditar): null;
         bloquearResultado(span_autoeval)
         bloquearResultado(span_supervisor)
         bloquearResultado(span_subordinado)
@@ -123,6 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
         superviEvalEditar.length > 0 ? ocultarBotonEditarInputs(superviEvalEditar): null;
         botonAutoEvaluacion.length > 0 ? ocultarBotonEditarInputs(botonAutoEvaluacion): null;
         parEvalEditar.length > 0 ? ocultarBotonEditarInputs(parEvalEditar): null;
+        subordinadoEditar.length > 0 ? ocultarBotonEditarInputs(subordinadoEditar): null;
         bloquearResultado(span_autoeval)
         bloquearResultado(span_supervisor)
         bloquearResultado(span_par)
@@ -627,8 +673,6 @@ function showAlert(message, category = 'success') {
     }
 
 
-
-
 function showAlertGrandes(message, category = 'success') {
     const alertContainer = document.createElement('div');
     alertContainer.className = 'fixed top-5 z-[100000] animate-fade-in-up left-[35%] transform -translate-x-1/2';
@@ -644,13 +688,23 @@ function showAlertGrandes(message, category = 'success') {
     
     // Contenedor del icono (fijo en la parte superior)
     const iconContainer = document.createElement('div');
-    iconContainer.className = category === 'error' 
-        ? 'text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg flex-shrink-0 mt-1'
-        : 'text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg flex-shrink-0 mt-1';
+    let iconColor = '';
+    
+    if (category === 'error') {
+        iconColor = 'text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg flex-shrink-0 mt-1';
+    } else if (category === 'atencion') {
+        iconColor = 'text-[#ffc107] bg-white/5 backdrop-blur-xl p-1 rounded-lg flex-shrink-0 mt-1';
+    } else {
+        iconColor = 'text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg flex-shrink-0 mt-1';
+    }
+    
+    iconContainer.className = iconColor;
     
     const iconSpan = document.createElement('span');
     if (category === 'error') {
         iconSpan.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert-icon lucide-circle-alert"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>`;
+    } else if (category === 'atencion') {
+        iconSpan.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert-icon lucide-triangle-alert"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>`;
     } else {
         iconSpan.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check"><path d="M20 6 9 17l-5-5"/></svg>`;
     }
@@ -662,7 +716,14 @@ function showAlertGrandes(message, category = 'success') {
     const titleDiv = document.createElement('div');
     const titleText = document.createElement('h4');
     titleText.className = 'text-white font-medium mb-2';
-    titleText.textContent = category === 'error' ? 'Error:' : 'Proceso Exitoso:';
+    
+    if (category === 'error') {
+        titleText.textContent = 'Error:';
+    } else if (category === 'atencion') {
+        titleText.textContent = 'Atención:';
+    } else {
+        titleText.textContent = 'Proceso Exitoso:';
+    }
     
     const messageDiv = document.createElement('div');
     const messageText = document.createElement('p');
@@ -674,9 +735,17 @@ function showAlertGrandes(message, category = 'success') {
     closeButton.className = 'flex close-btn flex-shrink-0';
     
     const closeIconContainer = document.createElement('div');
-    closeIconContainer.className = category === 'error'
-        ? 'text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg hover:bg-white/10 transition-colors'
-        : 'text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg hover:bg-white/10 transition-colors';
+    let closeIconColor = '';
+    
+    if (category === 'error') {
+        closeIconColor = 'text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg hover:bg-white/10 transition-colors';
+    } else if (category === 'atencion') {
+        closeIconColor = 'text-[#ffc107] bg-white/5 backdrop-blur-xl p-1 rounded-lg hover:bg-white/10 transition-colors';
+    } else {
+        closeIconColor = 'text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg hover:bg-white/10 transition-colors';
+    }
+    
+    closeIconContainer.className = closeIconColor;
     
     const closeIconSpan = document.createElement('span');
     closeIconSpan.className = 'material-symbols-rounded';

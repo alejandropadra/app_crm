@@ -1,9 +1,19 @@
 {% extends 'layout.html' %}
 {% from 'helpers/_forms.html' import render_field %}
 
+
+{%block estilos%}
+
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
+    
+{%endblock%}
 {% block body %}
+
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <input type="hidden" value={{ficha_get}} id="ficha_get">
+<input type="hidden" value="{{ficha}}" id="ficha">
+<input type="hidden" value="{{ficha_evaluador_supervisor}}" id="ficha_supervisor">
+<input type="hidden" value="{{estado_evaluacion}}" id="estado_evaluacion">
 
 <div class="flex w-full justify-start my-7 mx-7 items-center gap-3">
 
@@ -12,8 +22,9 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
         </span>
     </button>
-    <h3>Gestión de Equipo/</h3> <h3 class=" text-[--coral]"> Detalles trabajador </h3>
+    <h3>Gestión de Equipo/</h3> <h3 class=" text-[--coral]"> Detalles trabajador <span class=" text-valor-azul"> -> {{usuario_dueño_indicador[0]['ename'] | title}}  </span></h3>
 </div>
+
 
 
 
@@ -23,13 +34,15 @@
     {% include "components/tarjeta_perfil.html" %}
 </div>
 
+
+
 <div class="bg-white opado p-5 rounded-[20px] shadow-custom " id="tarjetaprincipalgdi" >
     <form action="" method="post">
 
         <div class="rounded-t mb-0 px-4 py-3 border-0 flex flex-col sm:flex-row justify-between items-center gap-3">
             <!-- Contenedor del título con flex-grow para ocupar el espacio a la izquierda -->
             <div class="relative px-0 md:px-4 flex-grow flex gap-5">
-                <h3 class="text-left opado">Aprobacion de Indicadores Funcionales</h3>
+                <h3 class="text-left opado"> {%if etapa_general >= 2%} Resultado de Indicadores Funcionales  {%else%} Aprobacion de Indicadores Funcionales {%endif%}</h3>
                 <!--<button id="autoayuda" type="button" class=" opado absolute md:static top-[-30px] right-[-35px] autoayuda bg-slate-600 flex justify-center  w-8 h-8 rounded-[50%] items-center text-white hover:bg-slate-400 p-4  outline-none focus:outline-none ease-linear transition-all duration-150" type="button">
                     <span class="">
                         <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#fff" stroke-width="2.5" viewBox="0 0 256 256"><path d="M192,96c0,28.51-24.47,52.11-56,55.56V160a8,8,0,0,1-16,0V144a8,8,0,0,1,8-8c26.47,0,48-17.94,48-40s-21.53-40-48-40S80,73.94,80,96a8,8,0,0,1-16,0c0-30.88,28.71-56,64-56S192,65.12,192,96Zm-64,96a16,16,0,1,0,16,16A16,16,0,0,0,128,192Z"></path></svg>
@@ -37,7 +50,7 @@
             </div>
         
             <!-- Contenedor de botones, alineados a la derecha -->
-            <div class="flex space-x-2 items-center">
+            <div class="flex space-x-2 items-center {%if etapa_general >= 2%} hidden {%endif%}">
                 <button type="button" id="botonEditar" class="opado cursor-pointer text-zinc-200 flex gap-2 items-center bg-green-500 px-4 py-2 rounded-lg font-medium text-sm hover:bg-green-300 transition-all ease-in duration-200">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil-icon lucide-pencil"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg> 
                     
@@ -51,12 +64,14 @@
             <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 divide-y divide-gray-200" id="indicadorTable">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
+                        {%if etapa_general < 2%}
                         <th scope="col" class="p-4">
                             <div class="flex items-center">
                                 <input id="checkbox-all-search" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                                 <label for="checkbox-all-search" class="sr-only">checkbox</label>
                             </div>
                         </th>
+                        {%endif%}
                         <th scope="col" class="px-6 py-3 min-w-[300px] max-w-[280px] break-words whitespace-normal " id="indicadorAyuda">
                             Indicadores
                         </th>
@@ -95,12 +110,14 @@
                 <tbody>
                     {% for indicador in indicadores %}
                     <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                        {%if etapa_general < 2%}
                         <td class="w-4 p-4">
                             <div class="flex items-center">
                                 <input id="checkbox-table-search-1" type="checkbox" class="row-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                                 <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
                             </div>
                         </td>
+                        {%endif%}
         
                         <td class="px-4 py-3 text-sm text-gray-700  text-left break-words whitespace-normal align-center">
                             {{indicador.nombre_indicador}}
@@ -126,7 +143,7 @@
                         </td>
                         <td class="px-6 py-4 text-gray-700 font-extrabold text-center">
         
-                        {% if indicador.cumplimiento%} {{indicador.cumplimiento}}% {%else%} 0% {%endif%}
+                            {% if indicador.cumplimiento%} {{indicador.cumplimiento}}% {%else%} 0% {%endif%}
                         </td>
         
                         <td class=" px-6 py-4  text-center font-bold text-[#333]">
@@ -140,14 +157,17 @@
                                             p-3 rounded-2xl">{% if indicador.desempeno%} {{indicador.desempeno}} {%else%} NN {%endif%}</span>
                         </td>
         
+                        {%if etapa_general < 2%}
                         <td class=" px-6 py-4  text-center relative">
 
 
-
+                            
                             {% if indicador.status_aprobacion%}
-                            <button data-tooltip-target="tooltip-edit{{loop.index0}}" id="editarStatus" type="button" class="absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
+                            
+                            <button data-tooltip-target="tooltip-edit{{loop.index0}}" id="editarStatus" type="button" class=" {%if etapa_general >= 2%} hidden {%endif%} absolute top-0  right-1 bg-slate-200 p-2 rounded-full text-sm">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left-icon lucide-arrow-right-left"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
                             </button>
+                            
                             {%endif%}
 
                             <div id="tooltip-edit{{loop.index0}}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
@@ -180,6 +200,25 @@
                             </div>
 
                         </td>
+                        {%else%}
+
+                        <td class=" px-6 py-4  text-center relative">
+
+                            {% if indicador.status_aprobacion%}
+
+                                <span class=" p-3 rounded-xl text-center {% if indicador.status_aprobacion == 'A'%} bg-green-300  
+                                            {% elif indicador.status_aprobacion == 'R'%} bg-red-300 
+                                            {% elif indicador.status_aprobacion == 'C'%} bg-blue-300 
+                                            {%endif%} font-bold  text-[#333]" >{{indicador.status_aprobacion}}</span> 
+                
+                            {%else%}
+                                <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                            {%endif%}
+
+
+
+                        </td>
+                        {%endif%}
         
                         <td class="p-2">
                             <div class="flex flex-col gap-5">
@@ -229,7 +268,7 @@
                         <td class="pr-4 align-middle border text-xs whitespace-nowrap p-4 text-center font-bold bg-blue-200 text-[#333]" id="footerPeso">  {{ total_peso }}%</td>
                         <td></td>
                         <td></td>
-                        <td></td>
+
                         <td class="pr-4 align-middle border text-xs whitespace-nowrap p-4 text-center font-extrabold text-gray-700
                         
                                 {% if total_cumplimiento < 50%}
@@ -257,12 +296,979 @@
 
 
 
+{%if etapa_general == 2 %}
+<div class="tarjeta-base bg-white overflow-x-auto sombra w-full shadow-custom z-0 mt-8 flex flex-col gap-4 p-3">
+    <h3 class="opado p-3">Resultados Evaluación de Competencias </h3>
+    <table class="table-auto w-full border-collapse opado" id="tabla-HV">
+        <thead>
+            <tr>
+                <td class="w-1/4 px-3 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                    
+                </td>
+                <td class="w-1/12 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">
+                    Peso %
+                </td>
+                <td id="Auto_eval"class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">
+                    Auto Evaluación
+                </td>
+                <td id="Supervisor"class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">
+                    Supervisor
+                </td>
+                {%if usuario_dueño_evaluacion[0].nivel == 'I' %}
+                    <td class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">
+                        Par
+                    </td>
+                    <td class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">
+                        Colaborador
+                    </td>
+                {%endif%}
+
+                <td class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">
+                    Cumplimiento
+                </td>
+                <td class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">
+                    Desempeño
+                </td>
+            </tr>
+        </thead>
+        <tbody>
+        <tr class="!h-[90px]">
+            <td class="border border-solid h-full p-0" id="Desmotracion">
+                <div class=" p-4  relative">
+                    <h4 class=" font-normal text-[#000000] ">Demostración Valores Corporativos</h4>
+                    <!-- 
+                    <div class=" absolute top-0 bg-blue-600 p-1 m-0 flex items-center justify-center rounded-full" >
+                        <span class="material-symbols-rounded m-0 p-0 text-white text-[15px]">
+                            info
+                            </span>
+                    </div>
+                -->
+                </div>
+            </td>
+            <td class="border border-solid h-full p-0 ">
+                <input type="text"  name="Peso" required class="w-full peso h-full p-2 border-none " placeholder="%" value="4%" readonly>
+            </td>
+
+            <!--AUTOEVALUACION DE LA PRIMERA FILA-->
+            <td class="border border-solid h-full p-0 text-center relative  " id="Primera_autoeval">
+                {%if autoevaluaciones.numero_1 != None and autoevaluaciones.numero_1 != '' %}
+                <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                    {%if autoevaluaciones.numero_1 == 'UP' %} bg-red-300 
+                    {%elif autoevaluaciones.numero_1 == 'FP-' %} bg-yellow-300 
+                    {%elif autoevaluaciones.numero_1 == 'FP' %} bg-slate-300 
+                    {%elif autoevaluaciones.numero_1 == 'FP+' %} bg-green-300
+                    {%elif autoevaluaciones.numero_1 == 'O' %} bg-blue-300 
+                    {%endif%} resultado_span_autoevaluacion" > {{autoevaluaciones.numero_1}}</span>
+                            
+                {%else%}
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                {%endif%}
+            </td> <!--FIN DE LA AUTOEVALUACION DE LA PRIMERA FILA-->
+
+            <!--EVALUACION SUPERVISOR DE LA PRIMERA FILA-->
+            <td  class="border border-solid h-full p-0 text-center relative " id="Primera_supervi">
+
+                {%if supervisor_evaluaciones.numero_1 and supervisor_evaluaciones.numero_1  != None and supervisor_evaluaciones.numero_1 != '' %}
+
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                        {%if supervisor_evaluaciones.numero_1 == 'UP' %} bg-red-300 
+                        {%elif supervisor_evaluaciones.numero_1 == 'FP-' %} bg-yellow-300 
+                        {%elif supervisor_evaluaciones.numero_1 == 'FP' %} bg-slate-300 
+                        {%elif supervisor_evaluaciones.numero_1 == 'FP+' %} bg-green-300
+                        {%elif supervisor_evaluaciones.numero_1 == 'O' %} bg-blue-300 
+                        {%endif%} resultado_span_supervisorEvaluacion"> {{supervisor_evaluaciones.numero_1}}</span>
+
+                {%else%}
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                {%endif%}
+            </td> <!--FIN DE LA EVALUACION SUPERVISOR DE LA PRIMERA FILA-->
+
+            {%if usuario_dueño_evaluacion[0].nivel == 'I' %}
+
+                <!--EVALUACION PAR DE LA PRIMERA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative " id="Primera_par">
+                    {%if par_evaluaciones.numero_1 and par_evaluaciones.numero_1  != None and par_evaluaciones.numero_1  != "" %}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if par_evaluaciones.numero_1 == 'UP' %} bg-red-300 
+                            {%elif par_evaluaciones.numero_1 == 'FP-' %} bg-yellow-300 
+                            {%elif par_evaluaciones.numero_1 == 'FP' %} bg-slate-300 
+                            {%elif par_evaluaciones.numero_1 == 'FP+' %} bg-green-300
+                            {%elif par_evaluaciones.numero_1 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_par"> {{par_evaluaciones.numero_1}}</span>
+                    {%else%}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                    {%endif%}
+                </td> <!--FIN DE LA EVALUACION PAR DE LA PRIMERA FILA-->
+
+
+                <!--EVALUACION COLABORADOR DE LA PRIMERA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative " id="Primera_colaborador">
+                    {%if subordinado_eval.numero_1 and subordinado_eval.numero_1  != None and subordinado_eval.numero_1  != "" %}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if subordinado_eval.numero_1 == 'UP' %} bg-red-300 
+                            {%elif subordinado_eval.numero_1 == 'FP-' %} bg-yellow-300 
+                            {%elif subordinado_eval.numero_1 == 'FP' %} bg-slate-300 
+                            {%elif subordinado_eval.numero_1 == 'FP+' %} bg-green-300
+                            {%elif subordinado_eval.numero_1 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_subordinado"> {{subordinado_eval.numero_1}}</span>
+                        {%else%}
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                    {%endif%}
+                </td> <!--FIN DE LA EVALUACION COLABORADOR DE LA PRIMERA FILA-->
+            {%endif%}
+            <!--CUMPLIMIENTO DE LA PRIMERA FILA-->
+            <td class="border border-solid h-full p-0 text-center relative ">
+
+                {%if cumplimientos.numero_1 and cumplimientos.numero_1  != None%}
+
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                        {%if cumplimientos.numero_1 == 'UP' %} bg-red-300 
+                        {%elif cumplimientos.numero_1 == 'FP-' %} bg-yellow-300 
+                        {%elif cumplimientos.numero_1 == 'FP' %} bg-slate-300 
+                        {%elif cumplimientos.numero_1 == 'FP+' %} bg-green-300
+                        {%elif cumplimientos.numero_1 == 'O' %} bg-blue-300 
+                        {%endif%} resultado_span_cumplimiento"> {{cumplimientos.numero_1}}</span>
+
+                {%else%}
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                {%endif%}
+            </td> <!--FIN DE CUMPLIMIENTO DE LA PRIMERA FILA-->
+
+            <!--DESEMPEÑO DE LA PRIMERA FILA-->
+            <td class="border border-solid h-full p-0 text-center relative ">
+
+                {%if desempeños.numero_1 and desempeños.numero_1  != None%}                
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                        {%if desempeños.numero_1 == 'UP' %} bg-red-300 
+                        {%elif desempeños.numero_1 == 'FP-' %} bg-yellow-300 
+                        {%elif desempeños.numero_1 == 'FP' %} bg-slate-300 
+                        {%elif desempeños.numero_1 == 'FP+' %} bg-green-300
+                        {%elif desempeños.numero_1 == 'O' %} bg-blue-300 
+                        {%endif%} resultado_span_desempeño"> {{desempeños.numero_1}}</span>
+
+                {%else%}
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                {%endif%}
+            </td> <!--FIN DE DESEMPEÑO DE LA PRIMERA FILA-->
+        </tr>
+
+        <tr class="!h-[90px]">
+            <td class="border border-solid h-full p-0" id="Foco">
+                <div class=" p-4 ">
+                    <h4 class=" font-normal text-[#000000] ">Foco en Resultados <br></h4>
+                </div>
+            </td>
+            <td class="border border-solid h-full p-0 ">
+                <input type="text" id="Peso" name="Peso" required class="w-full peso h-full p-2 border-none " placeholder="%" value="4%" readonly>
+            </td>
+                
+            <!--AUTOEVALUACIÓN DE SEGUNDA FILA-->
+            <td class="border border-solid h-full p-0 text-center relative " id="Segunda_autoeval">
+
+                {%if autoevaluaciones.numero_2 != None and autoevaluaciones.numero_2 != ""%}
+
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                        {%if autoevaluaciones.numero_2 == 'UP' %} bg-red-300 
+                        {%elif autoevaluaciones.numero_2 == 'FP-' %} bg-yellow-300 
+                        {%elif autoevaluaciones.numero_2 == 'FP' %} bg-slate-300 
+                        {%elif autoevaluaciones.numero_2 == 'FP+' %} bg-green-300
+                        {%elif autoevaluaciones.numero_2 == 'O' %} bg-blue-300 
+                        {%endif%} resultado_span_autoevaluacion" > {{autoevaluaciones.numero_2}}</span>
+                {%else%}
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                {%endif%}
+            </td><!--FIN DE LA AUTOEVALUACION DE LA SEGUNDA FILA-->
+
+
+            <!--EVALUACION SUPERVISOR DE LA SEGUNDA FILA-->
+            <td class="border border-solid h-full p-0 text-center relative " id="Segunda_supervi">
+
+                {%if supervisor_evaluaciones.numero_2 and supervisor_evaluaciones.numero_2  != None%}
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                        {%if supervisor_evaluaciones.numero_2 == 'UP' %} bg-red-300 
+                        {%elif supervisor_evaluaciones.numero_2 == 'FP-' %} bg-yellow-300 
+                        {%elif supervisor_evaluaciones.numero_2 == 'FP' %} bg-slate-300 
+                        {%elif supervisor_evaluaciones.numero_2 == 'FP+' %} bg-green-300
+                        {%elif supervisor_evaluaciones.numero_2 == 'O' %} bg-blue-300 
+                        {%endif%} resultado_span_supervisorEvaluacion"> {{supervisor_evaluaciones.numero_2}}</span>
+                            
+                {%else%}
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                {%endif%}
+            </td> <!--FIN DE LA EVALUACION SUPERVISOR DE LA SEGUNDA FILA-->
 
 
 
+            {%if usuario_dueño_evaluacion[0].nivel == 'I' %}
+
+            <!--EVALUACION PAR DE LA SEGUNDA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative " id="Segunda_par">
+
+                    {%if par_evaluaciones.numero_2 and par_evaluaciones.numero_2  != None%}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if par_evaluaciones.numero_2 == 'UP' %} bg-red-300 
+                            {%elif par_evaluaciones.numero_2 == 'FP-' %} bg-yellow-300 
+                            {%elif par_evaluaciones.numero_2 == 'FP' %} bg-slate-300 
+                            {%elif par_evaluaciones.numero_2 == 'FP+' %} bg-green-300
+                            {%elif par_evaluaciones.numero_2 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_par"> {{par_evaluaciones.numero_2}}</span>
+
+                    {%else%}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                    {%endif%}
+                </td> <!--FIN DE LA EVALUACION PAR DE LA SEGUNDA FILA-->
+
+
+                <!--EVALUACION COLABORADOR DE LA SEGUNDA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative " id="Segunda_colaborador">
+
+                    {%if subordinado_eval.numero_2 and subordinado_eval.numero_2  != None and subordinado_eval.numero_2  != "" %}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if subordinado_eval.numero_2 == 'UP' %} bg-red-300 
+                            {%elif subordinado_eval.numero_2 == 'FP-' %} bg-yellow-300 
+                            {%elif subordinado_eval.numero_2 == 'FP' %} bg-slate-300 
+                            {%elif subordinado_eval.numero_2 == 'FP+' %} bg-green-300
+                            {%elif subordinado_eval.numero_2 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_subordinado"> {{subordinado_eval.numero_2}}</span>
+                                
+                    {%else%}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>2
+                    {%endif%}
+                </td> <!--FIN DE LA EVALUACION COLABORADOR DE LA SEGUNDA FILA-->
+            {%endif%}
+
+            <!--CUMPLIMIENTO DE LA SEGUNDA FILA-->
+            <td class="border border-solid h-full p-0 text-center relative ">
+
+                {%if cumplimientos.numero_2 and cumplimientos.numero_2  != None%}
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                        {%if cumplimientos.numero_2 == 'UP' %} bg-red-300 
+                        {%elif cumplimientos.numero_2 == 'FP-' %} bg-yellow-300 
+                        {%elif cumplimientos.numero_2 == 'FP' %} bg-slate-300 
+                        {%elif cumplimientos.numero_2 == 'FP+' %} bg-green-300
+                        {%elif cumplimientos.numero_2 == 'O' %} bg-blue-300 
+                        {%endif%} resultado_span_cumplimiento"> {{cumplimientos.numero_2}}</span>
+
+                {%else%}
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                {%endif%}
+            </td> <!--FIN DE CUMPLIMIENTO DE LA SEGUNDA FILA-->
+
+            <!--DESEMPEÑO DE LA SEGUNDA FILA-->
+            <td class="border border-solid h-full p-0 text-center relative ">
+
+                {%if desempeños.numero_2 and desempeños.numero_2  != None%}
+
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                        {%if desempeños.numero_2 == 'UP' %} bg-red-300 
+                        {%elif desempeños.numero_2 == 'FP-' %} bg-yellow-300 
+                        {%elif desempeños.numero_2 == 'FP' %} bg-slate-300 
+                        {%elif desempeños.numero_2 == 'FP+' %} bg-green-300
+                        {%elif desempeños.numero_2 == 'O' %} bg-blue-300 
+                        {%endif%} resultado_span_desempeño"> {{desempeños.numero_2}}</span>
+
+                {%else%}
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                {%endif%}
+            </td> <!--FIN DE DESEMPEÑO DE LA SEGUNDA FILA-->
+        </tr>
+
+        <tr class="!h-[90px]">
+            <td class="border border-solid h-full p-0" id="Influencia">
+                <div class=" p-4 ">
+                    <h4 class=" font-normal text-[#000000] ">Influencia Organizacional <br></h4>
+                </div>
+            </td>
+            <td class="border border-solid h-full p-0 ">
+                <input type="text" id="Peso" name="Peso" required class="w-full peso h-full p-2 border-none " placeholder="%" value="4%" readonly>
+            </td>
+
+            <!--AUTOEVALUACIÓN DE TECERA FILA-->
+            <td class="border border-solid h-full p-0 text-center relative " id="Tercer_autoeval">
+
+                {%if autoevaluaciones.numero_3 != None and  autoevaluaciones.numero_3 !=""%}
+
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                        {%if autoevaluaciones.numero_3 == 'UP' %} bg-red-300 
+                        {%elif autoevaluaciones.numero_3 == 'FP-' %} bg-yellow-300 
+                        {%elif autoevaluaciones.numero_3 == 'FP' %} bg-slate-300 
+                        {%elif autoevaluaciones.numero_3 == 'FP+' %} bg-green-300
+                        {%elif autoevaluaciones.numero_3 == 'O' %} bg-blue-300 
+                        {%endif%} resultado_span_autoevaluacion" > {{autoevaluaciones.numero_3}}</span>
+            
+                {%else%}
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                {%endif%}
+            </td><!--FIN DE LA AUTOEVALUACION DE LA TERCERA FILA-->
+
+
+            <!--EVALUACION SUPERVISOR DE LA TERCERA FILA-->
+            <td class="border border-solid h-full p-0 text-center relative " id="Tercera_supervi">
+
+                {%if supervisor_evaluaciones.numero_3 and supervisor_evaluaciones.numero_3  != None%}
+
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                        {%if supervisor_evaluaciones.numero_3 == 'UP' %} bg-red-300 
+                        {%elif supervisor_evaluaciones.numero_3 == 'FP-' %} bg-yellow-300 
+                        {%elif supervisor_evaluaciones.numero_3 == 'FP' %} bg-slate-300 
+                        {%elif supervisor_evaluaciones.numero_3 == 'FP+' %} bg-green-300
+                        {%elif supervisor_evaluaciones.numero_3 == 'O' %} bg-blue-300 
+                        {%endif%} resultado_span_supervisorEvaluacion"> {{supervisor_evaluaciones.numero_3}}</span>
+                            
+                {%else%}
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                {%endif%}
+            </td> <!--FIN DE LA EVALUACION SUPERVISOR DE LA TERCERA FILA-->
+
+            {%if usuario_dueño_evaluacion[0].nivel == 'I' %}
+
+                <!--EVALUACION PAR DE LA TERCERA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative " id="Tercer_par">
+
+                    {%if par_evaluaciones.numero_3 and par_evaluaciones.numero_3  != None%}
+
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if par_evaluaciones.numero_3 == 'UP' %} bg-red-300 
+                            {%elif par_evaluaciones.numero_3 == 'FP-' %} bg-yellow-300 
+                            {%elif par_evaluaciones.numero_3 == 'FP' %} bg-slate-300 
+                            {%elif par_evaluaciones.numero_3 == 'FP+' %} bg-green-300
+                            {%elif par_evaluaciones.numero_3 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_par"> {{par_evaluaciones.numero_3}}</span>
+                            
+                    {%else%}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                    {%endif%}
+                </td> <!--FIN DE LA EVALUACION PAR DE LA TERCERA FILA-->
+
+
+                
+                <!--EVALUACION COLABORADOR DE LA TERCERA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative " id="Tercer_colaborador">
+                    {%if subordinado_eval.numero_3 and subordinado_eval.numero_3  != None and subordinado_eval.numero_3  != "" %}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if subordinado_eval.numero_3 == 'UP' %} bg-red-300 
+                            {%elif subordinado_eval.numero_3 == 'FP-' %} bg-yellow-300 
+                            {%elif subordinado_eval.numero_3 == 'FP' %} bg-slate-300 
+                            {%elif subordinado_eval.numero_3 == 'FP+' %} bg-green-300
+                            {%elif subordinado_eval.numero_3 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_subordinado"> {{subordinado_eval.numero_3}}</span>
+
+                    {%else%}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                    {%endif%}
+                </td> <!--FIN DE LA EVALUACION COLABORADOR DE LA TERCERA FILA-->
+
+                {%endif%}
+                <!--CUMPLIMIENTO DE LA TERCERA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+                {%if cumplimientos.numero_3 and cumplimientos.numero_3  != None and cumplimientos.numero_3  != "" %}   
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                        {%if cumplimientos.numero_3 == 'UP' %} bg-red-300 
+                        {%elif cumplimientos.numero_3 == 'FP-' %} bg-yellow-300 
+                        {%elif cumplimientos.numero_3 == 'FP' %} bg-slate-300 
+                        {%elif cumplimientos.numero_3 == 'FP+' %} bg-green-300
+                        {%elif cumplimientos.numero_3 == 'O' %} bg-blue-300 
+                        {%endif%} resultado_span_cumplimiento"> {{cumplimientos.numero_3}}</span>
+
+                    {%else%}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                    {%endif%}
+                </td> <!--FIN DE CUMPLIMIENTO DE LA TERCERA FILA-->
+
+
+                <!--DESEMPEÑO DE LA TERCERA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if desempeños.numero_3 and desempeños.numero_3  != None%}
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if desempeños.numero_3 == 'UP' %} bg-red-300 
+                            {%elif desempeños.numero_3 == 'FP-' %} bg-yellow-300 
+                            {%elif desempeños.numero_3 == 'FP' %} bg-slate-300 
+                            {%elif desempeños.numero_3 == 'FP+' %} bg-green-300
+                            {%elif desempeños.numero_3 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_desempeño"> {{desempeños.numero_3}}</span>
+
+                    {%else%}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                    {%endif%}
+                </td> <!--FIN DE DESEMPEÑO DE LA TERCERA FILA-->
+            </tr>
+
+            <tr class="!h-[90px]">
+                <td class="border border-solid h-full p-0" id="Liderazgo">
+                    <div class=" p-4 ">
+                        <h4 class=" font-normal text-[#000000] ">Liderazgo <br></h4>
+                    </div>
+                </td>
+                <td class="border border-solid h-full p-0 ">
+                    <input type="text" id="Peso" name="Peso" required class="w-full peso h-full p-2 border-none " placeholder="%" value="4%" readonly>
+                </td>
+
+                <!--AUTOEVALUACIÓN DE CUARTA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative " id="Cuarto_autoeval">
+
+                    {%if autoevaluaciones.numero_4 != None and autoevaluaciones.numero_4 != ""%}
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if autoevaluaciones.numero_4 == 'UP' %} bg-red-300 
+                            {%elif autoevaluaciones.numero_4 == 'FP-' %} bg-yellow-300 
+                            {%elif autoevaluaciones.numero_4 == 'FP' %} bg-slate-300 
+                            {%elif autoevaluaciones.numero_4 == 'FP+' %} bg-green-300
+                            {%elif autoevaluaciones.numero_4 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_autoevaluacion" > {{autoevaluaciones.numero_4}}</span>
+
+                    {%else%}
+                    <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                    {%endif%}
+                </td><!--FIN DE LA AUTOEVALUACION DE LA CUARTA FILA-->
+
+
+
+                <!--EVALUACION SUPERVISOR DE LA CUARTA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative " id="Cuarto_supervi">
+
+                    {%if supervisor_evaluaciones.numero_4 and supervisor_evaluaciones.numero_4  != None%}
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if supervisor_evaluaciones.numero_4 == 'UP' %} bg-red-300 
+                            {%elif supervisor_evaluaciones.numero_4 == 'FP-' %} bg-yellow-300 
+                            {%elif supervisor_evaluaciones.numero_4 == 'FP' %} bg-slate-300 
+                            {%elif supervisor_evaluaciones.numero_4 == 'FP+' %} bg-green-300
+                            {%elif supervisor_evaluaciones.numero_4 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_supervisorEvaluacion"> {{supervisor_evaluaciones.numero_4}}</span>                            
+                    {%else%}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                    {%endif%}
+                </td> <!--FIN DE LA EVALUACION SUPERVISOR DE LA SEGUNDA FILA-->
+
+                {%if usuario_dueño_evaluacion[0].nivel == 'I' %}
+
+
+                    <!--EVALUACION PAR DE LA CUARTA FILA-->
+                    <td class="border border-solid h-full p-0 text-center relative " id="Cuarto_par">
+
+                        {%if par_evaluaciones.numero_4 and par_evaluaciones.numero_4  != None%}
+
+
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                                {%if par_evaluaciones.numero_4 == 'UP' %} bg-red-300 
+                                {%elif par_evaluaciones.numero_4 == 'FP-' %} bg-yellow-300 
+                                {%elif par_evaluaciones.numero_4 == 'FP' %} bg-slate-300 
+                                {%elif par_evaluaciones.numero_4 == 'FP+' %} bg-green-300
+                                {%elif par_evaluaciones.numero_4 == 'O' %} bg-blue-300 
+                                {%endif%} resultado_span_par"> {{par_evaluaciones.numero_4}}</span>
+                                
+                        {%else%}
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                        {%endif%}
+                    </td> <!--FIN DE LA EVALUACION PAR DE LA CUARTA FILA-->
+                
+
+                    <!--EVALUACION COLABORADOR DE LA CUARTA FILA-->
+                    <td class="border border-solid h-full p-0 text-center relative " id="Cuarto_colaborador">
+
+                        {%if subordinado_eval.numero_4 and subordinado_eval.numero_4  != None and subordinado_eval.numero_4  != "" %}
+
+
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                                {%if subordinado_eval.numero_4 == 'UP' %} bg-red-300 
+                                {%elif subordinado_eval.numero_4 == 'FP-' %} bg-yellow-300 
+                                {%elif subordinado_eval.numero_4 == 'FP' %} bg-slate-300 
+                                {%elif subordinado_eval.numero_4 == 'FP+' %} bg-green-300
+                                {%elif subordinado_eval.numero_4 == 'O' %} bg-blue-300 
+                                {%endif%} resultado_span_subordinado"> {{subordinado_eval.numero_4}}</span>                                
+                        {%else%}
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                        {%endif%}
+                    </td> <!--FIN DE LA EVALUACION COLABORADOR DE LA CUARTA FILA-->
+
+                {%endif%}
+                <!--CUMPLIMIENTO DE LA CUARTA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if cumplimientos.numero_4 and cumplimientos.numero_4  != None%}
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if cumplimientos.numero_4 == 'UP' %} bg-red-300 
+                            {%elif cumplimientos.numero_4 == 'FP-' %} bg-yellow-300 
+                            {%elif cumplimientos.numero_4 == 'FP' %} bg-slate-300 
+                            {%elif cumplimientos.numero_4 == 'FP+' %} bg-green-300
+                            {%elif cumplimientos.numero_4 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_cumplimiento"> {{cumplimientos.numero_4}}</span>
+
+                    {%else%}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                    {%endif%}
+                </td> <!--FIN DE CUMPLIMIENTO DE LA CUARTA FILA-->
+
+                <!--DESEMPEÑO DE LA CUARTA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if desempeños.numero_4 and desempeños.numero_4  != None%}
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if desempeños.numero_4 == 'UP' %} bg-red-300 
+                            {%elif desempeños.numero_4 == 'FP-' %} bg-yellow-300 
+                            {%elif desempeños.numero_4 == 'FP' %} bg-slate-300 
+                            {%elif desempeños.numero_4 == 'FP+' %} bg-green-300
+                            {%elif desempeños.numero_4 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_desempeño"> {{desempeños.numero_4}}</span>
+
+                    {%else%}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                    {%endif%}
+                </td> <!--FIN DE DESEMPEÑO DE LA CUARTA FILA-->
+            </tr>
+
+            <tr class="!h-[90px]">
+                <td class="border border-solid h-full p-0" id="Desarrollo">
+                    <div class=" p-4 ">
+                        <h4 class=" font-normal text-[#000000] ">Desarrollo del Equipo de Trabajo</h4>
+                    </div>
+                </td>
+                <td class="border border-solid h-full p-0 ">
+                    <input type="text" id="Peso" name="Peso" required class="w-full peso h-full p-2 border-none " placeholder="%" value="4%">
+                </td>
+                
+                <!--AUTOEVALUACIÓN DE QUINTA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative " id="Quinta_autoeval">
+
+                    {%if autoevaluaciones.numero_5 != None and autoevaluaciones.numero_5 != ""%}
+                    
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if autoevaluaciones.numero_5 == 'UP' %} bg-red-300 
+                            {%elif autoevaluaciones.numero_5 == 'FP-' %} bg-yellow-300 
+                            {%elif autoevaluaciones.numero_5 == 'FP' %} bg-slate-300 
+                            {%elif autoevaluaciones.numero_5 == 'FP+' %} bg-green-300
+                            {%elif autoevaluaciones.numero_5 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_autoevaluacion" > {{autoevaluaciones.numero_5}}</span>
+                        
+                    {%else%}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span> 
+                    {%endif%}
+                </td><!--FIN DE LA AUTOEVALUACION DE LA QUINTA FILA-->
+
+
+
+                <!--EVALUACION SUPERVISOR DE LA QUINTA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative " id="Quinta_supervi">
+
+                    {%if supervisor_evaluaciones.numero_5 and supervisor_evaluaciones.numero_5  != None%}
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if supervisor_evaluaciones.numero_5 == 'UP' %} bg-red-300 
+                            {%elif supervisor_evaluaciones.numero_5 == 'FP-' %} bg-yellow-300 
+                            {%elif supervisor_evaluaciones.numero_5 == 'FP' %} bg-slate-300 
+                            {%elif supervisor_evaluaciones.numero_5 == 'FP+' %} bg-green-300
+                            {%elif supervisor_evaluaciones.numero_5 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_supervisorEvaluacion"> {{supervisor_evaluaciones.numero_5}}</span>
+                            
+                    {%else%}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                    {%endif%}
+                </td> <!--FIN DE LA EVALUACION SUPERVISOR DE LA QUINTA FILA-->
+
+
+                {%if usuario_dueño_evaluacion[0].nivel == 'I' %}
+
+                    <!--EVALUACION PAR DE LA QUINTA FILA-->
+                    <td class="border border-solid h-full p-0 text-center relative " id="Quinta_par">
+
+                        {%if par_evaluaciones.numero_5 and par_evaluaciones.numero_5  != None%}
+
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                                {%if par_evaluaciones.numero_5 == 'UP' %} bg-red-300 
+                                {%elif par_evaluaciones.numero_5 == 'FP-' %} bg-yellow-300 
+                                {%elif par_evaluaciones.numero_5 == 'FP' %} bg-slate-300 
+                                {%elif par_evaluaciones.numero_5 == 'FP+' %} bg-green-300
+                                {%elif par_evaluaciones.numero_5 == 'O' %} bg-blue-300 
+                                {%endif%} resultado_span_par"> {{par_evaluaciones.numero_5}}</span>
+                                
+                        {%else%}
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                        {%endif%}
+                    </td> <!--FIN DE LA EVALUACION PAR DE LA QUINTA FILA-->
+
+
+                    <!--EVALUACION COLABORADOR DE LA CUARTA FILA-->
+                    <td class="border border-solid h-full p-0 text-center relative " id="Quinta_colaborador">
+
+                        {%if subordinado_eval.numero_5 and subordinado_eval.numero_5  != None and subordinado_eval.numero_5  != "" %}
+
+
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                                {%if subordinado_eval.numero_5 == 'UP' %} bg-red-300 
+                                {%elif subordinado_eval.numero_5 == 'FP-' %} bg-yellow-300 
+                                {%elif subordinado_eval.numero_5 == 'FP' %} bg-slate-300 
+                                {%elif subordinado_eval.numero_5 == 'FP+' %} bg-green-300
+                                {%elif subordinado_eval.numero_5 == 'O' %} bg-blue-300 
+                                {%endif%} resultado_span_subordinado"> {{subordinado_eval.numero_5}}</span>
+
+                                
+                        {%else%}
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                        {%endif%}
+                    </td> <!--FIN DE LA EVALUACION COLABORADOR DE LA CUARTA FILA-->
+
+                {%endif%}
+
+
+                <!--CUMPLIMIENTO DE LA QUINTA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if cumplimientos.numero_5 and cumplimientos.numero_5  != None%}
+
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if cumplimientos.numero_5 == 'UP' %} bg-red-300 
+                            {%elif cumplimientos.numero_5 == 'FP-' %} bg-yellow-300 
+                            {%elif cumplimientos.numero_5 == 'FP' %} bg-slate-300 
+                            {%elif cumplimientos.numero_5 == 'FP+' %} bg-green-300
+                            {%elif cumplimientos.numero_5 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_cumplimiento"> {{cumplimientos.numero_5}}</span>
+
+                    {%else%}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                    {%endif%}
+                </td> <!--FIN DE CUMPLIMIENTO DE LA QUINTA FILA-->
+
+                <!--DESEMPEÑO DE LA QUINTA FILA-->
+                <td class="border border-solid h-full p-0 text-center relative ">
+
+                    {%if desempeños.numero_5 and desempeños.numero_5  != None%}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333]
+                            {%if desempeños.numero_5 == 'UP' %} bg-red-300 
+                            {%elif desempeños.numero_5 == 'FP-' %} bg-yellow-300 
+                            {%elif desempeños.numero_5 == 'FP' %} bg-slate-300 
+                            {%elif desempeños.numero_5 == 'FP+' %} bg-green-300
+                            {%elif desempeños.numero_5 == 'O' %} bg-blue-300 
+                            {%endif%} resultado_span_desempeño"> {{desempeños.numero_5}}</span>
+
+                    {%else%}
+                        <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span> 
+                    {%endif%}
+                </td> <!--FIN DE DESEMPEÑO DE LA QUINTA FILA-->
+            </tr>
+
+
+            {%if usuario_dueño_evaluacion[0].nivel != 'I' %}
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="border border-solid h-full p-0 text-center">
+                    {%if total_desempeño or total_desempeño != None %}
+                        <span class="resultado_span_desempeño p-3 rounded-2xl  h-full text-center font-bold text-[#333] ">{{total_desempeño | float}}% </span>
+                        <input type="hidden" id="total" class="w-full h-full p-2 border-none text-center" value={{total_desempeño}}>
+                    {%else%}
+                        <input type="number" id="total" class="w-full h-full p-2 border-none text-center">
+                    {%endif%}
+                </td>
+                <td></td>
+            </tr>
+            {%else%}
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="border border-solid h-full p-0 text-center">
+                    {%if total_desempeño or total_desempeño != None %}
+                        <span class="resultado_span_desempeño p-3 rounded-2xl  h-full text-center font-bold text-[#333]">{{total_desempeño}} % </span>
+                        <input type="hidden" id="total" class="w-full h-full p-2 border-none text-center" value={{total_desempeño}}>
+                    {%else%}
+                        <input type="number" id="total" class="w-full h-full p-2 border-none">
+                    {%endif%}
+                </td>
+                <td></td>
+            </tr>
+            {%endif%}
+
+        </tbody>
+    </table>
+
+</div>
+{%endif%}
+
+
+{%if etapa_general == 2 %}
+{% set safe_desempeño = 0 if (total_desempeño is none or total_desempeño == '---' or total_desempeño == '') else total_desempeño %}
+{% set safe_cumplimiento = 0 if (total_cumplimiento is none or total_cumplimiento == '---' or total_cumplimiento == '') else total_cumplimiento %}
+{% set totalDempeños = (safe_desempeño + safe_cumplimiento) | round(1) %}
+<div class=" w-full   flex items-center justify-end opado mt-5 p-3 gap-4">
+    <div class=" bg-white shadow-custom w-auto flex items-center p-4 rounded-xl gap-3 ">
+        <h3>Resultado Final:</h3>
+        <div class=" text-lg font-semibold {%if totalDempeños < 30%} text-yellow-400 {%elif totalDempeños < 60%} text-green-600 {%else%} text-blue-600 {%endif%}  ">{{totalDempeños}}%</div>   
+    </div>
+
+    <div class=" bg-white shadow-custom w-auto flex items-center p-4 rounded-xl gap-3 ">
+        <h3>Resultado Cualitativo:</h3>
+        <div class=" text-lg font-semibold {%if totalDempeños < 30%} text-yellow-400 {%elif totalDempeños < 60%} text-green-600 {%else%} text-blue-600 {%endif%}  ">
+            {%if totalDempeños <=80 %}
+                <span>UP</span>
+            {%elif totalDempeños >=81 and totalDempeños <=99%}
+                <span>FP-</span>
+            {%elif totalDempeños >=100 and totalDempeños <=109%}
+                <span>FP</span>
+            {%elif totalDempeños >=110  and totalDempeños <=119 %}
+                <span>FP+</span>
+            {%elif totalDempeños >= 200 %}
+                <span>FP+</span>
+            {%endif%}
+        </div>  
+        
+    </div>
+
+</div>
+{%endif%}
+
+
+    {%if etapa_general == 2  and evaluacion_completada%}
+    <div class="tarjeta-base bg-white !shadow-custom mt-5 opado">
+
+        <div class=" p-4">
+            <h3>Retroalimentación</h3>
+
+            <form action="" class=" flex flex-col py-4">
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+                    <div class="form-group-resultados col-span-2  rounded-2xl p-5 flex flex-col blanco" >
+                        <label>¿Recibió usted el feedback correspondiente de su supervisor asociado a su desempeño?</label>
+                        
+                        <div class="flex gap-5 mt-3 w-full  items-center">
+                            <div class="radio-option">
+                                <div class="radio-wrapper">
+                                    <input type="radio" name="respuesta" id="si" value="si" {%if retroalimentacion_resultados.feedback%} disabled {%else%}  required {%endif%} {%if retroalimentacion_resultados.feedback == "Sí"%} checked {%endif%}>
+                                    <svg viewBox="0 0 35.6 35.6">
+                                        <circle class="background" cx="17.8" cy="17.8" r="17.8"></circle>
+                                        <circle class="stroke" cx="17.8" cy="17.8" r="14.37"></circle>
+                                        <polyline class="check" points="11.78 18.12 15.55 22.23 25.17 12.87"></polyline>
+                                    </svg>
+                                </div>
+                                <label for="si">Sí</label>
+                            </div>
+                            
+                            <div class="radio-option">
+                                <div class="radio-wrapper">
+                                    <input type="radio" name="respuesta" id="no" value="no"  {%if retroalimentacion_resultados.feedback%} disabled {%else%}  required {%endif%} {%if retroalimentacion_resultados.feedback == "No"%} checked {%endif%}>
+                                    <svg viewBox="0 0 35.6 35.6">
+                                        <circle class="background" cx="17.8" cy="17.8" r="17.8"></circle>
+                                        <circle class="stroke" cx="17.8" cy="17.8" r="14.37"></circle>
+                                        <polyline class="check" points="11.78 18.12 15.55 22.23 25.17 12.87"></polyline>
+                                    </svg>
+                                </div>
+                                <label for="no">No</label>
+                            </div>
+                        </div>
+                        <span id="error" class="error">Debes seleccionar una opción.</span>
+                    </div>
+
+                    <div class="w-full p-5 bg-blue-100 rounded-xl {%if ficha_get == ficha%} col-span-2 {%endif%}">
+                        <div class="flex items-center mb-2 text-[#333]">
+                            <label class="block text-sm font-bold" for="ComentarioColab">Obeservaciones del colaborador</label>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-pen-icon lucide-user-round-pen"><path d="M2 21a8 8 0 0 1 10.821-7.487"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="8" r="5"/></svg>
+                        </div>
+
+
+
+                        <!-- Oculto, para guardar contenido -->
+                        <textarea 
+                            name="" 
+                            class="bg-white w-full rounded-xl resize-none overflow-hidden" 
+                            id="ComentarioColab"
+                            placeholder="Escribe tu comentario aquí..."
+                            rows="4">{% if retroalimentacion_resultados.comentarios_colaborador %}{{retroalimentacion_resultados.comentarios_colaborador}}{% endif %}</textarea>
+                    </div>
+
+
+
+
+
+                    {%if ficha_get != ficha%}
+
+                        <div class="w-full p-5 bg-blue-100 rounded-xl {%if ficha_get == ficha%} col-span-2 {%endif%}">
+                            <div class="flex items-center mb-2 text-[#333]">
+                            <label class="block  text-sm font-bold " for="ComentarioSuperv">Observaciones del Supervisor</label>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-glasses-icon lucide-glasses"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M14 15a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/><path d="M2.5 13 5 7c.7-1.3 1.4-2 3-2"/><path d="M21.5 13 19 7c-.7-1.3-1.5-2-3-2"/></svg>
+                            </div>
+
+                            <!-- 
+                            <div class="quill-wrapper">
+                                <div id="editorDos" class="editor">
+                                    {%if retroalimentacion_resultados.comentarios_supervisor%}
+
+                                {{retroalimentacion_resultados.comentarios_supervisor}}
+                                {%endif%}
+                                </div>
+                            </div>-->
+
+
+                            <textarea 
+                                name="" 
+                                class="bg-white w-full rounded-xl resize-none overflow-hidden" 
+                                id="ComentarioSuperv"
+                                placeholder="Escribe tu comentario aquí..."
+                                rows="4">{% if retroalimentacion_resultados.comentarios_supervisor %}{{retroalimentacion_resultados.comentarios_supervisor}}{% endif %}</textarea>
+
+
+                        </div>
+
+                    {%endif%}
+
+                </div>
+
+
+
+
+                <div class=" flex justify-end items-center ">
+                    <button type="button" class=" mt-3 cursor-pointer text-zinc-200 flex gap-2 items-center bg-valor-azul px-4 py-2 rounded-lg font-medium text-sm hover:bg-azul-dark transition-all ease-in duration-200" id="enviarRetroalimentacion">
+                        Enviar
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+
+                    </button>
+                </div>
+
+
+
+
+            </form>
+
+        </div>
+
+    </div>
+    {%endif%}
+
+
+
+
+
+
+
+
+<input type="hidden" id="comentario_colaborador_resultado" value="{{retroalimentacion_resultados.comentarios_colaborador}}">
+<input type="hidden" id="comentario_superv_resultado" value="{{retroalimentacion_resultados.comentarios_supervisor}}">
 
 {% endblock %}
 
 {% block js%}
 <script src="{{ url_for('static', filename='js/detalles_gestion_equipo.js') }}"></script>
+<!-- 
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>-->
+
+<script>
+    // Tu código original funciona sin cambios
+/*
+    const current_ficha = document.getElementById('ficha').value;
+    const ficha_getQuill = document.getElementById('ficha_get').value;
+    const comentario_colaborador_resultado = document.getElementById('comentario_colaborador_resultado').value;
+
+    let esSoloLectura = false;
+    if (current_ficha == ficha_getQuill){
+        esSoloLectura = false;
+    }else if (current_ficha !== ficha_getQuill ){
+        esSoloLectura= true;
+        
+
+    }
+
+    if (comentario_colaborador_resultado != ""){
+        esSoloLectura = true
+        console.log('asd')
+    }
+
+    console.log(esSoloLectura)
+    const quill = new Quill('#editor', {
+        theme: 'snow',
+        placeholder: 'Escribe aquí tu comentario...',
+        readOnly: esSoloLectura,
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline', 'strike'],
+                ['blockquote', 'code-block'],
+                [{ 'header': 1 }, { 'header': 2 }],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],
+                [{ 'direction': 'rtl' }],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'font': [] }],
+                [{ 'align': [] }],
+            ]
+        }
+    });
+
+    if (!esSoloLectura) {
+        quill.on('text-change', function () {
+            const content = quill.root.innerHTML; // Cambio aquí
+            
+            const hiddenInput = document.getElementById('ComentarioColab');
+            if (hiddenInput) {
+                hiddenInput.value = content;
+            }
+        });
+    }
+
+    console.log(quill.root.innerHTML)
+if (comentario_colaborador_resultado != "") {
+    quill.root.innerHTML = comentario_colaborador_resultado;
+}*/
+</script>
+
+
+
+<script>
+    /*
+    const comentario_superv_resultado = document.getElementById('comentario_superv_resultado').value;
+    let esSoloLecturaDos = false;
+
+    if (comentario_superv_resultado != ""){
+        esSoloLectura = true
+        console.log('asd')
+    }
+  // Inicializar Quill en el div con id="editor"
+    const quillDos = new Quill('#editorDos', {
+        theme: 'snow',
+        placeholder: 'Escribe aquí tu comentario...',
+        readOnly: esSoloLectura,
+        modules: {
+            toolbar: [
+            ['bold', 'italic', 'underline', 'strike'],
+            ['blockquote', 'code-block'],
+            [{ 'header': 1 }, { 'header': 2 }],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+
+            [{ 'indent': '-1'}, { 'indent': '+1' }],
+            [{ 'direction': 'rtl' }],
+
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'font': [] }],
+            [{ 'align': [] }],
+
+            ]
+        }
+        });
+
+
+    if (!esSoloLectura) {
+    quillDos.on('text-change', function() {
+        const content = quill.root.innerHTML;
+        const hiddenInputSuperv = document.getElementById('ComentarioSuperv');
+            if (hiddenInputSuperv) {
+                hiddenInputSuperv.value = content;
+            }
+        });
+    }
+
+    if (comentario_superv_resultado != "") {
+        quill.root.innerHTML = comentario_superv_resultado;
+    }*/
+</script>
+
+
 {% endblock %}
