@@ -1,4 +1,5 @@
 from flask import Blueprint, current_app
+from flask import send_from_directory
 from flask import render_template, request, flash, redirect, url_for, abort, session, jsonify
 from werkzeug.utils import secure_filename
 from flask_wtf.csrf import CSRFError
@@ -8,7 +9,7 @@ from .forms import GestionUsers
 from .forms import RegistrarUsuarios
 from .forms import formgdi, RegistrarHojaVida
 from .models import User, Indicadores,HojaVida,Cronograma, Cargos, Evaluacion, Configuracion, Retroalimentacion
-from .email import welcome_mail, Prueba_mail, inicio_gdd, cierre_gdd, aprobacion_indicadores, indicadores_cargados, Seleccionado_evaluador, procesar_notificaciones_individuales, seleccionado_par, inicio_periodo_evaluacion
+from .email import welcome_mail, Prueba_mail, inicio_gdd, cierre_gdd, aprobacion_indicadores, indicadores_cargados, Seleccionado_evaluador, procesar_notificaciones_individuales, seleccionado_par, inicio_periodo_evaluacion, inicio_etapa_dos, inicio_avance
 from .servicios import servicio_notificacion
 from . import login_manager
 from .consts import *
@@ -26,6 +27,7 @@ from requests.auth import HTTPBasicAuth
 import json
 import pandas as pd
 import asyncio
+import threading
 from threading import Thread
 
 
@@ -2155,23 +2157,65 @@ def CorreoMasivo():
     datos = request.get_json()
     try:
         texto = datos.get('texto')
+        tipo = datos.get('tipo')
         print(texto)
-        #lista = ['escalona9465@gmail.com', 'eliezer_chirino@corimon.com', 'eliezergach1508@gmail.com', 'alejandro_padra@corimon.com', 'alejandrop912@gmail.com', 'jose_escalona@corimon.com', 'venicia_pena@corimon.com', 'alejandropadra@protonmail.com', 'eliezerincrp@gmail.com','digitalingpadra@gmail.com', 'venicia3006@gmail.com']
-        lista = User.get_by_usuarios()
+        print(tipo)
+        """lista = ['escalona9465@gmail.com', 'eliezer_chirino@corimon.com', 
+                    'eliezergach1508@gmail.com', 'alejandro_padra@corimon.com', 
+                    'alejandrop912@gmail.com', 'jose_escalona@corimon.com', 
+                    'venicia_pena@corimon.com', 'alejandropadra@protonmail.com', 
+                    'eliezerincrp@gmail.com','digitalingpadra@gmail.com', 
+                    'venicia3006@gmail.com', 'dguedez2002@gmail.com',
+                    'guedez20023@gmail.com', 'claudiogptpa@gmail.com', 
+                    'd1l4nj0su3g@gmail.com', '220010862@uam.edu.ve', 
+                    'preparadorrandol@gmail.com', 'randol.jgm@gmail.com', 
+                    'thewathershow@gmail.com', 'escalona_65@hotmail.com', 
+                    'escalona.jose.65.94@gmail.com', 'escalonabusiness15@gmail.com',
+                    'venicia_3006@hotmail.com', 'ssaioros1993@hotmail.com',
+                    'veni_pe@hotmail.com', 'dilanjosueguedez2002@hotmail.com',
+                    'dilanjosueguedez2002@gmail.com', 'graterolalexis59@gmail.com',
+                    'alegraterol123023@gmail.com', 'gojiracomputer@gmail.com',
+                    'ch.vidaunitec@gmail.com', 'genegabych@gmail.com ',
+                    'gloriangellugo2710@gmail.com','alvix.arreaza@gmail.com',
+                    'nacky.aldana@gmail.com', 'aldanaconsultores@gmail.com ',
+                    'jonathan_francisco@gmail.com', 'pao123vere@gmail.com ', 'eliezerchirin0@hotmail.com']
 
-        if len(texto) <=11:
-            asyncio.run(cierre_gdd(lista, texto))
+        class SimpleUser:
+            def __init__(self, email):
+                self.email = email
+        
+        lista_users = [SimpleUser(email) for email in lista]"""
+        lista_users= User.get_by_usuarios()
+        
+        app = current_app._get_current_object()
+        
+        def enviar_en_background():
 
-        else:
-            asyncio.run(inicio_gdd(lista, texto))
+            with app.app_context():
+                try:
+                    if tipo == 'cierre':
+                        asyncio.run(cierre_gdd(lista_users, texto))
+                    elif tipo == "inicio":
+                        asyncio.run(inicio_gdd(lista_users, texto))
+                    elif tipo == 'avance':
+                        asyncio.run(inicio_avance(lista_users, texto))
+
+                except Exception as e:
+                    print(f" Error en envío masivo: {e}")
+                    import traceback
+                    traceback.print_exc()
+        
+        # Iniciar thread en background
+        thread = threading.Thread(target=enviar_en_background)
+        thread.daemon = True
+        thread.start()
         
         return jsonify({
             "success": True,
-            "message": "Correo procesado correctamente"
-        }), 200
+            "message": f"Enviando correos a  destinatarios en segundo plano..."
+        }), 202  
 
     except Exception as e:
-        flash("Ocurrió un error", "error")
         print(f"Error: {str(e)}")
         return jsonify({
             "success": False,
@@ -2189,11 +2233,12 @@ def mover_etapa():
         currentActive = datos.get('currentActive')
         print(currentActive)
         Configuracion.actualizar_solo_etapa(currentActive)
-        
+        """
         if currentActive == 2:
             usuarios = User.get_by_usuarios()
             usuarios_notificar = []
-            """asyncio.run(inicio_periodo_evaluacion(usuarios))
+            #asyncio.run(inicio_etapa_dos(usuarios))
+            #asyncio.run(inicio_periodo_evaluacion(usuarios))
             
             for usuario in usuarios:
                 usuario_from_sap = consultar_sap(usuario.ficha)
@@ -2221,11 +2266,10 @@ def mover_etapa():
                 mensaje = f"Proceso iniciado. Se enviarán {len(usuarios_notificar)} notificaciones."
             else:
                 mensaje = "No se encontraron usuarios nivel I para notificar."
-        else:"""
-        mensaje = "Proceso realizado correctamente"
-        if currentActive == 3:
-            Configuracion.actualizar_solo_etapa(1)
         
+        if currentActive == 3:
+            Configuracion.actualizar_solo_etapa(1)"""
+        mensaje = "No se encontraron usuarios nivel I para notificar."
         return jsonify({
             "success": True,
             "message": mensaje
@@ -2313,3 +2357,49 @@ def Retroalimentacion_ruta():
             "success": False,
             "message": f"Error inesperado: {str(e)}"
         }), 500
+        
+
+
+@page.route('/app_crm/gdd/documentacion', methods=['GET'])
+def Documentacion():
+    variables_configuracion_global = Configuracion.get_data()
+    etapa_general = variables_configuracion_global.etapa_actual
+    etapa_general = int(etapa_general)
+    usuario = current_user
+    ficha = current_user.ficha
+    rest = consultar_sap(ficha)
+
+
+    
+    return render_template('/gdd/documentacion.html', 
+                            titulo= "Documentacion",
+                            usuario=usuario,
+                            etapa_general=etapa_general,
+                            rest=rest,
+                            ruta_foto_personal = ruta_foto_personal,
+                            consultar_cargo = consultar_cargo,
+                            ficha=ficha)
+
+
+
+@page.route('/app_crm/archivo/<nombre_archivo>', methods=['GET'])
+def archivo(nombre_archivo):
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    adj_documents = os.path.join(base_dir, 'static', 'adj')
+    archivo_completo = os.path.join(adj_documents, nombre_archivo)
+
+
+    if not os.path.exists(archivo_completo):
+        return f"Archivo no encontrado: {nombre_archivo}", 404
+    
+    descargar = request.args.get('download')
+    try:
+        return send_from_directory(
+            directory=adj_documents,
+            path=nombre_archivo,
+            as_attachment=bool(descargar)
+        )
+    except FileNotFoundError:
+        return "Archivo no encontrado en el servidor.", 404
+    except Exception as e:
+        return f"Error al servir el archivo: {str(e)}", 500

@@ -85,8 +85,8 @@
 
             
             <div id="select-evaluacion" class="flex flex-col gap-2 p-3" >
-                <a  href="{{ url_for('.evaluacion_competencias', ficha_get=current_user.ficha) }}" class="p-2 rounded-[30px]   font-semibold cursor-pointer text-white hover:bg-neutral-700" id="auto_evaluacion">Auto Evaluación</a>
-                <a href="{{ url_for('.Seleccionar_evaluar')}}" class="p-2  font-semibold cursor-pointer text-white hover:bg-neutral-700 rounded-[30px]" id="evualuacion_terceros">Evaluación a Terceros</a>
+                <a {%if etapa_general <2 %} onclick="showAlertGrandes('Esta sección no está disponible', 'atencion')" {%else%} href="{{ url_for('.evaluacion_competencias', ficha_get=current_user.ficha) }}" {%endif%} class="p-2 rounded-[30px]   font-semibold cursor-pointer text-white hover:bg-neutral-700" id="auto_evaluacion">Auto Evaluación</a>
+                <a {%if etapa_general <2 %} onclick="showAlertGrandes('Esta sección no está disponible', 'atencion')" {%else%} href="{{ url_for('.Seleccionar_evaluar')}}" {%endif%} class="p-2  font-semibold cursor-pointer text-white hover:bg-neutral-700 rounded-[30px]" id="evualuacion_terceros">Evaluación a Terceros</a>
             </div>
         </div>
 

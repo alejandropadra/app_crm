@@ -251,7 +251,10 @@ document.addEventListener("DOMContentLoaded", async function () {
                     "Content-Type": "application/json",
                     "X-CSRFToken": csrfToken
                 },
-                body: JSON.stringify({texto})
+                body: JSON.stringify({
+                    texto: texto,
+                    tipo: 'inicio'
+                })
             });
 
             if (!response.ok) throw new Error('Error en la solicitud');
@@ -355,7 +358,113 @@ document.addEventListener("DOMContentLoaded", async function () {
                     "Content-Type": "application/json",
                     "X-CSRFToken": csrfToken
                 },
-                body: JSON.stringify({texto})
+                body: JSON.stringify({
+                    texto: texto,
+                    tipo: 'cierre'
+                })
+            });
+
+            if (!response.ok) throw new Error('Error en la solicitud');
+
+            const result = await response.json();
+            console.log('Respuesta del servidor:', result);
+            showAlert("Notificación Masiva Realizada", "Success")
+        } catch (error) {
+            console.error('Error al enviar nuevo estado:', error);
+            alert('Ocurrió un error al actualizar el estado.');
+        } finally {
+            modalInstanceLoading.hide();
+            const backdrop = document.querySelector('[modal-backdrop]');
+            if (backdrop) backdrop.remove();
+
+        }
+    });
+
+    cancelButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            btn.blur();
+            document.activeElement.blur();
+            modal.setAttribute("aria-hidden", "true");
+            modal.setAttribute("inert", "");
+            modalInstance.hide();
+            const backdrop = document.querySelector('[modal-backdrop]');
+            if (backdrop) backdrop.remove();
+        });
+    });
+    
+    
+
+
+});
+
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", async function () {
+    const enviarStartCuatro = document.getElementById('enviarStartCuatro');
+
+    const modal = document.getElementById("popup-modalTres");
+    const modalLoading = document.getElementById("popup-cargando");
+    const modalInstanceLoading = new Modal(modalLoading, {
+        backdrop: 'static',  
+        closable: false     
+    });
+    const cancelButtons = document.querySelectorAll('#cancelButtons, .cancelButtons');
+    const modalInstance = new Modal(modal);
+    const segurocuatro = document.getElementById('seguroCuatro');
+    const rutaDestinoCorreo = "/app_crm/configuracionGDD/CorreoMasivo";
+    const textoPrincipalModalDos = document.getElementById('textoPrincipalModalTres');
+    const textoSmallDos  = document.getElementById('textoSmallTres');
+    let texto =''
+    enviarStartCuatro.addEventListener("click",  () => {
+
+        
+            const finDate = document.getElementById('avanceDate').value;
+            console.log(finDate)
+
+            
+            if(!finDate){
+                showAlert('Seleccione un rango de fecha', "error")
+                return;
+            }
+
+            const fechas = finDate.split(' - ');
+
+            if (fechas.length === 2) {
+                texto = `${fechas[0]} hasta ${fechas[1]}`;
+                console.log(texto);
+            } else {
+                console.log("Formato inválido:", startdate);
+            }
+
+            textoPrincipalModalDos.textContent = '¿Estas seguro de enviar la notificacion de inicio?';
+            textoSmallDos.textContent = `Se enviará que el periodo para la carga de la información será desde ${texto}. `;
+                
+        
+                modal.removeAttribute("aria-hidden");
+                modal.removeAttribute("inert");
+                modalInstance.show();
+    });
+
+
+    segurocuatro.addEventListener("click", async function () {
+        modalLoading.removeAttribute("aria-hidden");
+        modalLoading.removeAttribute("inert");
+        modalInstanceLoading.show();
+        try {
+            const response = await fetch(rutaDestinoCorreo, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken
+                },
+                body: JSON.stringify({
+                    texto: texto,
+                    tipo: 'avance'
+                })
             });
 
             if (!response.ok) throw new Error('Error en la solicitud');
@@ -398,9 +507,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
 
-
-
-
 document.addEventListener("DOMContentLoaded", async function () {
     // Variables globales dentro del scope del DOMContentLoaded
     const etapa_general = parseInt(document.getElementById('etapa_general').value.trim());
@@ -419,7 +525,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     const seguroStep = document.getElementById('seguroStep');
     const seguroFinTodo = document.getElementById('SeguroFinTodo');
 
-
     const modalLoading = document.getElementById("popup-cargando");
     const modalInstanceLoading = new Modal(modalLoading, {
         backdrop: 'static',  
@@ -427,8 +532,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     let currentActive = etapa_general;
-
-    
 
     // Inicialización del estado visual
     steps.forEach((paso, indice) => {
@@ -475,106 +578,108 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     });
 
-
     // Event listener para el botón "next"
     next.addEventListener('click', () => {
-        currentActive++;
-        if (currentActive > circles.length) {
-            currentActive = circles.length;
+        let tempActive = currentActive + 1;
+        if (tempActive > circles.length) {
+            tempActive = circles.length;
         }
-        if (currentActive <3){
-            CambioModal(currentActive)
+        
+        if (tempActive < 3){
+            CambioModal(tempActive);
             modalStep.removeAttribute("aria-hidden");
             modalStep.removeAttribute("inert");
             modalInstance.show();
-        }else{
+        } else {
             modalStepFinTodo.removeAttribute("aria-hidden");
             modalStepFinTodo.removeAttribute("inert");
             modalInstanceFintodo.show();
-
         }
-
     });
 
-    
     // Event listener para el botón "prev"
     prev.addEventListener("click", async function () {
-        currentActive--;
-        if (currentActive < 1) {
-            currentActive = 1;
+        let tempActive = currentActive - 1;
+        if (tempActive < 1) {
+            tempActive = 1;
         }
 
-        CambioModal(currentActive)
+        CambioModal(tempActive);
         modalStep.removeAttribute("aria-hidden");
         modalStep.removeAttribute("inert");
         modalInstance.show();
-        
-
     });
 
     seguroStep.addEventListener("click", async function () {
+        // Obtener el valor de la etapa del modal
+        const etapaActualElement = document.getElementById('etapaActual');
+        const nuevaEtapa = parseInt(etapaActualElement.textContent);
+        
         modalInstance.hide();
         const backdrop = document.querySelector('[modal-backdrop]');
         if (backdrop) backdrop.remove();
-        const textoLoading= document.getElementById('textoLoading');
+        
+        const textoLoading = document.getElementById('textoLoading');
         textoLoading.textContent = "Realizando el Proceso...";
         modalLoading.removeAttribute("aria-hidden");
         modalLoading.removeAttribute("inert");
         modalInstanceLoading.show();
+        
         try {
-            enviarAlBackendEtapaAño('MoverEtapa', currentActive);
+            await enviarAlBackendEtapaAño('MoverEtapa', nuevaEtapa);
+            // Solo actualizar currentActive si el backend responde exitosamente
+            currentActive = nuevaEtapa;
+            update();
         } catch (error) {
             console.error('Error al enviar nuevo estado:', error);
             alert('Ocurrió un error al actualizar el estado.');
         } finally {
             setTimeout(() => {
-            
                 modalInstanceLoading.hide();
                 const backdrop = document.querySelector('[modal-backdrop]');
                 if (backdrop) backdrop.remove();
             }, 1500); 
-
-            update();
-            
         }
-
-    })
+    });
 
     seguroFinTodo.addEventListener("click", async function() {
         const Afconfig = document.getElementById('Afconfig').value.trim();
-        if( !Afconfig || Afconfig == ""){
+        if (!Afconfig || Afconfig == "") {
             showAlert("Ingrese el valor del proximo Año Fiscal", 'error');
             return;
         }
-        const textoLoading= document.getElementById('textoLoading');
+        
+        const textoLoading = document.getElementById('textoLoading');
         textoLoading.textContent = "Realizando el Proceso...";
+        
         try {
             modalInstanceFintodo.hide();
-            enviarAlBackendEtapaAño('actualizarAF', Afconfig)
-            enviarAlBackendEtapaAño('MoverEtapa', currentActive);
+            
+            // La etapa final es 3 (circles.length)
+            const nuevaEtapa = circles.length;
+            
+            await enviarAlBackendEtapaAño('actualizarAF', Afconfig);
+            await enviarAlBackendEtapaAño('MoverEtapa', nuevaEtapa);
+            
             modalLoading.removeAttribute("aria-hidden");
             modalLoading.removeAttribute("inert");
             modalInstanceLoading.show();
-
+            
+            currentActive = nuevaEtapa;
         } catch (error) {
             console.error('Error al enviar nuevo estado:', error);
             alert('Ocurrió un error al actualizar el estado.');
         } finally {
             setTimeout(() => {
-                
                 modalInstanceLoading.hide();
                 const backdrop = document.querySelector('[modal-backdrop]');
                 if (backdrop) backdrop.remove();
                 update();
-                window.location.reload()
+                window.location.reload();
             }, 1500); 
-
         }
+    });
 
-
-    })
-
-    
     function update() {
         circles.forEach((circle, idx) => {
             if (idx < currentActive) {
@@ -587,21 +692,20 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
 
         const activeCircles = document.querySelectorAll('.circle.active');
-        progress.style.width = (activeCircles.length - 1) / (circles.length - 1) * 100 + '%';
+        if (circles.length > 1) {
+            progress.style.width = (activeCircles.length - 1) / (circles.length - 1) * 100 + '%';
+        }
 
         updateButtons();
-
     }
 
     function updateButtons() {
-        console.log(currentActive);
-
+        console.log('currentActive:', currentActive);
         prev.disabled = currentActive === 1;
         next.disabled = currentActive === circles.length;
     }
 
-    async function enviarAlBackendEtapaAño(sufijo_ruta, currentActive){
-
+    async function enviarAlBackendEtapaAño(sufijo_ruta, currentActive) {
         try {
             const response = await fetch(`/app_crm/configuracionGDD/${sufijo_ruta}`, {
                 method: "POST",
@@ -616,27 +720,26 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             const result = await response.json();
             console.log('Respuesta del servidor:', result);
-            showAlert("Etapa Modificada Exitosamente", "Success")
-            } catch (error) {
-                console.error('Error al enviar nuevo estado:', error);
-                alert('Ocurrió un error al actualizar el estado.');
-            } 
+            showAlert("Etapa Modificada Exitosamente", "Success");
+        } catch (error) {
+            console.error('Error al enviar nuevo estado:', error);
+            throw error; // Re-lanzar para que el catch externo lo maneje
+        } 
     }
 
-    function CambioModal(currentActive){
+    function CambioModal(activeValue) {
         const etapaActual = document.getElementById('etapaActual');
-        console.log(typeof(currentActive))
         const modalStepTextoSmall = document.getElementById('modalStepTextoSmall');
-        etapaActual.textContent= currentActive
+        etapaActual.textContent = activeValue;
 
-        if (currentActive== 2){
-            texto= 'En estado 2, se le habilitará el proceso de Evalución de Competencias a los usuarios'
-        }else if (currentActive == 1){
-            texto= 'En Estado 1, los usuarios solo podrán realizar su proceso de Gestion de Indicadores, por lo tanto el modulo de evaluaciones no estará disponible'
+        let texto;
+        if (activeValue == 2) {
+            texto = 'En estado 2, se le habilitará el proceso de Evalución de Competencias a los usuarios';
+        } else if (activeValue == 1) {
+            texto = 'En Estado 1, los usuarios solo podrán realizar su proceso de Gestion de Indicadores, por lo tanto el modulo de evaluaciones no estará disponible';
         }
 
-        modalStepTextoSmall.textContent = texto
-
+        modalStepTextoSmall.textContent = texto;
     }
 });
 

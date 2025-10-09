@@ -1,4 +1,4 @@
-
+server = 'mysql://Di:DiIoT4.0@localhost/app_crm'
 
 class Config:
     SECRET_KEY = 'codigo_secreto'
@@ -12,7 +12,8 @@ class DevelopmentConfig(Config):
     MAIL_SERVER = 'smtp.office365.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
-
+    MAIL_USERNAME = 'app_rrhh@corimon.com'
+    MAIL_PASSWORD =  'gwmjlbfpsbwzjvfc'
     MAIL_TEST = ''
 
 class ProductionConfig(DevelopmentConfig):

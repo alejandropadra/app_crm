@@ -292,16 +292,6 @@
 
         </div>
 
-
-
-
-
-    
-    
-
-
-
-
 </div>
 
 
@@ -334,6 +324,26 @@
                     <button class="btn" id="next">Avanzar</button>
                 </div>
             </div>
+        </div>
+
+        <div class=" bg-white rounded-2xl shadow-custom p-5 flex flex-col gap-4 relative max-w-[360px] min-h-[250px]">
+            
+            <h3> Correo de Avences de Primer Semestre
+            </h3>
+            <form action="">
+                <div class=" relative  ">
+                    <div class="absolute top-3 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                        </svg>
+                    </div>
+                        <input id="avanceDate" class=" w-full blanco border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5" placeholder="El formato es DD-MM-YYY" />
+                    
+                </div>
+                <button id="enviarStartCuatro" type="button" class=" absolute bottom-8 right-5 cursor-pointer text-zinc-200 flex gap-2 items-center bg-valor-azul px-4 py-2 rounded-lg font-medium text-sm hover:bg-azul-dark transition-all ease-in duration-200 !z-0">
+                    Enviar
+                </button>
+            </form>
         </div>
 
 
@@ -419,7 +429,7 @@
                     <p class=" small" id="textoSmallTres">Recuerda, se le bloqueará a todos el proceso de GDD</p>
                 </div>
 
-                <button  type="button" id="seguroTres" class=" cancelButtons text-white bg-valor-azul hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                <button  type="button" id="seguroCuatro" class=" cancelButtons text-white bg-valor-azul hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
                     Si, estoy seguro
                 </button>
                 <button  type="button" class=" cancelButtons py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">No, cancelar</button>
@@ -549,6 +559,19 @@
         lang: 'es-ES',
     });
 
+    const picker3 = new easepick.create({
+        element: document.getElementById('avanceDate'),
+        css: [
+        'https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css',
+        ],
+        plugins: ['RangePlugin'],
+        RangePlugin: {
+        elementEnd: document.getElementById('end-date'),
+        },
+        format: 'DD-MM-YYYY',
+        lang: 'es-ES',
+    });
+
 
     function forceZIndex(pickerInstance, z = 9999) {
 
@@ -565,6 +588,7 @@
 
     forceZIndex(picker);
     forceZIndex(picker2);
+    forceZIndex(picker3);
 
 
 

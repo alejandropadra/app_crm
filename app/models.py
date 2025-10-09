@@ -1096,6 +1096,168 @@ class Retroalimentacion(db.Model):
 
 
 
+class GestionCorreos(db.Model):
+    __tablename__ = 'gestion_correos'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.String(255), nullable=False)
+    tipo_correo = db.Column(db.String(100), nullable=False)
+    asunto = db.Column(db.String(255), nullable=False)
+    estado = db.Column(db.String(50), nullable=False)
+    intentos = db.Column(db.Integer, default=0)
+    mensaje_error = db.Column(db.Text, nullable=True)
+    fecha_envio = db.Column(db.Date, default=datetime.date.today)  
+    fecha_ultimo_intento = db.Column(db.Date, nullable=True)
+    enviado_por = db.Column(db.String(100), nullable=True)
+    
+    @classmethod
+    def ya_enviado_hoy(cls, email, tipo_correo):
+        """Verifica si ya se envió este correo hoy"""
+        hoy = datetime.date.today()
+        registro = cls.query.filter_by(
+            email=email,
+            tipo_correo=tipo_correo,
+            fecha_envio=hoy
+        ).first()
+        return registro is not None
+    
+
+    @classmethod
+    def registrar_envio(cls, email, tipo_correo, asunto, estado='pendiente', enviado_por=None):
+        """Registra un nuevo intento de envío de correo"""
+        try:
+
+            if cls.ya_enviado_hoy(email, tipo_correo):
+                print(f"Email {email} ya fue enviado hoy para {tipo_correo}")
+                return None
+            
+            nuevo_registro = cls(
+                email=email,
+                tipo_correo=tipo_correo,
+                asunto=asunto,
+                estado=estado,
+                intentos=1,
+                enviado_por=enviado_por,
+                fecha_ultimo_intento=datetime.date.today()
+            )
+            db.session.add(nuevo_registro)
+            db.session.commit()
+            return nuevo_registro
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al registrar envío: {e}")
+            return None
+    
+    @classmethod
+    def registrar_envios_bulk(cls, envios):
+        """Registra múltiples envíos en una sola transacción"""
+        try:
+            hoy = datetime.date.today()
+            registros = []
+            emails_omitidos = []
+            
+            for envio in envios:
+                email = envio['email']
+                tipo_correo = envio['tipo_correo']
+                
+
+                if cls.ya_enviado_hoy(email, tipo_correo):
+                    emails_omitidos.append(email)
+                    continue
+                
+                nuevo_registro = cls(
+                    email=email,
+                    tipo_correo=tipo_correo,
+                    asunto=envio['asunto'],
+                    estado=envio.get('estado', 'pendiente'),
+                    intentos=1,
+                    enviado_por=envio.get('enviado_por', 'sistema'),
+                    fecha_ultimo_intento=hoy
+                )
+                registros.append(nuevo_registro)
+            
+            if registros:
+                db.session.bulk_save_objects(registros)
+                db.session.commit()
+            
+            if emails_omitidos:
+                print(f" {len(emails_omitidos)} emails ya fueron enviados hoy y se omitieron")
+            
+            return len(registros)
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al registrar envíos en bulk: {e}")
+            return 0
+        
+    @classmethod
+    def actualizar_estado(cls, registro_id, estado, mensaje_error=None):
+        """Actualiza el estado de un registro de correo"""
+        try:
+            registro = cls.query.get(registro_id)
+            if registro:
+                registro.estado = estado
+                registro.fecha_ultimo_intento = datetime.date.today()
+                if mensaje_error:
+                    registro.mensaje_error = mensaje_error
+                if estado == 'enviado':
+                    registro.intentos += 1
+                db.session.commit()
+                return True
+            return False
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al actualizar estado: {e}")
+            return False
+
+    @classmethod
+    def marcar_como_enviado(cls, email, tipo_correo):
+        """Marca un correo como enviado exitosamente"""
+        try:
+            hoy = datetime.date.today()
+            registro = cls.query.filter_by(
+                email=email, 
+                tipo_correo=tipo_correo,
+                fecha_envio=hoy  
+            ).order_by(cls.fecha_envio.desc()).first()
+            
+            if registro:
+                registro.estado = 'enviado'
+                registro.intentos += 1
+                registro.fecha_ultimo_intento = hoy
+                db.session.commit()
+                return True
+            return False
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al marcar como enviado: {e}")
+            return False
+
+    @classmethod
+    def marcar_como_fallido(cls, email, tipo_correo, mensaje_error):
+        """Marca un correo como fallido y registra el error"""
+        try:
+            hoy = datetime.date.today()
+            registro = cls.query.filter_by(
+                email=email, 
+                tipo_correo=tipo_correo,
+                fecha_envio=hoy  
+            ).order_by(cls.fecha_envio.desc()).first()
+            
+            if registro:
+                registro.estado = 'fallido'
+                registro.intentos += 1
+                registro.mensaje_error = mensaje_error
+                registro.fecha_ultimo_intento = hoy
+                db.session.commit()
+                return True
+            return False
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al marcar como fallido: {e}")
+            return False
+
+
+
 
 
 

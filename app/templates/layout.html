@@ -138,14 +138,27 @@
                                         <span class="descipcionesSubmenu">Gestión de Indicadores</span>
                                     </a>
                                 </li>
-                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white  ">
-                                    <a href="{{ url_for('.evaluacion_competencias', ficha_get=current_user.ficha) }}" class=" flex items-center gap-2  ">
-                                        <span class="">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-handshake-icon lucide-handshake"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/></svg>
-                                        </span>
-                                        <span class="descipcionesSubmenu">Competencias</span>
-                                    </a>
-                                </li>
+                                    <li class=" ml-5 mb-3 pl-1  bg-transparent rounded-md relative after:absolute after:top-0 after:left-5 after:h-full after:w-[2px] after:bg-red-600">
+                                        <a 
+                                            class="relative text-white gap-1  hover:text-rojo-crm pl-6 my-2 flex items-center">
+                                        
+                                            <span>
+                                                <svg svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-candlestick-icon lucide-chart-candlestick"><path d="M9 5v4"/><rect width="4" height="6" x="7" y="9" rx="1"/><path d="M9 15v2"/><path d="M17 3v2"/><rect width="4" height="8" x="15" y="5" rx="1"/><path d="M17 13v3"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/></svg>
+                                            </span>
+                                            
+                                            Autoevaluacion
+                                        </a>
+
+                                        <a 
+                                            class="relative text-white gap-1  hover:text-rojo-crm pl-6 my-2 flex items-center">
+                                            <span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-notebook-pen-icon lucide-notebook-pen"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/></svg>
+                                            </span>
+                                        Evaluacion a Terceros
+                                        </a>
+
+
+                                    </li>
                                 <li class=" pl-8 py-2 hover:text-rojo-crm text-white  ">
                                     <a href="" class=" flex items-center gap-2  ">
                                         <span class="">
@@ -233,12 +246,34 @@
                                     </a>
                                 </li>
                                 <li class=" pl-8 py-2 hover:text-rojo-crm text-white ">
-                                    <a href="{{ url_for('.evaluacion_competencias', ficha_get=current_user.ficha) }}" class=" flex items-center gap-2  ">
+                                    <a  class=" flex items-center gap-2  ">
                                         <span class="">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-handshake-icon lucide-handshake"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/></svg>
                                         </span>
                                         <span class="descipcionesSubmenu">Competencias</span>
                                     </a>
+
+                                    <li class=" ml-5 mb-3 pl-1  bg-transparent rounded-md relative after:absolute after:top-0 after:left-5 after:h-full after:w-[2px] after:bg-red-600">
+                                        <a  href="{{ url_for('.evaluacion_competencias', ficha_get=current_user.ficha) }}"
+                                            class="relative text-white gap-1  hover:text-rojo-crm pl-6 my-2 flex items-center">
+                                        
+                                            <span>
+                                                <svg svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-candlestick-icon lucide-chart-candlestick"><path d="M9 5v4"/><rect width="4" height="6" x="7" y="9" rx="1"/><path d="M9 15v2"/><path d="M17 3v2"/><rect width="4" height="8" x="15" y="5" rx="1"/><path d="M17 13v3"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/></svg>
+                                            </span>
+                                            
+                                            Autoevaluacion
+                                        </a>
+
+                                        <a  href="{{ url_for('.Seleccionar_evaluar')}}"
+                                            class="relative text-white gap-1  hover:text-rojo-crm pl-6 my-2 flex items-center">
+                                            <span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-notebook-pen-icon lucide-notebook-pen"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/></svg>
+                                            </span>
+                                        Evaluacion a Terceros
+                                        </a>
+
+
+                                    </li>
                                 </li>
                                 <li class=" pl-8 py-2 hover:text-rojo-crm text-white ">
                                     <a href="" class=" flex items-center gap-2  ">
@@ -262,6 +297,13 @@
                                         <span class="descipcionesSubmenu">Resultados</span>
                                     </a>
                                 </li>
+                                <!-- 
+                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white">
+                                    <a  href="{{ url_for('.Documentacion')}}" class=" flex items-center gap-2  ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-marked-icon lucide-book-marked"><path d="M10 2v8l3-3 3 3V2"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>
+                                        <span class="descipcionesSubmenu">Documentación</span>
+                                    </a>
+                                </li>-->
                             </ul>
                         </div>
                     </li>

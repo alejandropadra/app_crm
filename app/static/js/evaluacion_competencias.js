@@ -1,3 +1,13 @@
+document.addEventListener('DOMContentLoaded', function() {
+    const etapa_general = document.getElementById('etapa').value;
+    if(parseInt(etapa_general)<2){
+        showAlertGrandes('Actualmente solo puede visualizar pero no enviar datos', 'atencion');
+        const boton_enviar_bloquear = document.getElementById('enviar');
+        boton_enviar_bloquear.classList.add('hidden');
+    }
+
+});
+
 
 const ficha_del_dueño_del_indicador= document.getElementById('ficha_del_dueño_del_indicador').value;
 const ficha_usuario_actual= document.getElementById('ficha_usuario_actual').value;

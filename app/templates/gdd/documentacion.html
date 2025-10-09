@@ -1,0 +1,219 @@
+{% extends 'layout.html' %}
+{% from 'helpers/_forms.html' import render_field %}
+
+
+{% block body%}
+<style>
+/* Variables de Color (sin cambios) */
+.card-animated-azul {
+    --bg-color-main: #496fb6; 
+    --bg-color-light: #91bfff; 
+    --text-color-hover: #FFFFFF;
+}
+
+/* Estilos de la tarjeta (ajustado el height para que fluya mejor) */
+.card-animated-azul {
+    width: 100%; 
+    height: 100%; /* Se ajusta a su contenido */
+    min-height: 250px; /* Mantiene una altura mínima para la animación */
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease-out;
+}
+
+.card-animated-azul:hover {
+    transform: translateY(-5px) scale(1.005);
+    box-shadow: 0 24px 36px rgba(0, 0, 0, 0.11),
+                0 24px 46px rgba(73, 111, 182, 0.538); 
+}
+
+
+/* Overlay (sin cambios) */
+.card-animated-azul .overlay {
+    width: 118px; 
+    height: 118px;
+    border-radius: 50%;
+    background: var(--bg-color-main); 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0); 
+    z-index: 0;
+    transition: transform 0.4s ease-out;
+}
+
+.card-animated-azul:hover .overlay {
+    transform: translate(-50%, -50%) scale(12); 
+}
+
+
+/* Círculo que contiene el icono (ajustado para que el fondo sea el color principal por defecto) */
+.card-animated-azul .circle {
+    width: 110px;
+    height: 110px;
+    z-index: 10;
+    background: var(--bg-color-main); /* Cambiado a color principal por defecto */
+    border: 2px solid var(--bg-color-main);
+    transition: all 0.3s ease-out;
+}
+
+.card-animated-azul:hover .circle {
+    background: var(--bg-color-light) !important; 
+    border-color: var(--bg-color-light) !important; 
+}
+
+
+/* El icono (se asegura que sea blanco por defecto) */
+.card-animated-azul .circle svg {
+    stroke: #FFFFFF; /* Icono blanco por defecto */
+}
+
+/* Texto y otros elementos al hacer hover (sin cambios) */
+.card-animated-azul:hover .flex-col * {
+    color: var(--text-color-hover) !important;
+    stroke: var(--text-color-hover) !important;
+}
+
+</style>
+
+<h2 class="text-2xl font-bold mb-2 px-5">Tutorial Completo: Plataforma de Gestión de Desempeño - Paso a Paso</h2>
+
+<div class="container mx-auto p-4">
+    <div class="flex justify-center">
+        <video controls class="rounded-lg shadow-lg w-full h-full **max-w-5xl lg:max-w-6xl**">
+            <source src="{{ url_for('static', filename='adj/Video/Video de GDD.mp4') }}" type="video/mp4">
+            Tu navegador no soporta la reproducción de videos.
+        </video>
+    </div>
+</div>
+
+<div class="w-[90%] max-w-3xl lg:max-w-4xl px-4 mt-6 mb-6"> 
+    
+    <h2 class="text-2xl font-bold mb-4 mt-4">Manuales de Ayuda y Referencia</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5"> 
+        
+        <div class="card-animated-azul shadow-xl p-4 flex items-center justify-center bg-white rounded-xl border border-gray-200">
+            
+            <div class="overlay"></div> 
+            
+            <div class="flex flex-col items-center relative z-10 p-2"> 
+                
+                <div class="circle mb-3 rounded-full flex items-center justify-center">
+                    
+                    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" 
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+                        class="lucide lucide-file-text-icon lucide-file-text"> 
+                        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                        <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                        <path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
+                    </svg>
+                    
+                </div>
+                
+                <p class="font-bold text-center mb-2 transition-colors duration-300 text-xl text-gray-800">Manual Administrador GDD</p>
+                
+                <div class="grid grid-cols-2 gap-3 mt-2"> 
+                    
+                    <a href="{{ url_for('page.archivo', nombre_archivo='ManualAdministradorGDD.pdf') }}" target="_blank" class="text-sm hover:underline flex items-center justify-center transition-colors gap-1 duration-300 text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye">
+                            <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <span class="text-base">Ver archivo</span>
+                    </a>
+
+                    <a href="{{ url_for('page.archivo', nombre_archivo='ManualAdministradorGDD.pdf',download=True) }}" class="text-sm hover:underline flex items-center justify-center transition-colors gap-1 duration-300 text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download-icon lucide-download"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
+                        <span class="text-base">Descargar</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+
+        <div class="card-animated-azul shadow-xl p-4 flex items-center justify-center bg-white rounded-xl border border-gray-200">
+            
+            <div class="overlay"></div> 
+            
+            <div class="flex flex-col items-center relative z-10 p-2"> 
+                
+                <div class="circle mb-3 rounded-full flex items-center justify-center">
+                    
+                    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" 
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+                        class="lucide lucide-file-text-icon lucide-file-text"> 
+                        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                        <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                        <path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
+                    </svg>
+                    
+                </div>
+                
+                <p class="font-bold text-center mb-2 transition-colors duration-300 text-xl text-gray-800">Manual de Usuario GDD</p>
+                
+                <div class="grid grid-cols-2 gap-3 mt-2"> 
+                    
+                    <a href="{{ url_for('page.archivo', nombre_archivo='ManualUsuarioGDD.pdf') }}" target="_blank" class="text-sm hover:underline flex items-center justify-center transition-colors gap-1 duration-300 text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye">
+                            <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <span class="text-base">Ver archivo</span>
+                    </a>
+
+                    <a href="{{ url_for('page.archivo', nombre_archivo='ManualUsuarioGDD.pdf',download=True) }}" class="text-sm hover:underline flex items-center justify-center transition-colors gap-1 duration-300 text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download-icon lucide-download"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
+                        <span class="text-base">Descargar</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+        
+   <!--- <div class="card-animated-azul shadow-xl p-4 flex items-center justify-center bg-white rounded-xl border border-gray-200">
+    
+    <div class="overlay"></div> 
+    
+    <div class="flex flex-col items-center relative z-10 p-2"> 
+        
+        <div class="circle mb-3 bg-white border-2 border-white rounded-full flex items-center justify-center">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" 
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+                class="lucide lucide-file-text-icon lucide-file-text text-slate-100"> 
+                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                <path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
+            </svg>
+            
+        </div>
+        
+        <p class="font-bold truncate text-center mb-2 transition-colors gap-2 duration-300">Documento 3</p>
+        
+        <div class="grid grid-cols-2 gap-3 mt-2"> 
+            
+            <a href="" target="_blank" class="text-sm  hover:underline flex items-center justify-center space-x-1 transition-colors gap-2 duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye">
+                    <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>Ver archivo</span>
+            </a>
+
+            <a href="" class="text-sm  hover:underline flex items-center justify-center space-x-1 transition-colors gap-2 duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download-icon lucide-download"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
+                <span>Descargar</span>
+            </a>
+            
+        </div>
+        
+    </div>
+</div>-->
+
+
+{% endblock %}

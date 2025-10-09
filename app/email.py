@@ -1,4 +1,5 @@
 import time
+import datetime
 from threading import Thread
 import asyncio
 from aiosmtplib import SMTP
@@ -6,6 +7,7 @@ from email.message import EmailMessage
 from flask import current_app, render_template
 from flask_mail import Message
 import sys
+from .models import GestionCorreos
 
 from concurrent.futures import ThreadPoolExecutor
 
@@ -155,62 +157,41 @@ def seleccionado_par(par, a_quien_evaluar):
 async def inicio_gdd(users, texto):
     """Notificación masiva de inicio de periodo"""
     if isinstance(users, list):
-        return await enviar_correo_masivo_async(users, "Inicio de periodo de carga de indicadores funcionales", "email/inicio_gdd.html", texto=texto)
+        return await enviar_correo_masivo_async(users, "Inicio de periodo de carga de indicadores funcionales", "email/inicio_gdd.html", tipo_correo='Inicio_GDD', texto=texto)
     else:
-        return await enviar_correo_masivo_async([users], "Inicio de periodo de carga de indicadores funcionales", "email/inicio_gdd.html", texto=texto)
+        return await enviar_correo_masivo_async([users], "Inicio de periodo de carga de indicadores funcionales", "email/inicio_gdd.html", tipo_correo='Inicio_GDD', texto=texto)
 
 async def cierre_gdd(users, texto):
     """Notificación masiva de cierre de periodo"""
     if isinstance(users, list):
-        return await enviar_correo_masivo_async(users, 'Cierre periodo de carga indicadores funcionales', "email/cierre_carga.html", texto=texto)
+        return await enviar_correo_masivo_async(users, 'Cierre periodo de carga indicadores funcionales', "email/cierre_carga.html", tipo_correo='Fin_GDD', texto=texto )
     else:
-        return await enviar_correo_masivo_async([users], 'Cierre periodo de carga indicadores funcionales', "email/cierre_carga.html", texto=texto)
+        return await enviar_correo_masivo_async([users], 'Cierre periodo de carga indicadores funcionales', "email/cierre_carga.html", tipo_correo='Fin_GDD', texto=texto )
     
 async def inicio_periodo_evaluacion(users):
     """Notificación masiva de cierre de periodo"""
     if isinstance(users, list):
-        return await enviar_correo_masivo_async(users, 'Cierre periodo de carga indicadores funcionales', "email/notificacion_evaluacion_general.html")
+        return await enviar_correo_masivo_async(users, 'Cierre periodo de carga indicadores funcionales', "email/notificacion_evaluacion_general.html", tipo_correo='Inicio_periodo')
     else:
-        return await enviar_correo_masivo_async([users], 'Cierre periodo de carga indicadores funcionales', "email/notificacion_evaluacion_general.html")
+        return await enviar_correo_masivo_async([users], 'Cierre periodo de carga indicadores funcionales', "email/notificacion_evaluacion_general.html", tipo_correo='Inicio_periodo')
 
+async def inicio_etapa_dos(users):
+    """Notificación masiva de cierre de periodo"""
+    if isinstance(users, list):
+        return await enviar_correo_masivo_async(users, 'Inicio de carga de resultados de los indicadores funcionales y el inicio del proceso de Evaluación de Competencia', "email/evaluacion_etapa2.html", tipo_correo='Inicio_estapa_dos')
+    else:
+        return await enviar_correo_masivo_async([users], 'resultados de los indicadores funcionales y el inicio del proceso de Evaluación de Competencia', "email/evaluacion_etapa2.html", tipo_correo='Inicio_estapa_dos')
+
+async def inicio_avance(users, texto):
+    """Notificación masiva de cierre de periodo"""
+    if isinstance(users, list):
+        return await enviar_correo_masivo_async(users, 'Carga de Avances de Primer Semestre - GDD', "email/avances_primer_semestre.html", tipo_correo='avance_semestre', texto=texto )
+    else:
+        return await enviar_correo_masivo_async([users], 'Carga de Avances de Primer Semestre - GDD', "email/avances_primer_semestre.html", tipo_correo='avance_semestre', texto=texto )
+    
 # ↑↑EN ESTAS FUNCIONES SON LOS CORREOS MASIVOS↑↑
 
 
-
-
-
-
-"""
-def cierre_carga(users):
-    if isinstance(users, list):
-        send_mass_email(users, 
-                    'Cierre periodo de carga indicadores funcionales', 
-                    'email/cierre_carga.html')
-    else:
-        send_mass_email([users], 
-                    'Cierre periodo de carga indicadores funcionales', 
-                    'email/cierre_carga.html')
-"""
-
-
-"""def indicadores_cargados(user):
-    message = Message('Indicadores cargados por Nombre del Colaborador - Requiere su aprobación',
-                    sender=current_app.config['MAIL_USERNAME'],
-                    recipients=[user.email])
-    
-    message.html = render_template('email/indicadores_cargados.html', user=user)
-    thread = Thread(target=send_async_mail, args=[message])
-    thread.start()"""
-"""
-def aprobacion_indicadores(user):
-    message = Message('Indicadores funcionales aprobados',
-                    sender=current_app.config['MAIL_USERNAME'],
-                    recipients=[user.email])
-    
-    message.html = render_template('email/aprobacion_indicadores.html', user=user)
-    thread = Thread(target=send_async_mail, args=[message])
-    thread.start()
-    """
 
 
 MAX_CONCURRENT = 2  # Reducido para evitar saturar el servidor
@@ -218,9 +199,10 @@ BATCH_SIZE = 15     # Procesar en lotes de 15 emails
 DELAY_BETWEEN_BATCHES = 0.8  # Pausa de 0.8 segundos entre lotes
 
 
-async def send_email(user_email, subject, html_content, smtp_user, smtp_pass, semaphore):
+async def send_email(user_email, subject, html_content, smtp_user, smtp_pass, semaphore, tipo_correo):
     """Envía un email individual con reintentos"""
     async with semaphore:
+        email = user_email.email if hasattr(user_email, 'email') else user_email
         max_retries = 3
         for attempt in range(max_retries):
             smtp = None
@@ -244,8 +226,9 @@ async def send_email(user_email, subject, html_content, smtp_user, smtp_pass, se
                 await smtp.send_message(message)
                 await smtp.quit()
                 
-                print(f"✅ Enviado a {user_email}")
-                return True
+                print(f"Enviado a {user_email}")
+                return {'success': True, 'email': email, 'tipo_correo': tipo_correo}
+
                 
             except Exception as e:
                 if smtp:
@@ -256,13 +239,13 @@ async def send_email(user_email, subject, html_content, smtp_user, smtp_pass, se
                 
                 if attempt < max_retries - 1:
                     wait_time = (attempt + 1) * 2  # Backoff: 2s, 4s, 6s
-                    print(f"⚠️ Reintento {attempt + 1}/{max_retries} para {user_email} en {wait_time}s")
+                    print(f"Reintento {attempt + 1}/{max_retries} para {user_email} en {wait_time}s")
                     await asyncio.sleep(wait_time)
                 else:
-                    print(f"❌ Error definitivo con {user_email}: {str(e)}")
-                    return False
+                    print(f"Error definitivo con {user_email}: {str(e)}")
+                    return {'success': False, 'email': email, 'tipo_correo': tipo_correo, 'error': str(e)}
 
-async def enviar_correo_masivo_async(users, subject, template, **template_vars):
+async def enviar_correo_masivo_async(users, subject, template, tipo_correo, **template_vars):
     """
     Esta versión debe ejecutarse desde un entorno async:
     await enviar_correo_masivo_async(...)
@@ -272,8 +255,6 @@ async def enviar_correo_masivo_async(users, subject, template, **template_vars):
     
     start_time = time.time()
     total_users = len(users)
-    successful_sends = 0
-    failed_sends = 0
     
     print(f"Iniciando envío masivo a {total_users} destinatarios")
     
@@ -284,56 +265,114 @@ async def enviar_correo_masivo_async(users, subject, template, **template_vars):
     # Renderizar template una sola vez 
     html_content = render_template(template, **template_vars)
     
-    # Procesar en lotes para evitar saturar el servidor
-    for i in range(0, total_users, BATCH_SIZE):
-        batch = users[i:i + BATCH_SIZE]
+    # FILTRAR USUARIOS QUE YA FUERON ENVIADOS HOY
+    hoy = datetime.date.today()
+    usuarios_filtrados = []
+    usuarios_omitidos = []
+    
+    for user in users:
+        email = user.email if hasattr(user, 'email') else user
+        if not GestionCorreos.ya_enviado_hoy(email, tipo_correo):
+            usuarios_filtrados.append(user)
+        else:
+            usuarios_omitidos.append(email)
+    
+    if usuarios_omitidos:
+        print(f"{len(usuarios_omitidos)} emails ya fueron enviados hoy y se omitirán del envío")
+    
+    if not usuarios_filtrados:
+        print(" No hay emails nuevos para enviar. Todos ya fueron enviados hoy.")
+        return {
+            'total_sent': 0,
+            'total_failed': 0,
+            'success_rate': 0,
+            'duration': 0,
+            'skipped': len(usuarios_omitidos)
+        }
+    
+    print(f"Se enviarán {len(usuarios_filtrados)} emails nuevos")
+    
+    # Guardar en la BD ANTES de enviar (solo los filtrados)
+    envios_data = [
+        {
+            'email': user.email if hasattr(user, 'email') else user,
+            'tipo_correo': tipo_correo,
+            'asunto': subject,
+            'estado': 'pendiente',
+            'enviado_por': 'sistema'
+        }
+        for user in usuarios_filtrados
+    ]
+    registrados = GestionCorreos.registrar_envios_bulk(envios_data)
+    print(f" Registrados {registrados} emails en BD")
+    
+    successful_sends = 0
+    failed_sends = 0
+    total_a_enviar = len(usuarios_filtrados)
+    
+    # Procesar SOLO los usuarios filtrados (no duplicados)
+    for i in range(0, total_a_enviar, BATCH_SIZE):
+        batch = usuarios_filtrados[i:i + BATCH_SIZE] 
         batch_num = (i // BATCH_SIZE) + 1
-        total_batches = (total_users + BATCH_SIZE - 1) // BATCH_SIZE
+        total_batches = (total_a_enviar + BATCH_SIZE - 1) // BATCH_SIZE
         
-        print(f"📦 Procesando lote {batch_num}/{total_batches} ({len(batch)} emails)")
+        print(f"Procesando lote {batch_num}/{total_batches} ({len(batch)} emails)")
         
         # Crear semáforo para este lote
         semaphore = asyncio.Semaphore(MAX_CONCURRENT)
         
         # Crear tareas para el lote actual
         tasks = [
-            asyncio.create_task(send_email(user.email, subject, html_content, smtp_user, smtp_pass, semaphore))
+            asyncio.create_task(send_email(
+                user.email if hasattr(user, 'email') else user, 
+                subject, 
+                html_content, 
+                smtp_user, 
+                smtp_pass, 
+                semaphore, 
+                tipo_correo
+            ))
             for user in batch
         ]
         
         # Ejecutar lote y contar resultados
         batch_results = await asyncio.gather(*tasks, return_exceptions=True)
         
-        # Contar éxitos y fallos
+        # Actualizar BD y contar éxitos/fallos
         for result in batch_results:
-            if result is True:
-                successful_sends += 1
+            if isinstance(result, dict):
+                if result['success']:
+                    GestionCorreos.marcar_como_enviado(result['email'], result['tipo_correo'])
+                    successful_sends += 1
+                else:
+                    GestionCorreos.marcar_como_fallido(result['email'], result['tipo_correo'], result.get('error', 'Error desconocido'))
+                    failed_sends += 1
             else:
+                # Si hubo una excepción no manejada
                 failed_sends += 1
         
         # Pausa entre lotes (excepto en el último)
-        if i + BATCH_SIZE < total_users:
-            print(f"⏸️ Pausa de {DELAY_BETWEEN_BATCHES}s antes del siguiente lote")
+        if i + BATCH_SIZE < total_a_enviar:
+            print(f"Pausa de {DELAY_BETWEEN_BATCHES}s antes del siguiente lote")
             await asyncio.sleep(DELAY_BETWEEN_BATCHES)
     
-    # Estadísticas finales
     end_time = time.time()
     duration = end_time - start_time
-    success_rate = (successful_sends / total_users * 100) if total_users > 0 else 0
+    success_rate = (successful_sends / total_a_enviar * 100) if total_a_enviar > 0 else 0
     
     print(f"Completado en {duration:.2f}s:")
-    print(f" Enviados: {successful_sends}")
-    print(f" Fallidos: {failed_sends}")
+    print(f"Enviados: {successful_sends}")
+    print(f"Fallidos: {failed_sends}")
+    print(f"Omitidos: {len(usuarios_omitidos)}")
     print(f"Tasa de éxito: {success_rate:.1f}%")
     
     return {
         'total_sent': successful_sends,
         'total_failed': failed_sends,
+        'skipped': len(usuarios_omitidos),
         'success_rate': success_rate,
         'duration': duration
     }
-
-
 
 
 
@@ -357,11 +396,11 @@ def enviar_notificacion_individual_mejorada(app, user, equipo, delay=0):
                                             user=user, equipo=equipo)
             mail.send(message)
 
-        print(f"✅ Correo enviado a {user.email}")
+        print(f" Correo enviado a {user.email}")
         return {"success": True, "email": user.email}
 
     except Exception as e:
-        print(f"❌ Error enviando a {user.email}: {str(e)}")
+        print(f" Error enviando a {user.email}: {str(e)}")
         return {"success": False, "email": user.email, "error": str(e)}
 
 def procesar_notificaciones_individuales(app, users_data):
@@ -393,45 +432,3 @@ def procesar_notificaciones_individuales(app, users_data):
 
 
 
-
-
-
-
-
-
-
-
-
-#Esto es una función de prueba para enviar masivamente por copia oculta
-""" 
-def enviar_correo_masivo(users, asunto, template, **template_vars):
-    
-    Envía un único correo HTML a múltiples destinatarios:
-    - El primero en To
-    - El resto en BCC (ocultos)
-    - Usa un template HTML con variables dinámicas
-
-    Args:
-        users (list): lista de emails (str)
-        asunto (str): asunto del correo
-        template (str): ruta al template HTML
-        **template_vars: variables para el template (ej: texto="Hola")
-    
-    if not users or len(users) < 1:
-        raise ValueError("Debe haber al menos un destinatario")
-
-    app = current_app._get_current_object()
-
-    # Renderiza el HTML del mensaje con las variables proporcionadas
-    html_content = render_template(template, **template_vars)
-
-    msg = Message(
-        subject=asunto,
-        recipients=[users[0]],
-        bcc=users[1:],
-        html=html_content,  # ENVÍA HTML, no plain text
-        sender=app.config['MAIL_USERNAME']
-    )
-
-    mail.send(msg)
-    print(f"✅ Correo enviado a {users[0]} con {len(users[1:])} BCC ocultos.")"""

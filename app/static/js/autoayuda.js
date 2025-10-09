@@ -239,7 +239,7 @@ driverObjModal.drive();
                 const estado_actual = estado_evaluacion ? estado_evaluacion.value.trim() : '';
 
                 const competencyDescriptions = {
-                    'Demostración valores coorporativos': {
+                    'Demostración valores Corporativos': {
                         UP: 'Nunca demuestra los comportamientos asociados a los valores corporativos.',
                         'FP-': 'En ocasiones demuestra los comportamientos asociados a los valores corporativos.',
                         FP: 'Siempre demuestra los comportamientos asociados los valores corporativos.',
@@ -371,11 +371,11 @@ driverObjModal.drive();
                 };
                 const steps = [];
 
-                // 1. Demostración valores coorporativos y sus niveles (Primera)
+                // 1. Demostración valores Corporativos y sus niveles (Primera)
                 steps.push({
                     element: '#Desmotracion',
                     popover: {
-                        title: 'Demostración valores coorporativos',
+                        title: 'Demostración valores Corporativos',
                         description: `Actuación y comportamiento acorde
                                 con los pilares fundamentales para la
                                 convivencia laboral destacando la
@@ -390,7 +390,7 @@ driverObjModal.drive();
                     }
                 });
                 steps.push(introMessageStep);
-                steps.push(...createRatingSteps(1, 'Demostración valores coorporativos', competencyDescriptions['Demostración valores coorporativos'], estado_actual)),
+                steps.push(...createRatingSteps(1, 'Demostración Valores Corporativos', competencyDescriptions['Demostración valores Corporativos'], estado_actual)),
 
 
                 // 2.Foco en Resultados y sus niveles (Segunda)
