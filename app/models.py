@@ -1098,7 +1098,6 @@ class Retroalimentacion(db.Model):
 
 class GestionCorreos(db.Model):
     __tablename__ = 'gestion_correos'
-
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(255), nullable=False)
     tipo_correo = db.Column(db.String(100), nullable=False)
