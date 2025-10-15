@@ -381,6 +381,7 @@ function editRow(button) {
         const tendenciaField = document.getElementById("Tendencia");
         tendenciaField.value = tendencia;
         tendenciaField.readOnly = edicion;
+        tendenciaField.disabled = edicion;
 
         const pesoField =  document.getElementById("peso")
         pesoField.value = peso;
@@ -389,16 +390,15 @@ function editRow(button) {
         const AfAnterior = document.getElementById('AFANTERIOR');
         if (realAnterior !=""){
             AfAnterior.value =realAnterior;
-            AfAnterior.readOnly = edicion;
         }
+        AfAnterior.readOnly = edicion;
 
         
         const Afppto = document.getElementById('AFPPTO');
         if (pptoAFactual !=""){
             Afppto.value =pptoAFactual;
-            Afppto.readOnly = edicion;
-
         }
+        Afppto.readOnly = edicion;
         
         const AfActual = document.getElementById('AFACTUAL');
         console.log(AfActual)
