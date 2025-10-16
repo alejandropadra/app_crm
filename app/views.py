@@ -36,6 +36,11 @@ adj_imagenes = 'app/static/img/fotos_personal/'
 page = Blueprint('page', __name__)
 
 
+class SAPError(Exception):
+    """Excepción personalizada para errores de SAP"""
+    def __init__(self, message, status_code=None):
+        super().__init__(message)
+        self.status_code = status_code
 
 
 @page.route("/app_crm/prueba", methods=['GET', 'POST'])
@@ -61,17 +66,45 @@ def handle_csrf_error(e):
     flash('La sesión ha expirado. Por favor inicie sesión nuevamente.', 'warning')
     return redirect(url_for('.login'))
 
-@page.app_errorhandler(500)
-def internar_error_server(error):
-    flash(ERROR_500,'error')
-    return render_template('no hay nada pa'),500
+@page.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    flash('La sesión ha expirado. Por favor inicie sesión nuevamente.', 'warning')
+    return redirect(url_for('.login'))
 
-@page.app_errorhandler(404)
-def page_not_found(error):
-    flash(ERROR_404)
-    return "ERROR 404, NO SE ENCONTRÓ LA RUTA ESPECIFICADA"
+@page.app_errorhandler(SAPError)
+def handle_sap_error(error):
+    if error.status_code:
+        print(f"Error SAP - Código HTTP: {error.status_code}")
+    else:
+        print(f"Error SAP: {str(error)}")
+    
+    flash('El servicio de SAP no está disponible. Por favor, intente más tarde.', 'error')
+    return render_template("errors/500.html", error=error), 503
+
+@page.app_errorhandler(502)
+def handle_sap_error(error):
+
+    flash('sds.', 'error')
+    return render_template("errors/500.html", error=error), 502
+
+@page.app_errorhandler(Exception)
+def handle_all_errors(error):
+    print(f"Error: {type(error).__name__} - {str(error)}")
+    
+    if isinstance(error, CSRFError):
+        flash('La sesión ha expirado. Por favor inicie sesión nuevamente.', 'warning')
+        return redirect(url_for('.login'))
+    
+    flash('Ha ocurrido un error inesperado. Por favor, intente nuevamente.', 'error')
+    return render_template("errors/500.html"), 500
 #======================================== FIN MANEJO DE ERRORES=================================================================<
 
+
+
+@page.route("/app_crm/error500", methods=['GET', 'POST'])
+def error500():
+    print('asda')
+    return render_template("errors/500.html")
 
 
 #========================================= MANEJO DE SESION ===========================================================================
@@ -757,6 +790,8 @@ def menu():
     usuario = current_user
     ficha = current_user.ficha
     rest = consultar_sap(ficha)
+
+    
     variables_configuracion_global = Configuracion.get_data()
     etapa_general = variables_configuracion_global.etapa_actual
     etapa_general = int(etapa_general)
@@ -1497,6 +1532,7 @@ def evaluacion_competencias(ficha_get):
     retorna: response_json    
 """
 
+"""
 def consultar_sap(ficha):
     sap_url = USRL_SAP_PARTICIPANTES_FICHA
     
@@ -1538,8 +1574,41 @@ def consultar_sap(ficha):
         error_message = f" Excepción durante la consulta a SAP: {str(e)}"
         print(error_message)
         flash('Error de conexión a SAP', 'error')
-        return "Error de conexión"
-
+        return "Error de conexión"""
+        
+        
+def consultar_sap(ficha):
+    sap_url = USRL_SAP_PARTICIPANTES_FICHA
+    
+    params = {
+        'sap-client': '510',
+        'FICHA': ficha,
+    }
+    
+    user_fuente = U_FUENTE
+    contra_fuente = C_FUENTE
+    
+    try:
+        response = requests.get(
+            sap_url, 
+            auth=HTTPBasicAuth(user_fuente, contra_fuente), 
+            params=params, 
+            verify=True,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            response_json = response.json()
+            
+            if response_json and 'pernr' in response_json[0]:
+                return response_json
+            else:
+                raise SAPError("Respuesta SAP inválida: falta campo 'pernr'")
+        else:
+                raise SAPError(f"Servicio SAP no disponible (HTTP {response.status_code})", status_code=response.status_code)
+        
+    except requests.RequestException as e:
+        raise SAPError(f"Error de conexión con SAP: {str(e)}")
 
 "consultar listado de participantes gdd"
 def participantes_gdd():

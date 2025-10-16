@@ -1,34 +1,76 @@
-{% extends 'layout.html' %}
-{% block container %}
-<main class="px-3 " style="min-height: 70vh;  display: flex; justify-content: center; align-items: center;">
-
-
-  <div class="EfectoDiv  container "   >
-  
-    <div class="circle"></div>
-    <div class="circle"></div>
-
-    <div class="row d-flex justify-content-around  mt-3 inner h-100  " >
-        <div class="col-sm-12 col-xl-6 d-flex justify-content-center">
-            <img src="static/img/2montana-removebg-preview.png"  alt="" style="border-radius: 8px;">
-        </div>
-
-        <div class="texto col-md-12 col-lg-12 col-sm-12 mt-3 col-xl-6 p-3" >
-            <div class="row" style="margin-left: 0px;">
-                <div class="col-12 col-sm-12">
-                    <h3 class="text-start pb-1 sub-titulo" style="font-size: 80px;">ERROR 500</h3>
-                    <p class="text-start">Error en la solicitud!.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@latest/dist/driver.css"/>
+    <!--Icono-->
+    <link rel='icon' type='image/png' href="{{ url_for('static', filename = 'img/Corimon_logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/estilos.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+    <title>Error</title>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <section class="min-h-screen flex items-center justify-center px-4">
+        <div class="container mx-auto lg:flex lg:items-center lg:gap-16 max-w-7xl">
+            <!-- Contenido de texto -->
+            <div class="w-full lg:w-1/2 space-y-8">
+                <!-- Badge de error -->
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-blue-900/30 rounded-full">
+                    <div class="w-2 h-2 bg-rojo-crm rounded-full animate-pulse"></div>
+                    {%if error%}
+                    <span class="text-base font-semibold text-red-600 dark:text-red-400 tracking-wide">{{ error }}</span>
+                    {%else%}
+                    <span class="text-base font-semibold text-red-600 dark:text-red-400 tracking-wide">ERROR 505</span>
+                    {%endif%}
                 </div>
-                <div class="col d-flex justify-content-end align-items-end "  >
-                    <a href="/" id="vermas" style="margin-top: 15%;"><h3 class="fs-4 ">click para ir al inicio &rarr;</h3></a>
+
+                <!-- Título principal -->
+                <div class="space-y-4">
+                    <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white leading-tight">
+                        Error en el<br/>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-700 dark:from-blue-400 dark:to-purple-400">
+                            Servidor
+                        </span>
+                    </h1>
+                    
+                    <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-xl">
+                        Disculpa, estamos experimentando un error interno. Por favor, intenta de nuevo más tarde.
+                    </p>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="flex flex-col sm:flex-row items-center gap-4 pt-4">
+                    <button onclick="window.history.back()" class="group flex items-center justify-center w-full sm:w-auto px-8 py-4 text-base font-medium text-gray-700 transition-all duration-300 bg-white border-2 border-gray-300 rounded-xl gap-3 hover:border-gray-400 hover:shadow-lg hover:-translate-y-0.5 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:border-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 transition-transform group-hover:-translate-x-1">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
+                        </svg>
+                        <span>Volver atrás</span>
+                    </button>
+
+                    
+                </div>
+
+                <!-- Información adicional -->
+                <div class="pt-8 border-t border-gray-200 dark:border-gray-700">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                        </svg>
+                        Si el problema persiste, contacta con soporte técnico
+                    </p>
                 </div>
             </div>
+
+            <!-- Imagen -->
+            <div class="relative w-full mt-12 lg:w-1/2 lg:mt-0">
+                <div class="absolute i"></div>
+                <img class="w-full h-80 md:h-96 lg:h-[36rem] rounded-2xl object-cover " 
+                        src="{{ url_for('static', filename = 'img/error.png') }}" 
+                        alt="Error 505 - Servidor">
+            </div>
         </div>
-    </div>
-  </div>
-
-
-</main>
-
-
-{% endblock %}
+    </section>
+</body>
+</html>
