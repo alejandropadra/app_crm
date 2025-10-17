@@ -4,6 +4,7 @@
 {% block body %}
 <link rel="stylesheet" href="{{ url_for('static', filename = 'css/estilos_tabla.css') }}">
 
+
 <div class="flex flex-col gap-4">
     <div class="grid grid-cols-1 lg:grid-cols-3 w-full gap-7">
 
@@ -199,4 +200,114 @@
     </div>
     
 </div>
+
+
+
+
+<!-- Contenedor del modal -->
+<div id="modal-container">
+    <div class="modal-background">
+        <div class="modal w-[90%] max-w-2xl flex flex-col" style="max-height: 700px !important">
+            <!-- Header del modal -->
+            <div class="p-8 text-center border-b border-gray-100 relative">
+                <button class="absolute top-4 right-4 w-9 h-9 border-none bg-transparent cursor-pointer rounded-full flex items-center justify-center transition-colors duration-200 hover:bg-red-500 hover:text-white" onclick="closeModal()">
+                    <svg class="w-5 h-5 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                
+                <div class="w-20 h-20 bg-gradient-to-br from-gray-900 to-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                    </svg>
+                </div>
+
+                <div class="inline-block bg-gray-50 text-gray-700 px-4 py-1.5 rounded-full text-sm font-medium mb-3">v1.2.0.0</div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Actualizaciones Disponibles</h2>
+                <p class="text-gray-600 text-base">Nuevas características de la aplicación</p>
+            </div>
+
+            <!-- Contenido -->
+            <div class="p-8">
+                <div class="flex flex-col gap-6">
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-semibold text-left text-gray-900 mb-1">Documentación y Tutoriales</h3>
+                            <p class="text-sm text-gray-600 leading-relaxed text-justify">En el menú de navegación de la izquierda, se encuentra un nuevo botón llamado "Documentación", donde podrá encontrar
+                                el manual instructivo de la aplicación, así como un video tutorial para facilitar su uso.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-semibold text-left text-gray-900 mb-1">Gestión de Contraseñas</h3>
+                            <p class="text-sm text-gray-600 leading-relaxed text-justify">En el Login ahora puede reestablecer su contraseña en caso de olvido, haciendo clic en el enlace "¿Olvidaste tu contraseña?".
+                                Recibirá un correo electrónico con una nueva contraseña generada automáticamente.
+                            </p>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-8 pb-8">
+                <button  onclick="closeModal()" class="w-full bg-gray-900 text-white py-3 px-6 border-none rounded-xl text-base font-medium cursor-pointer transition-all duration-200 hover:bg-gray-700 active:scale-[0.98]">
+                    Continuar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        let modal = document.getElementById("modal-container");
+        modal.style.display = "block";
+        modal.classList.add("one");
+    }, 1000);
+});
+
+
+function closeModal(equis) {
+
+    let modal = document.getElementById("modal-container");
+    modal.classList.add("out");
+
+    setTimeout(() => {
+        modal.style.display = "none"; 
+        modal.classList.remove("one", "out");
+        
+    }, 1000);
+}
+
+
+    document.getElementById('modal-container').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+</script>
 {% endblock %}

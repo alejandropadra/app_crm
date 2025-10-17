@@ -207,13 +207,14 @@ p{
     transform-origin: top;
     transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease-in-out; 
     opacity: 0; 
-    z-index: 99;
+    z-index: 999;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
 #down.active {
     transform: translateY(0) scaleY(1); 
     opacity: 1; 
+    z-index: 9999;
 }
 
 
@@ -328,7 +329,7 @@ nav {
 }
 
 .tarjeta-elevada {
-  z-index: 10; /* Un z-index más bajo que el del menú, pero suficiente para elevar la tarjeta */
+  z-index: 10; 
 }
 
 

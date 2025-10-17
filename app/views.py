@@ -9,7 +9,7 @@ from .forms import GestionUsers
 from .forms import RegistrarUsuarios
 from .forms import formgdi, RegistrarHojaVida
 from .models import User, Indicadores,HojaVida,Cronograma, Cargos, Evaluacion, Configuracion, Retroalimentacion
-from .email import welcome_mail, Prueba_mail, inicio_gdd, cierre_gdd, aprobacion_indicadores, indicadores_cargados, Seleccionado_evaluador, procesar_notificaciones_individuales, seleccionado_par, inicio_periodo_evaluacion, inicio_etapa_dos, inicio_avance
+from .email import welcome_mail, Prueba_mail, inicio_gdd, cierre_gdd, aprobacion_indicadores, indicadores_cargados, Seleccionado_evaluador, procesar_notificaciones_individuales, seleccionado_par, inicio_periodo_evaluacion, inicio_etapa_dos, inicio_avance, cambio_clave
 from .servicios import servicio_notificacion
 from . import login_manager
 from .consts import *
@@ -103,8 +103,36 @@ def handle_all_errors(error):
 
 @page.route("/app_crm/error500", methods=['GET', 'POST'])
 def error500():
-    print('asda')
+
     return render_template("errors/500.html")
+
+
+
+@page.route("/app_crm/cambio_contraseña", methods=['GET', 'POST'])
+def Cambio_contraseña():
+    form = LoginForm()
+    ficha = form.ficha.data
+    if request.method == 'POST':
+        if ficha :
+            print(ficha)
+            existe = User.get_by_ficha(ficha)
+
+            if existe:
+                contrasena = generar_contrasena_aleatoria()
+                print(contrasena)
+                User.actualizar_password(ficha,contrasena)
+                usuario = existe
+                print(usuario)
+                flash(f'Contraseña cambiada exitosamente. Estimado(a) {usuario.nombre} {usuario.apellido}, por favor revise su correo electrónico para obtener su nueva contraseña.', 'success')
+                cambio_clave(usuario, contrasena)
+                return redirect(url_for('.login'))
+            else:
+                flash('La ficha ingresada no existe en el sistema.', 'error')
+
+        else:
+            flash('Por favor ingrese su ficha.', 'error') 
+
+    return render_template("auth/cambio_contraseña.html", form=form)
 
 
 #========================================= MANEJO DE SESION ===========================================================================

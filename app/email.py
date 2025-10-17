@@ -127,7 +127,7 @@ def Seleccionado_evaluador(subordinado, supervisor):
     app = current_app._get_current_object()
     message = Message(f'Notificación de evaluación a supervisor {supervisor.nombre} {supervisor.apellido} ',
                     sender=app.config['MAIL_USERNAME'],
-                    recipients=[subordinado.email,'eliezergach1508@gmail.com' ])
+                    recipients=[subordinado.email])
     message.html = render_template('email/seleccionado_evaluador.html', subordinado=subordinado, supervisor=supervisor)
     thread = Thread(target=send_async_mail, args=[app, message])
     thread.start()
@@ -136,11 +136,20 @@ def seleccionado_par(par, a_quien_evaluar):
     app = current_app._get_current_object()
     message = Message(f'Notificación de evaluación a par: {a_quien_evaluar.nombre} {a_quien_evaluar.apellido} ',
                     sender=app.config['MAIL_USERNAME'],
-                    recipients=[par.email,'eliezergach1508@gmail.com' ])
+                    recipients=[par.email])
     message.html = render_template('email/seleccionado_par.html', a_quien_evaluar=a_quien_evaluar, par=par)
     thread = Thread(target=send_async_mail, args=[app, message])
     thread.start()
-    
+
+def cambio_clave(usuario, nueva_clave):
+    app = current_app._get_current_object()
+    message = Message(f'Nueva clave de acceso - Plataforma de Gestión del Desempeño',
+                    sender=app.config['MAIL_USERNAME'],
+                    recipients=[usuario.email])
+    message.html = render_template('email/cambio_clave.html', usuario=usuario, nueva_clave=nueva_clave)
+    thread = Thread(target=send_async_mail, args=[app, message])
+    thread.start()
+
 """def Notificar_a_supervisor_evaluar_colaboradores(user, equipo):
     app = current_app._get_current_object()
     message = Message(f'Notificación de evaluación a colaboradores ',

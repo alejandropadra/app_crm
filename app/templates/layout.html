@@ -174,6 +174,13 @@
                                         <span class="descipcionesSubmenu">Resultados</span>
                                     </a>
                                 </li>
+
+                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white">
+                                    <a  href="{{ url_for('.Documentacion')}}" class=" flex items-center gap-2  ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-marked-icon lucide-book-marked"><path d="M10 2v8l3-3 3 3V2"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>
+                                        <span class="descipcionesSubmenu">Documentación</span>
+                                    </a>
+                                </li>
                                 
                             </ul>
                         </div>
@@ -188,7 +195,7 @@
 
 
         <!-- Menú Lateral -->
-        <div id="SideNav" class=" animate-slide-left bg-[--azul-dark] relative p-[30px] sombra rounded-[23px] h-full w-[17rem] transition-all duration-300 hidden lg:!block ">
+        <div id="SideNav" class=" animate-slide-left bg-[--azul-dark] relative p-[30px] sombra rounded-[23px] h-full w-[17rem] transition-all duration-300 hidden xl:!block ">
             <div id="logo" class=" flex-col w-full rounded-[26px] items-center cursor-pointer " onclick="window.location.href='/app_crm/gdd/menu'" >
                 <div class="flex items-end justify-between gap-2">
                     <div class="w-[68px] flex-shrink-0">
@@ -318,7 +325,13 @@
                 <div class=" pr-[1px]">
 
                 
-                    <nav class=" opado animate-fade-in-up  flex items-center bg-[#ffffff] p-[10px] sombra rounded-[18px] min-h-[50px] justify-between ">
+                    <nav class="  z-[11] opado animate-fade-in-up  flex items-center bg-[#ffffff] p-[10px] sombra rounded-[18px] min-h-[50px] justify-between ">
+                        
+                        <button id="menuBtnResponsive" type="button" data-drawer-target="drawer-navigation" data-drawer-show="drawer-navigation" aria-controls="drawer-navigation" class="xl:hidden text-white bg-[--azul-dark] p-2 rounded-lg cursor-pointer transition-transform transform hover:-translate-y-1  duration-200 ease-in-out">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu-icon lucide-menu"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+                        </button>
+
+                        
                         <div class=" flex items-center gap-3">
                             <button id="autoayuda" class="autoayuda bg-slate-600 flex justify-center  w-8 h-8 rounded-[50%] items-center text-white hover:bg-slate-400 p-4  outline-none focus:outline-none ease-linear transition-all duration-150" type="button">
                                 <span class="">
@@ -328,10 +341,6 @@
                                 <h4>Ayuda</h4>
                         </div>
 
-
-                        <button id="menuBtnResponsive" type="button" data-drawer-target="drawer-navigation" data-drawer-show="drawer-navigation" aria-controls="drawer-navigation" class="lg:hidden text-white bg-[--azul-dark] p-2 rounded-lg cursor-pointer transition-transform transform hover:-translate-y-1  duration-200 ease-in-out">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu-icon lucide-menu"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-                        </button>
 
 
                         <!--Notificaciones-->
@@ -399,7 +408,7 @@
                         </div>
 
                         <!--Droprdown de Usuario-->
-                        <div class="relative">
+                        <div class="relative" style="z-index: 10000" >
                             <div id="drop" class=" blanco flex items-center  p-3 gap-4 rounded-[22px] cursor-pointer transition-transform transform hover:-translate-y-1  duration-200 ease-in-out">
                                 <div class=" w-10 h-10 rounded-full overflow-hidden">
                                 

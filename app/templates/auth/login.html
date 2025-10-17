@@ -79,61 +79,116 @@
 </style>
 <body class=" h-screen  w-full flex items-center relative p-3 lg:p-0  ">
 
-    <div class="fixed top-5 z-50 animate-fade-in-up left-[12%] md:left-[40%]">
-        {% with messages = get_flashed_messages(with_categories=True) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    {% if category == 'error' %}
-                    <div class="flex flex-col gap-2 w-[300px] text-[10px] sm:text-xs">
-                        <div class="error-alert cursor-default flex items-center  w-full h-12 sm:h-14 rounded-lg bg-azul-dark px-[10px]">
-                            <div class="flex gap-2 items-center justify-around w-full">
-                                <div class="text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert-icon lucide-circle-alert"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
-                                </div>
-                                <div class="flex flex-col">
-                                    <div>
-                                        <h4 class=" text-white">Error:</h4>
-                                    </div>
-                                    <div>
-                                        <p class="text-white">{{ message }}</p>
-                                    </div>
-                                </div>
-                                <button class="flex close-btn">
-                                    <div class="text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                                    </div>
-                                </button>
+<div class="fixed top-5 z-50 animate-fade-in-up left-[12%] md:left-[35%]">
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {% if category == 'error' %}
+                <div class="flex flex-col gap-2 w-auto max-w-md sm:max-w-lg text-[10px] sm:text-xs">
+                    <div class="error-alert cursor-default flex items-start w-full min-h-12 sm:min-h-14 rounded-lg bg-azul-dark px-[10px] py-3">
+                        <div class="flex gap-3 items-start justify-between w-full">
+                            <!-- Icono (fijo arriba) -->
+                            <div class="text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg flex-shrink-0 mt-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="12" x2="12" y1="8" y2="12"/>
+                                    <line x1="12" x2="12.01" y1="16" y2="16"/>
+                                </svg>
                             </div>
+                            
+                            <!-- Contenido del mensaje (expandible) -->
+                            <div class="flex flex-col flex-grow min-w-0">
+                                <div>
+                                    <h4 class="text-white font-medium mb-2">Error:</h4>
+                                </div>
+                                <div>
+                                    <p class="text-white text-sm leading-relaxed whitespace-pre-line break-words">{{ message }}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Botón cerrar (fijo arriba) -->
+                            <button class="flex close-btn flex-shrink-0">
+                                <div class="text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg hover:bg-white/10 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
+                                        <path d="M18 6 6 18"/>
+                                        <path d="m6 6 12 12"/>
+                                    </svg>
+                                </div>
+                            </button>
                         </div>
                     </div>
-                    {% else %}
-                    <div class="flex flex-col gap-2 w-[300px] text-[10px] sm:text-xs">
-                        <div class="error-alert cursor-default flex items-center  w-full h-12 sm:h-14 rounded-lg bg-azul-dark px-[10px]">
-                            <div class="flex gap-2 items-center justify-around w-full">
-                                <div class="text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check"><path d="M20 6 9 17l-5-5"/></svg>
-                                </div>
-                                <div class="flex flex-col">
-                                    <div>
-                                        <h4 class=" text-white">Proceso Exitoso:</h4>
-                                    </div>
-                                    <div>
-                                        <p class="text-white">{{ message }}</p>
-                                    </div>
-                                </div>
-                                <button class="flex close-btn">
-                                    <div class="text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                                    </div>
-                                </button>
+                </div>
+                
+                {% elif category == 'atencion' %}
+                <div class="flex flex-col gap-2 w-auto max-w-md sm:max-w-lg text-[10px] sm:text-xs">
+                    <div class="error-alert cursor-default flex items-start w-full min-h-12 sm:min-h-14 rounded-lg bg-azul-dark px-[10px] py-3">
+                        <div class="flex gap-3 items-start justify-between w-full">
+                            <!-- Icono de atención -->
+                            <div class="text-[#ffc107] bg-white/5 backdrop-blur-xl p-1 rounded-lg flex-shrink-0 mt-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert">
+                                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/>
+                                    <path d="M12 9v4"/>
+                                    <path d="M12 17h.01"/>
+                                </svg>
                             </div>
+                            
+                            <div class="flex flex-col flex-grow min-w-0">
+                                <div>
+                                    <h4 class="text-white font-medium mb-2">Atención:</h4>
+                                </div>
+                                <div>
+                                    <p class="text-white text-sm leading-relaxed whitespace-pre-line break-words">{{ message }}</p>
+                                </div>
+                            </div>
+                            
+                            <button class="flex close-btn flex-shrink-0">
+                                <div class="text-[#ffc107] bg-white/5 backdrop-blur-xl p-1 rounded-lg hover:bg-white/10 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
+                                        <path d="M18 6 6 18"/>
+                                        <path d="m6 6 12 12"/>
+                                    </svg>
+                                </div>
+                            </button>
                         </div>
                     </div>
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-    </div>
+                </div>
+                
+                {% else %}
+                <div class="flex flex-col gap-2 w-auto max-w-md sm:max-w-lg text-[10px] sm:text-xs">
+                    <div class="error-alert cursor-default flex items-start w-full min-h-12 sm:min-h-14 rounded-lg bg-azul-dark px-[10px] py-3">
+                        <div class="flex gap-3 items-start justify-between w-full">
+                            <!-- Icono de éxito -->
+                            <div class="text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg flex-shrink-0 mt-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check">
+                                    <path d="M20 6 9 17l-5-5"/>
+                                </svg>
+                            </div>
+                            
+                            <div class="flex flex-col flex-grow min-w-0">
+                                <div>
+                                    <h4 class="text-white font-bold mb-2">Proceso Exitoso:</h4>
+                                </div>
+                                <div>
+                                    <p class="text-white text-sm leading-relaxed whitespace-pre-line break-words">{{ message }}</p>
+                                </div>
+                            </div>
+                            
+                            <button class="flex close-btn flex-shrink-0">
+                                <div class="text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg hover:bg-white/10 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
+                                        <path d="M18 6 6 18"/>
+                                        <path d="m6 6 12 12"/>
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
     
 
     <div class="container grid grid-cols-1 m-3 lg:grid-cols-3   bg-white lg:gap-6 shadow-lg mx-auto rounded-[--radius] animate-fade-in opado z-0">
@@ -172,8 +227,8 @@
 
                     <button class="animate-fade-in opado button">Ingresar</button>
                     <p class="signup-link text-center font-medium mt-4">
-                        ¿No tienes una cuenta o no puedes entrar? 
-                        <a href="#" class="link text-blue-600 hover:underline"> Click aquí</a>
+                        ¿Has olvidado tu contraseña?
+                        <a href="{{ url_for('.Cambio_contraseña')}}" class="link text-blue-600 hover:underline"> Haga click aquí</a>
                     </p>
                 </form>
 
