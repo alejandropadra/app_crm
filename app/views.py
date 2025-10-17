@@ -132,7 +132,7 @@ def Cambio_contraseña():
         else:
             flash('Por favor ingrese su ficha.', 'error') 
 
-    return render_template("auth/cambio_contraseña.html", form=form)
+    return render_template("auth/cambio_clave.html", form=form)
 
 
 #========================================= MANEJO DE SESION ===========================================================================
