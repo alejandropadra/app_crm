@@ -109,13 +109,17 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     let estadoAcambiar =null;
     radioButtons.forEach(function(radioButton) {
-        radioButton.addEventListener('change', function(event) {
+        radioButton.addEventListener('click', function(event) {
             event.preventDefault()
             if (this.checked) {
 
                 estadoAcambiar = this.value;
-                console.log(estadoAcambiar)
-
+                if (estadoAcambiar === status_actual_gdd) {
+                    console.log('Ya está en ese estado, no se puede cambiar al mismo');
+                    showAlert('El sistema ya está en ese estado', 'error');
+                    return;
+                }
+                
                 if (estadoAcambiar === "Abierto") {
                     textoPrincipalModal.textContent = '¿Estás seguro de que quieres habilitar masivamente el proceso GDD?';
                     textoSmall.textContent = 'Esta Acción lleva a cabo que los usuarios puedan editar y agregar nuevos indicadores, pero no podrán Agregar el campo de AFACTUAL';
@@ -155,9 +159,44 @@ document.addEventListener("DOMContentLoaded", async function () {
             modalInstance.hide();
             const backdrop = document.querySelector('[modal-backdrop]');
             if (backdrop) backdrop.remove();
+            actualizarSeleccionVisual();
         });
     });
 
+
+    function actualizarSeleccionVisual() {
+    const radios = {
+        "Cerrado": {
+            input: document.querySelector('#inputradioDos'),
+            label: document.querySelector('.radioCheck.uno')
+        },
+        "Abierto": {
+            input: document.querySelector('#inputradio'),
+            label: document.querySelector('.radioCheck.dos')
+        },
+        "AFACTIVO": {
+            input: document.querySelector('#inputradioTres'),
+            label: document.querySelector('.radioCheck.tres')
+        }
+    };
+    
+    // Desmarcar todos
+    Object.values(radios).forEach(({ input, label }) => {
+        input.checked = false;
+        if (label && label.parentElement) {
+            label.parentElement.classList.remove('active-effect');
+        }
+    });
+    
+    // Marcar el del estado actual
+    if (status_actual_gdd && radios[status_actual_gdd]) {
+        const { input, label } = radios[status_actual_gdd];
+        input.checked = true;
+        if (label && label.parentElement) {
+            label.parentElement.classList.add('active-effect');
+        }
+    }
+}
 
     seguro.addEventListener("click", async function () {
 
@@ -337,7 +376,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             texto = `${finDate}`
 
-            textoPrincipalModalDos.textContent = '¿Estas seguro de enviar la notificacion de inicio?';
+            textoPrincipalModalDos.textContent = '¿Estas seguro de enviar la notificacion de Cierre?';
             textoSmallDos.textContent = `Se enviará que el periodo para la carga de la información será desde ${texto}. `;
                 
         
@@ -406,7 +445,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 document.addEventListener("DOMContentLoaded", async function () {
     const enviarStartCuatro = document.getElementById('enviarStartCuatro');
 
-    const modal = document.getElementById("popup-modalTres");
+    const modal = document.getElementById("popup-modalCuatro");
     const modalLoading = document.getElementById("popup-cargando");
     const modalInstanceLoading = new Modal(modalLoading, {
         backdrop: 'static',  

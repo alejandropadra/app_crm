@@ -161,21 +161,34 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
-document.addEventListener('DOMContentLoaded', async function() {
 
-    const ficha_get = document.getElementById('ficha_get').value;
-    const rutaDestino = `/app_crm/detalles_usuarios/${ficha_get}`;
-    const seguro = document.getElementById('seguro');
-    const textoPrincipalModal = document.getElementById('textoPrincipalModal');
-    const textoSmall = document.getElementById('textoSmall');
-    const spanEstadoActual = document.getElementById('estadoActual');
-    const checkbox = document.getElementById('inpLock')
+
+
+
+
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", async function () {
+
+
+    const radioButtons = document.querySelectorAll('input[name="radio"]');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
     const modal = document.getElementById("popup-modal");
     const cancelButtons = document.querySelectorAll('#cancelButtons, .cancelButtons');
     const modalInstance = new Modal(modal);
+    const seguro = document.getElementById('seguro');
+    const rutaDestino = "/app_crm/configuracionGDD";
 
-    let status_actual
-    await actualizarEstadoDesdeServidor()
+
+
+
+    const spanGDD = document.getElementById('spanGDD');
+
+    let status_actual_gdd = null;
 
     async function actualizarEstadoDesdeServidor() {
         try {
@@ -188,19 +201,73 @@ document.addEventListener('DOMContentLoaded', async function() {
                 },
                 body: JSON.stringify({ numero: numeroParaEnviar })
             });
+    
             if (!response.ok) throw new Error('Error al consultar el estado');
+    
             const data = await response.json();
-            
+    
             if (data.success) {
-                status_actual = data.estado;
-                if (status_actual == "AFACTIVO"){
-                    status_actual = "Abierto";
-                }
+                status_actual_gdd = data.estado;
 
-                spanEstadoActual.textContent = status_actual;
-                spanEstadoActual.classList.remove('text-[#e32c24]', 'text-[#047c54]');
-                spanEstadoActual.classList.add(status_actual === "Abierto" ? 'text-[#047c54]' : 'text-[#e32c24]');
-                checkbox.checked = (status_actual === "Cerrado");
+                
+                /* SPAN DE GDD */
+                spanGDD.textContent = status_actual_gdd;
+
+                spanGDD.classList.remove('text-[#e32c24]', 'text-[#047c54]', 'text-[#3073f1]');
+                spanGDD.classList.add(
+                    status_actual_gdd === "Abierto"
+                        ? 'text-[#047c54]'
+                        : status_actual_gdd === "AFACTIVO"
+                        ? 'text-[#3073f1]'
+                        : 'text-[#e32c24]'
+                );
+                
+            
+                /* LOGICA PARA LOS CHECKS ACTIVE */
+                const radios = {
+                    "Cerrado": {
+                        input: document.querySelector('#inputradioDos'),
+                        label: document.querySelector('.radioCheck.uno')
+                    },
+                    "Abierto": {
+                        input: document.querySelector('#inputradio'),
+                        label: document.querySelector('.radioCheck.dos')
+                    },
+                    "AFACTIVO": {
+                        input: document.querySelector('#inputradioTres'),
+                        label: document.querySelector('.radioCheck.tres')
+                    }
+                };
+                
+
+                Object.values(radios).forEach(({ input, label }) => {
+                    input.checked = false;
+                    if (label && label.parentElement) {
+                        label.parentElement.classList.remove('active-effect');
+                    }
+                });
+                
+
+                console.log("Estado actual GDD:", status_actual_gdd);
+                
+                // Activar el radio correspondiente
+                if (status_actual_gdd === "Abierto" && radios["Abierto"]) {
+                    const { input, label } = radios["Abierto"];
+                    input.checked = true;
+                    label.parentElement.classList.add('active-effect');
+                } else if (status_actual_gdd === "Cerrado" && radios["Cerrado"]) {
+                    const { input, label } = radios["Cerrado"];
+                    input.checked = true;
+                    label.parentElement.classList.add('active-effect');
+                } else if (status_actual_gdd === "AFACTIVO" && radios["AFACTIVO"]) {
+                    const { input, label } = radios["AFACTIVO"];
+                    input.checked = true;
+                    label.parentElement.classList.add('active-effect');
+                }
+            
+
+            } else {
+                throw new Error(data.message || "Respuesta sin éxito al consultar estado");
             }
         } catch (error) {
             console.error('Error:', error);
@@ -208,38 +275,96 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    checkbox.addEventListener("click", function (event) {
-        event.preventDefault();
+    await actualizarEstadoDesdeServidor()
 
-        if (status_actual === "Abierto") {
-            textoPrincipalModal.textContent = '¿Estás seguro de hacer el bloqueo del usuario?';
-            textoSmall.textContent = 'Recuerda, se le bloqueará el proceso de GDD';
-        } else {
-            textoPrincipalModal.textContent = '¿Estás seguro de habilitar su proceso del GDD?';
-            textoSmall.textContent = 'Recuerda, se le habilitará el proceso de GDD';
-        }
+    let estadoAcambiar =null;
+    radioButtons.forEach(function(radioButton) {
+        radioButton.addEventListener('click', function(event) {
+            event.preventDefault()
+            if (this.checked) {
 
-        modal.removeAttribute("aria-hidden");
-        modal.removeAttribute("inert");
-        modalInstance.show();
+                estadoAcambiar = this.value;
+
+                if (estadoAcambiar === status_actual_gdd) {
+                    console.log('Ya está en ese estado, no se puede cambiar al mismo');
+                    showAlert('El sistema ya está en ese estado', 'error');
+                    return;
+                }
+                console.log(estadoAcambiar)
+
+                if (estadoAcambiar === "Abierto") {
+                    textoPrincipalModal.textContent = '¿Estás seguro de que quieres habilitar masivamente el proceso GDD?';
+                    textoSmall.textContent = 'Esta Acción lleva a cabo que los usuarios puedan editar y agregar nuevos indicadores, pero no podrán Agregar el campo de AFACTUAL';
+                } else if (estadoAcambiar ==="Cerrado")  {
+                    textoPrincipalModal.textContent = '¿Estás seguro de bloquear masivamente el proceso GDD?';
+                    textoSmall.textContent = 'Esta acción hará que los usuarios no puedan ni agregar ni editar los indicadores';
+                } else if(estadoAcambiar ==="AFACTIVO"){
+                    textoPrincipalModal.textContent = '¿Estás seguro de Habilitar el AFACTUAL del proceso GDD?';
+                    textoSmall.textContent = 'Esta acción hará que los usuarios puedan agregar el AFACTUAL de los indicadores, pero no podrán agregar indicadores, ni editar campos como nombre del indicador, peso, etc...';
+                }
+        
+                modal.removeAttribute("aria-hidden");
+                modal.removeAttribute("inert");
+                modalInstance.show();
+                
+            }
+        });
+    });
+
+    cancelButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            btn.blur();
+            document.activeElement.blur();
+            modal.setAttribute("aria-hidden", "true");
+            modal.setAttribute("inert", "");
+            modalInstance.hide();
+            const backdrop = document.querySelector('[modal-backdrop]');
+            if (backdrop) backdrop.remove();
+            actualizarSeleccionVisual();
+        });
     });
 
 
 
-    seguro.addEventListener("click", async function () {
-        
-        let nuevoEstado
-        
-        if (status_actual === "Abierto" || status_actual === "AFACTIVO"){
-            nuevoEstado = 'Cerrado'
-        }else{
-            nuevoEstado = 'Abierto'
+function actualizarSeleccionVisual() {
+    const radios = {
+        "Cerrado": {
+            input: document.querySelector('#inputradioDos'),
+            label: document.querySelector('.radioCheck.uno')
+        },
+        "Abierto": {
+            input: document.querySelector('#inputradio'),
+            label: document.querySelector('.radioCheck.dos')
+        },
+        "AFACTIVO": {
+            input: document.querySelector('#inputradioTres'),
+            label: document.querySelector('.radioCheck.tres')
         }
-        console.log("Nuevo estado a enviar:", nuevoEstado);
+    };
+    
+    // Desmarcar todos
+    Object.values(radios).forEach(({ input, label }) => {
+        input.checked = false;
+        if (label && label.parentElement) {
+            label.parentElement.classList.remove('active-effect');
+        }
+    });
+    
+    // Marcar el del estado actual
+    if (status_actual_gdd && radios[status_actual_gdd]) {
+        const { input, label } = radios[status_actual_gdd];
+        input.checked = true;
+        if (label && label.parentElement) {
+            label.parentElement.classList.add('active-effect');
+        }
+    }
+}
 
+
+    seguro.addEventListener("click", async function () {
 
         try {
-            const response = await fetch(rutaDestino, {
+            const response = await fetch(`/app_crm/detalles_usuarios/${ficha_get}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -247,7 +372,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 },
                 body: JSON.stringify({
                     accion: "actualizar",
-                    estado: nuevoEstado
+                    estado: estadoAcambiar
                 })
             });
 
@@ -268,69 +393,15 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
 
-    cancelButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
-            btn.blur();
-            document.activeElement.blur();
-            checkbox.checked = (status_actual === 'Cerrado');
-            modal.setAttribute("aria-hidden", "true");
-            modal.setAttribute("inert", "");
-            modalInstance.hide();
-            const backdrop = document.querySelector('[modal-backdrop]');
-            if (backdrop) backdrop.remove();
-        });
-    });
-
-    /*
-    radioButtons.forEach(function(radioButton) {
-        radioButton.addEventListener('change', async function() { 
-            if (this.checked) {
-                const selectedValue = this.value;
-                console.log(selectedValue);
+    
+    
 
 
-                
-                try {
-                    const response = await fetch(rutaDestino, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRFToken": csrfToken
-                        },
-                        body: JSON.stringify(selectedValue)
-                    });
-            
-                    if (!response.ok) throw new Error('Error en la solicitud');
-            
-                    const result = await response.json();
-                    console.log('Respuesta del servidor:', result);
-
-
-
-                    await actualizarEstadoDesdeServidor(); 
-            
-                } catch (error) {
-                    console.error('Error al enviar nuevo estado:', error);
-                    alert('Ocurrió un error al actualizar el estado.');
-                } finally {
-                    // Asegúrate de que modalInstance esté definido
-                    if (typeof modalInstance !== 'undefined' && modalInstance) {
-                        modalInstance.hide();
-                    }
-                }
-            }
-        });
-    });*/
-
-
-
+    
+    
 
 
 });
-
-
-
-
 
 
 

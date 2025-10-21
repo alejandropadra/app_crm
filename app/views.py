@@ -1976,12 +1976,12 @@ def consultarStatus():
 def consultar_status_con_ficha():
     try:
         datos = request.get_json()
-        print(datos)
         if datos and 'numero' in datos:
             ficha = datos['numero']
             estado= User.estado_gdd(ficha)
-            print(estado)
+
             
+
             # Devolver solo la respuesta específica para este caso
             return jsonify({
                 "success": True,
