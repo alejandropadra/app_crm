@@ -1,0 +1,184 @@
+/* Variables de Color (sin cambios) */
+.card-animated-azul {
+    --bg-color-main: #496fb6; 
+    --bg-color-light: #91bfff; 
+    --text-color-hover: #FFFFFF;
+}
+
+/* Estilos de la tarjeta (ajustado el height para que fluya mejor) */
+.card-animated-azul {
+    width: 100%; 
+    height: 100%; /* Se ajusta a su contenido */
+    min-height: 250px; /* Mantiene una altura mínima para la animación */
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease-out;
+}
+
+.card-animated-azul:hover {
+    transform: translateY(-5px) scale(1.005);
+    box-shadow: 0 24px 36px rgba(0, 0, 0, 0.11),
+                0 24px 46px rgba(73, 111, 182, 0.538); 
+}
+
+
+/* Overlay (sin cambios) */
+.card-animated-azul .overlay {
+    width: 118px; 
+    height: 118px;
+    border-radius: 50%;
+    background: var(--bg-color-main); 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0); 
+    z-index: 0;
+    transition: transform 0.4s ease-out;
+}
+
+.card-animated-azul:hover .overlay {
+    transform: translate(-50%, -50%) scale(12); 
+}
+
+
+/* Círculo que contiene el icono (ajustado para que el fondo sea el color principal por defecto) */
+.card-animated-azul .circle {
+    width: 110px;
+    height: 110px;
+    z-index: 10;
+    background: var(--bg-color-main); /* Cambiado a color principal por defecto */
+    border: 2px solid var(--bg-color-main);
+    transition: all 0.3s ease-out;
+}
+
+.card-animated-azul:hover .circle {
+    background: var(--bg-color-light) !important; 
+    border-color: var(--bg-color-light) !important; 
+}
+
+
+/* El icono (se asegura que sea blanco por defecto) */
+.card-animated-azul .circle svg {
+    stroke: #FFFFFF; /* Icono blanco por defecto */
+}
+
+/* Texto y otros elementos al hacer hover (sin cambios) */
+.card-animated-azul:hover .flex-col * {
+    color: var(--text-color-hover) !important;
+    stroke: var(--text-color-hover) !important;
+}
+
+
+
+
+
+/* Radio buttons para los cambiar los videos*/
+
+.tabs {
+  display: flex;
+  position: relative;
+  background-color: #fff;
+  box-shadow: 0 0 1px 0 rgba(24, 94, 224, 0.15), 0 6px 12px 0 rgba(24, 94, 224, 0.15);
+  padding: 0.75rem;
+  border-radius: 99px;
+  width: 400px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  margin-bottom: 25px;
+}
+
+.tabs * {
+  z-index: 2;
+}
+
+.container input[type="radio"] {
+  display: none;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  width: 210px;
+  font-size: .8rem;
+  color: black;
+  font-weight: 500;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: color 0.15s ease-in;
+  white-space: nowrap;
+}
+
+.container input[type="radio"]:checked + label {
+  color: #185ee0;
+}
+
+.container input[type="radio"]:checked + label > .notification {
+  background-color: #185ee0;
+  color: #fff;
+  margin: 0px;
+}
+
+.container input[id="radio-1"]:checked ~ .glider {
+  transform: translateX(0);
+}
+
+.container input[id="radio-2"]:checked ~ .glider {
+  transform: translateX(100%);
+}
+
+.glider {
+  position: absolute;
+  display: flex;
+  height: 30px;
+  width: 185px; 
+  background-color: #e6eef9;
+  z-index: 1;
+  border-radius: 99px;
+  transition: 0.25s ease-out;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.container input[id="radio-1"]:checked ~ .glider {
+  transform: translate(0, -50%); 
+}
+
+.container input[id="radio-2"]:checked ~ .glider {
+  transform: translate(100%, -50%); 
+}
+
+@media (max-width: 700px) {
+  .tabs {
+    transform: scale(0.6);
+  }
+}
+
+
+/* Slider */
+    .slider-container {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .slider-content {
+        display: flex;
+        transition: transform 0.4s ease-in-out;
+        width: 200%; 
+    }
+    .slider-panel {
+        width: 50%; 
+        flex-shrink: 0;
+        box-sizing: border-box; 
+        padding: 0 1rem; 
+    }
+
+    .slider-content.show-competencias {
+        transform: translateX(-50%); 
+}
+
+

@@ -90,7 +90,8 @@
                     <span class="sr-only">Close menu</span>
                 </button>
             </div>
-            <div id="logo" class=" flex-col w-full rounded-[26px] items-center cursor-pointer " onclick="window.location.href='/app_crm/gdd/menu'" >
+            
+            <div id="logo" class=" flex-col w-full rounded-[26px] items-center cursor-pointer " >
 
                 <div class="flex items-end gap-2">
                     <div class="w-[68px] flex-shrink-0">
@@ -195,8 +196,10 @@
 
 
         <!-- Menú Lateral -->
-        <div id="SideNav" class=" animate-slide-left bg-[--azul-dark] relative p-[30px] sombra rounded-[23px] h-full w-[17rem] transition-all duration-300 hidden xl:!block ">
-            <div id="logo" class=" flex-col w-full rounded-[26px] items-center cursor-pointer " onclick="window.location.href='/app_crm/gdd/menu'" >
+        <div id="SideNav" class="animate-slide-left bg-[--azul-dark] relative p-[30px] sombra rounded-[23px] h-full w-[17rem] transition-all duration-300 hidden xl:!block">
+    
+            <!-- Logo (fijo arriba) -->
+            <div id="logo" class="flex-col w-full rounded-[26px] items-center cursor-pointer flex-shrink-0" onclick="window.location.href='/app_crm/gdd/menu'">
                 <div class="flex items-end justify-between gap-2">
                     <div class="w-[68px] flex-shrink-0">
                         <img src="{{ url_for('static', filename = 'img/Corimon_logo.png') }}" alt="" class="w-full h-auto object-contain">
@@ -206,115 +209,117 @@
                     </div>
                 </div>
                 <hr class="border-t border-rojo-crm w-full my-1">
-
-                <h4 class=" text-white font-extralight tracking-[2px] text-[13px] descripcion">y sus empresas filiales</h4>
+                <h4 class="text-white font-extralight tracking-[2px] text-[13px] descripcion">y sus empresas filiales</h4>
             </div>
     
             <!-- Botón para abrir/cerrar -->
-            <div class="absolute bg-orange-500 transition-all duration-150 ease-in-out hover:bg-green-600  
-                        top-24 right-[-15px] text-white w-10 h-10 rounded-full p-3 flex justify-center items-center cursor-pointer" 
-                        id="abrir-cerrar">
+            <div class="absolute bg-orange-500 transition-all duration-150 ease-in-out hover:bg-green-600 top-24 right-[-15px] text-white w-10 h-10 rounded-full p-3 flex justify-center items-center cursor-pointer z-10" 
+                id="abrir-cerrar">
                 <span class="" id="icono-flecha">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-left-icon lucide-chevrons-left"><path d="m11 17-5-5 5-5"/><path d="m18 17-5-5 5-5"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-left-icon lucide-chevrons-left">
+                        <path d="m11 17-5-5 5-5"/><path d="m18 17-5-5 5-5"/>
+                    </svg>
                 </span>
             </div>
     
             
     
             <!-- Menú -->
-            <div id="menu">
-                <h3 class="small my-4">Menú:</h3>
-                <ul class="list-none gap-4 flex-col flex">
-    
-                    <li onclick="toggleSubMenu(this)" class="cursor-pointer ">
-                        <a href="#" class="flex items-center justify-between p-3 gap-4 rounded-[22px] text-white hover:-translate-y-1 duration-200 ease-in-out hover:bg-orange-500" id="gestion">
-                            <div class="flex gap-5 items-center">
-                                <span class=" text-[28px] flex-shrink-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-icon lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                                </span>
-                                <div class="descripcion text-[15px] font-semibold">
-                                    Gestión del Desempeño
+            <div class="overflow-y-auto overflow-x-hidden h-[calc(100%-100px)] mt-4 pr-2" id="capa-scroll-sidenavMenu">
+                <div id="menu">
+                    <h3 class="small my-4">Menú:</h3>
+                    <ul class="list-none gap-4 flex-col flex">
+        
+                        <li onclick="toggleSubMenu(this)" class="cursor-pointer ">
+                            <a href="#" class="flex items-center justify-between p-3 gap-4 rounded-[22px] text-white hover:-translate-y-1 duration-200 ease-in-out hover:bg-orange-500" id="gestion">
+                                <div class="flex gap-5 items-center">
+                                    <span class=" text-[28px] flex-shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-icon lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    </span>
+                                    <div class="descripcion text-[15px] font-semibold">
+                                        Gestión del Desempeño
+                                    </div>
                                 </div>
-                            </div>
-                            <span class="material-symbols-rounded transition-transform duration-300 {%if vista%} {%if vista == 'gdd'%} rotate-180 {%endif%} {%endif%}">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
-                            </span>
-                        </a>
-                        
-                        <!-- Submenú con animación -->
-                        <div class="overflow-hidden {%if vista%} {%if vista == 'gdd'%} h-auto {%else%} max-h-0 {%endif%} {%endif%} transition-[max-height] duration-300 ease-in-out submenu ">
-                            <ul class="py-2 bg-transparent rounded-md relative after:absolute after:top-0 after:left-5 after:h-full after:w-[2px] after:bg-red-600 ">
-                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white" >
-                                    <a href="{{ url_for('.gdi')}}" class=" flex items-center gap-2  ">
-                                        <span class="">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trophy-icon lucide-trophy"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-                                        </span>
-                                        <span class="descipcionesSubmenu">Gestión de Indicadores</span>
-                                    </a>
-                                </li>
-                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white ">
-                                    <a  class=" flex items-center gap-2  ">
-                                        <span class="">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-handshake-icon lucide-handshake"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/></svg>
-                                        </span>
-                                        <span class="descipcionesSubmenu">Competencias</span>
-                                    </a>
-
-                                    <li class=" ml-5 mb-3 pl-1  bg-transparent rounded-md relative after:absolute after:top-0 after:left-5 after:h-full after:w-[2px] after:bg-red-600">
-                                        <a  href="{{ url_for('.evaluacion_competencias', ficha_get=current_user.ficha) }}"
-                                            class="relative text-white gap-1  hover:text-rojo-crm pl-6 my-2 flex items-center">
-                                        
-                                            <span>
-                                                <svg svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-candlestick-icon lucide-chart-candlestick"><path d="M9 5v4"/><rect width="4" height="6" x="7" y="9" rx="1"/><path d="M9 15v2"/><path d="M17 3v2"/><rect width="4" height="8" x="15" y="5" rx="1"/><path d="M17 13v3"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/></svg>
+                                <span class="material-symbols-rounded transition-transform duration-300 {%if vista%} {%if vista == 'gdd'%} rotate-180 {%endif%} {%endif%}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
+                                </span>
+                            </a>
+                            
+                            <!-- Submenú con animación -->
+                            <div class="overflow-hidden {%if vista%} {%if vista == 'gdd'%} h-auto {%else%} max-h-0 {%endif%} {%endif%} transition-[max-height] duration-300 ease-in-out submenu ">
+                                <ul class="py-2 bg-transparent rounded-md relative after:absolute after:top-0 after:left-5 after:h-full after:w-[2px] after:bg-red-600 ">
+                                    <li class=" pl-8 py-2 hover:text-rojo-crm text-white" >
+                                        <a href="{{ url_for('.gdi')}}" class=" flex items-center gap-2  ">
+                                            <span class="">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trophy-icon lucide-trophy"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
                                             </span>
-                                            
-                                            Autoevaluacion
+                                            <span class="descipcionesSubmenu">Gestión de Indicadores</span>
                                         </a>
-
-                                        <a  href="{{ url_for('.Seleccionar_evaluar')}}"
-                                            class="relative text-white gap-1  hover:text-rojo-crm pl-6 my-2 flex items-center">
-                                            <span>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-notebook-pen-icon lucide-notebook-pen"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/></svg>
-                                            </span>
-                                        Evaluacion a Terceros
-                                        </a>
-
-
                                     </li>
-                                </li>
-                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white ">
-                                    <a href="" class=" flex items-center gap-2  ">
-                                        <span class="">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-clock-icon lucide-file-clock"><path d="M16 22h2a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><circle cx="8" cy="16" r="6"/><path d="M9.5 17.5 8 16.25V14"/></svg>
-                                        </span>
-                                        <span class="descipcionesSubmenu">Reportes</span>
-                                    </a>
-                                </li>
+                                    <li class=" pl-8 py-2 hover:text-rojo-crm text-white ">
+                                        <a  class=" flex items-center gap-2  ">
+                                            <span class="">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-handshake-icon lucide-handshake"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/></svg>
+                                            </span>
+                                            <span class="descipcionesSubmenu">Competencias</span>
+                                        </a>
 
-                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white">
-                                    <a href="{{ url_for('.gestion_equipo')}}" class=" flex items-center gap-2  ">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-command-icon lucide-command"><path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"/></svg>
-                                        <span class="descipcionesSubmenu">Gestión de Equipo</span>
-                                    </a>
-                                </li>
+                                        <li class=" ml-5 mb-3 pl-1  bg-transparent rounded-md relative after:absolute after:top-0 after:left-5 after:h-full after:w-[2px] after:bg-red-600">
+                                            <a  href="{{ url_for('.evaluacion_competencias', ficha_get=current_user.ficha) }}"
+                                                class="relative text-white gap-1  hover:text-rojo-crm pl-6 my-2 flex items-center">
+                                            
+                                                <span>
+                                                    <svg svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-candlestick-icon lucide-chart-candlestick"><path d="M9 5v4"/><rect width="4" height="6" x="7" y="9" rx="1"/><path d="M9 15v2"/><path d="M17 3v2"/><rect width="4" height="8" x="15" y="5" rx="1"/><path d="M17 13v3"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/></svg>
+                                                </span>
+                                                
+                                                Autoevaluacion
+                                            </a>
 
-                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white">
-                                    <a {%if etapa_general <2 %} onclick="showAlertGrandes('Esta sección no está disponible', 'atencion')" {%else%}  href="{{ url_for('.gestion_equipo_detalles', ficha_get=current_user.ficha) }}" {%endif%}  class=" flex items-center gap-2  ">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calculator-icon lucide-calculator"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
-                                        <span class="descipcionesSubmenu">Resultados</span>
-                                    </a>
-                                </li>
-                                
-                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white">
-                                    <a  href="{{ url_for('.Documentacion')}}" class=" flex items-center gap-2  ">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-marked-icon lucide-book-marked"><path d="M10 2v8l3-3 3 3V2"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>
-                                        <span class="descipcionesSubmenu">Documentación</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
+                                            <a  href="{{ url_for('.Seleccionar_evaluar')}}"
+                                                class="relative text-white gap-1  hover:text-rojo-crm pl-6 my-2 flex items-center">
+                                                <span>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-notebook-pen-icon lucide-notebook-pen"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/></svg>
+                                                </span>
+                                            Evaluacion a Terceros
+                                            </a>
+
+
+                                        </li>
+                                    </li>
+                                    <li class=" pl-8 py-2 hover:text-rojo-crm text-white ">
+                                        <a href="" class=" flex items-center gap-2  ">
+                                            <span class="">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-clock-icon lucide-file-clock"><path d="M16 22h2a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><circle cx="8" cy="16" r="6"/><path d="M9.5 17.5 8 16.25V14"/></svg>
+                                            </span>
+                                            <span class="descipcionesSubmenu">Reportes</span>
+                                        </a>
+                                    </li>
+
+                                    <li class=" pl-8 py-2 hover:text-rojo-crm text-white">
+                                        <a href="{{ url_for('.gestion_equipo')}}" class=" flex items-center gap-2  ">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-command-icon lucide-command"><path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"/></svg>
+                                            <span class="descipcionesSubmenu">Gestión de Equipo</span>
+                                        </a>
+                                    </li>
+
+                                    <li class=" pl-8 py-2 hover:text-rojo-crm text-white">
+                                        <a {%if etapa_general <2 %} onclick="showAlertGrandes('Esta sección no está disponible', 'atencion')" {%else%}  href="{{ url_for('.gestion_equipo_detalles', ficha_get=current_user.ficha) }}" {%endif%}  class=" flex items-center gap-2  ">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calculator-icon lucide-calculator"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+                                            <span class="descipcionesSubmenu">Resultados</span>
+                                        </a>
+                                    </li>
+                                    
+                                    <li class=" pl-8 py-2 hover:text-rojo-crm text-white">
+                                        <a  href="{{ url_for('.Documentacion')}}" class=" flex items-center gap-2  ">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-marked-icon lucide-book-marked"><path d="M10 2v8l3-3 3 3V2"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>
+                                            <span class="descipcionesSubmenu">Documentación</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     

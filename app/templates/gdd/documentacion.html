@@ -1,91 +1,53 @@
 {% extends 'layout.html' %}
 {% from 'helpers/_forms.html' import render_field %}
 
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename = 'css/documentacion.css') }}">
+{% endblock%}
 
 {% block body%}
-<style>
-/* Variables de Color (sin cambios) */
-.card-animated-azul {
-    --bg-color-main: #496fb6; 
-    --bg-color-light: #91bfff; 
-    --text-color-hover: #FFFFFF;
-}
 
-/* Estilos de la tarjeta (ajustado el height para que fluya mejor) */
-.card-animated-azul {
-    width: 100%; 
-    height: 100%; /* Se ajusta a su contenido */
-    min-height: 250px; /* Mantiene una altura mínima para la animación */
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease-out;
-}
+<div class="container mx-auto px-4 mt-2">
+    <div class="tabs">
+        <input type="radio" id="radio-1" name="tabs" checked="" data-target="indicadores-content" >
+        <label class="tab font-semibold" for="radio-1">Gestión de Indicadores</label>
+        
+        <input type="radio" id="radio-2" name="tabs" data-target="competencias-content">
+        <label class="tab font-semibold" for="radio-2">Evaluación de Competencias</label>
+        
+        <span class="glider"></span>
+    </div>
 
-.card-animated-azul:hover {
-    transform: translateY(-5px) scale(1.005);
-    box-shadow: 0 24px 36px rgba(0, 0, 0, 0.11),
-                0 24px 46px rgba(73, 111, 182, 0.538); 
-}
+    <div class="slider-container">
+        <div class="slider-content" id="videos-wrapper-slider">
 
+            <div class="slider-panel" id="indicadores-content">
+                <h2 class="text-2xl font-bold mb-4 text-center">Tutorial: Gestión de Indicadores - Paso a Paso</h2>
 
-/* Overlay (sin cambios) */
-.card-animated-azul .overlay {
-    width: 118px; 
-    height: 118px;
-    border-radius: 50%;
-    background: var(--bg-color-main); 
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0); 
-    z-index: 0;
-    transition: transform 0.4s ease-out;
-}
+                <div class="flex justify-center">
+                    <video controls class="rounded-lg **w-full max-w-4xl**">
+                        <source src="{{ url_for('static', filename='adj/Video/Video_de_GDD.mp4') }}" type="video/mp4">
+                        Tu navegador no soporta la reproducción de videos.
+                    </video>
+                </div>
+            </div>
 
-.card-animated-azul:hover .overlay {
-    transform: translate(-50%, -50%) scale(12); 
-}
+            <div class="slider-panel" id="competencias-content">
+                <h2 class="text-2xl font-bold mb-4 text-center">Tutorial: Evaluación de Competencias y Cierre - Paso a Paso</h2>
 
+                <div class="flex justify-center">
+                    <video controls class="rounded-lg w-full max-w-4xl" id="video2">
+                        <source src="{{ url_for('static', filename='adj/Video/Nuevas_funciones_GDD.mp4') }}" type="video/mp4">
+                        Tu navegador no soporta la reproducción de videos.
+                    </video>
+                </div>
+            </div>
 
-/* Círculo que contiene el icono (ajustado para que el fondo sea el color principal por defecto) */
-.card-animated-azul .circle {
-    width: 110px;
-    height: 110px;
-    z-index: 10;
-    background: var(--bg-color-main); /* Cambiado a color principal por defecto */
-    border: 2px solid var(--bg-color-main);
-    transition: all 0.3s ease-out;
-}
-
-.card-animated-azul:hover .circle {
-    background: var(--bg-color-light) !important; 
-    border-color: var(--bg-color-light) !important; 
-}
-
-
-/* El icono (se asegura que sea blanco por defecto) */
-.card-animated-azul .circle svg {
-    stroke: #FFFFFF; /* Icono blanco por defecto */
-}
-
-/* Texto y otros elementos al hacer hover (sin cambios) */
-.card-animated-azul:hover .flex-col * {
-    color: var(--text-color-hover) !important;
-    stroke: var(--text-color-hover) !important;
-}
-
-</style>
-
-<h2 class="text-2xl font-bold mb-2 px-5">Tutorial: Plataforma de Gestión de Desempeño - Paso a Paso</h2>
-
-<div class="container mx-auto p-4">
-    <div class="flex justify-center">
-        <video controls class="rounded-lg shadow-lg w-full h-full **max-w-5xl lg:max-w-6xl**">
-            <source src="{{ url_for('static', filename='adj/Video/Video de GDD.mp4') }}" type="video/mp4">
-            Tu navegador no soporta la reproducción de videos.
-        </video>
+        </div>
     </div>
 </div>
+
+
 
 <div class="w-[90%] max-w-3xl lg:max-w-4xl px-4 mt-6 mb-6"> 
     
@@ -221,3 +183,7 @@
 
 
 {% endblock %}
+
+{% block js%}
+    <script src="{{ url_for('static', filename='js/documentacion.js') }}"></script>
+{% endblock %}   

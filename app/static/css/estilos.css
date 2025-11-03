@@ -195,6 +195,31 @@ p{
 
 
 
+#capa-scroll-sidenavMenu {
+    --sb-size: 2px;
+}
+#capa-scroll-sidenavMenu::-webkit-scrollbar {
+    width: 0;
+    transition: width ease-in-out .3s;
+}
+
+
+#capa-scroll-sidenavMenu:hover::-webkit-scrollbar {
+    width: var(--sb-size);
+}
+
+
+#capa-scroll-sidenavMenu::-webkit-scrollbar-track {
+    background: var(--azul-dark);
+    border-radius: 2px;
+}
+
+#capa-scroll-sidenavMenu::-webkit-scrollbar-thumb {
+    background: var(--Rojo);
+    border-radius: 2px;
+}
+
+
 #down {
     background-color: var(--blanco);
     position: absolute;
