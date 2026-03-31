@@ -1,9 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
+    console.log('sads')
     const indicador = document.getElementById('indicador').value;
     const fichaCurrentUser = document.getElementById('fichaCurrentUser').value;
     const indicadorStatus = document.getElementById('statusIndicador').value;
+    console.log(indicadorStatus)
 
-    if (indicador !== fichaCurrentUser || indicadorStatus !== 'Abierto') {
+    if (indicador !== fichaCurrentUser || indicadorStatus !== 'AFACTIVO') {
         showAlert("Todos los Inputs están bloqueados, solo puede visualizar", "success");
         const elementos = document.querySelectorAll('#formulario input, #formulario textarea, #formulario select, #formulario button');
         elementos.forEach(el => el.disabled = true);
