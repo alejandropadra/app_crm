@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const indicadorStatus = document.getElementById('statusIndicador').value;
     console.log(indicadorStatus)
 
-    if (indicador !== fichaCurrentUser || indicadorStatus !== 'AFACTIVO') {
+    if (indicador !== fichaCurrentUser || indicadorStatus !== 'Abierto') {
         showAlert("Todos los Inputs están bloqueados, solo puede visualizar", "success");
         const elementos = document.querySelectorAll('#formulario input, #formulario textarea, #formulario select, #formulario button');
         elementos.forEach(el => el.disabled = true);
