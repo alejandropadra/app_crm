@@ -363,18 +363,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     const segurotres = document.getElementById('seguroTres');
     const rutaDestinoCorreo = "/app_crm/configuracionGDD/CorreoMasivo";
     const textoPrincipalModalDos = document.getElementById('textoPrincipalModalTres');
-    const textoSmallDos  = document.getElementById('textoSmallTres');
+    const textoSmallDos  = document.getElementById('textoSmallCuatro');
     let texto =''
     enviarStartDos.addEventListener("click",  () => {
 
-            const finDate = document.getElementById('finDate').value;
-            console.log(finDate)
-            if(!finDate){
+            const segundaEtapaDate = document.getElementById('segundaEtapaDate').value;
+            console.log(segundaEtapaDate)
+            if(!segundaEtapaDate){
                 showAlert('Seleccione un rango de fecha', "error")
                 return;
             }
 
-            texto = `${finDate}`
+            texto = `${segundaEtapaDate}`
 
             textoPrincipalModalDos.textContent = '¿Estas seguro de enviar la notificacion de Cierre?';
             textoSmallDos.textContent = `Se enviará que el periodo para la carga de la información será desde ${texto}. `;
@@ -400,6 +400,104 @@ document.addEventListener("DOMContentLoaded", async function () {
                 body: JSON.stringify({
                     texto: texto,
                     tipo: 'cierre'
+                })
+            });
+
+            if (!response.ok) throw new Error('Error en la solicitud');
+
+            const result = await response.json();
+            console.log('Respuesta del servidor:', result);
+            showAlert("Notificación Masiva Realizada", "Success")
+        } catch (error) {
+            console.error('Error al enviar nuevo estado:', error);
+            alert('Ocurrió un error al actualizar el estado.');
+        } finally {
+            modalInstanceLoading.hide();
+            const backdrop = document.querySelector('[modal-backdrop]');
+            if (backdrop) backdrop.remove();
+
+        }
+    });
+
+    cancelButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            btn.blur();
+            document.activeElement.blur();
+            modal.setAttribute("aria-hidden", "true");
+            modal.setAttribute("inert", "");
+            modalInstance.hide();
+            const backdrop = document.querySelector('[modal-backdrop]');
+            if (backdrop) backdrop.remove();
+        });
+    });
+    
+    
+
+
+});
+
+
+document.addEventListener("DOMContentLoaded", async function () {
+    const enviarStartCinco = document.getElementById('enviarStartCinco');
+
+    const modal = document.getElementById("popup-modalCinco");
+    const modalLoading = document.getElementById("popup-cargando");
+    const modalInstanceLoading = new Modal(modalLoading, {
+        backdrop: 'static',  
+        closable: false     
+    });
+    const cancelButtons = document.querySelectorAll('#cancelButtons, .cancelButtons');
+    const modalInstance = new Modal(modal);
+    const segurocuatro = document.getElementById('seguroCinco');
+    const rutaDestinoCorreo = "/app_crm/configuracionGDD/CorreoMasivo";
+    const textoPrincipalModalCinco = document.getElementById('textoPrincipalModalCinco');
+    const textoSmallCinco  = document.getElementById('textoSmallCinco');
+    let texto =''
+    enviarStartCinco.addEventListener("click",  () => {
+
+        
+            const segundaEtapaDate = document.getElementById('segundaEtapaDate').value;
+            console.log(segundaEtapaDate)
+
+            
+            if(!segundaEtapaDate){
+                showAlert('Seleccione un rango de fecha', "error")
+                return;
+            }
+
+            const fechas = segundaEtapaDate.split(' - ');
+
+            if (fechas.length === 2) {
+                texto = `${fechas[0]} hasta ${fechas[1]}`;
+                console.log(texto);
+            } else {
+                console.log("Formato inválido:", startdate);
+            }
+
+            textoPrincipalModalCinco.textContent = '¿Estas seguro de enviar la notificacion de carga de resultados y proceso de evaluacion de competencias?';
+            textoSmallCinco.textContent = `Se enviará que el periodo para la carga de la información será desde ${texto}. `;
+                
+        
+                modal.removeAttribute("aria-hidden");
+                modal.removeAttribute("inert");
+                modalInstance.show();
+    });
+
+
+    segurocuatro.addEventListener("click", async function () {
+        modalLoading.removeAttribute("aria-hidden");
+        modalLoading.removeAttribute("inert");
+        modalInstanceLoading.show();
+        try {
+            const response = await fetch(rutaDestinoCorreo, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken
+                },
+                body: JSON.stringify({
+                    texto: texto,
+                    tipo: 'InicioEtapaDos'
                 })
             });
 

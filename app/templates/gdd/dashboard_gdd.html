@@ -1,0 +1,289 @@
+{% extends 'layout.html' %}
+{% from 'helpers/_forms.html' import render_field %}
+
+{% block estilos %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_gdd.css') }}">
+{% endblock %}
+
+{% block body %}
+
+    <input type="hidden" id="año_fiscal" value="{{ variables_configuracion_global.año_fiscal }}">
+
+    <div class="w-full bg-white opado shadow-light h-auto rounded-2xl py-5 px-4 flex flex-col gap-5 relative mx-2 mt-4" >
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <h2 class="text-2xl font-semibold text-gray-800">Dashboard de Gestión del Desempeño</h2>
+        </div>
+
+        <div class="dashboard-grid">
+
+            <div class="card-dashboard opado">
+                <div class="cp-header">
+                    <div>
+                        <h3 class="cp-title">Cumplimiento global </h3>
+                        <p class="cp-subtitle">{{ variables_configuracion_global.año_fiscal }}</p>
+                    </div>
+                </div>
+                <div class="cp-body">
+                    <div id="chart-cumplimiento-global" class="cp-chart-cumplimiento-global"></div>
+
+                    <div id="cumplimiento_anterior">
+                        <h1 id="valor-anterior" data-valor="{{ promedio_global_anterior }}" >0%</h1> 
+                        <p>Vs el año anterior</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="dashboard-col-stack">
+                <div class="card-dashboard opado">
+                    <div class="cp-header">
+                        <div>
+                            <h3 class="cp-title">Cumplimiento por Empresa</h3>
+                            
+                        </div>
+                    </div>
+                    <div class="cp-body">
+                        <div id="chart-empresas" class="cp-chart-barras"></div>
+                    </div>
+
+                </div>
+
+                <div class="card-dashboard opado">
+                    <div class="cp-header">
+                        <div>
+                            <h3 class="cp-title">Matriz de cumplimiento por nivel y filial</h3>
+                        </div>
+                        
+                    </div>
+                    <div class="cp-body">
+                        <div id="chart-nivel-filial" class="cp-chart-nivel-filial"></div>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="card-dashboard opado">
+                <div class="cp-header">
+                    <div>
+                        <h3 class="cp-title">Distribución de Performance</h3>
+                        <p class="cp-subtitle">{{ variables_configuracion_global.año_fiscal }}</p>
+                    </div>
+                    
+                </div>
+                <div class="cp-body performance ">
+                    <div id="chart-parametros" class="cp-chart"></div>
+                    <div id="legend-parametros" class="cp-legend"></div>
+
+                    <div id="total">
+                        <h1 id="badge-total" data-valor="{{ promedio_global_anterior }}"  ></h1> 
+                        <p>Total Participantes</p>
+                    </div>
+
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+            {#
+        <div class="card-dashboard opado">
+            <div class="cp-header">
+                <div>
+                    <h3 class="cp-title">Próximamente</h3>
+                    <p class="cp-subtitle">Otro indicador del dashboard</p>
+                </div>
+            </div>
+            <div class="placeholder-body">
+                <span>Sin datos</span>
+            </div>
+        </div>#}
+    
+    <div class="w-full bg-white opado shadow-light h-auto rounded-2xl py-5 px-4 flex flex-col gap-5 z-50 relative mx-1 mt-4" >
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <h2 class="text-2xl font-semibold text-gray-800">Filtros</h2>
+        </div>
+
+        <div class=" grid grid-cols-4 gap-4">
+            <div class="col-span-1 dropdown-container flex items-center"><!--Filtro de la filial-->
+                <div class="flex items-center justify-between w-full">
+                    <button id="dropdown-button-2" data-dropdown-toggle="dropdown-search-city" class=" rounded-xl w-full  shrink-0 z-10 inline-flex items-center justify-between py-2.5 px-4 text-sm font-medium text-center text-gray-500 border  border-gray-300  bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type="button">
+                        Filtro por Filial
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                </div>
+
+                <div id="dropdown-search-city" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg  w-44 dark:bg-gray-700">
+                    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdown-button-2">
+                        <li>
+                            <button type="button" data-filial-button="CRM" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                <div class="inline-flex items-center">
+                                    <div class=" w-8">
+                                        <img src="{{ url_for('static', filename='img/Corimon_logo.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                    </div>
+                                    
+                                    <P class="">Corimon, C.A</P>
+                                </div>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" data-filial-button="MGR" class=" FilialComparar inline-flex w-full px-4  gap-1 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                <div class="inline-flex items-center">
+                                    <div class=" w-8">
+                                        <img src="{{ url_for('static', filename='img/mg.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                    </div>
+                                    
+                                    <P class="">Montana Gráfica</P>
+                                </div>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" data-filial-button="CRP" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                <div class="inline-flex items-center">
+                                    <div class=" w-8">
+                                        <img src="{{ url_for('static', filename='img/CRP.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                    </div>
+                                    
+                                    <P class="">Corimon Pinturas</P>
+                                </div>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" data-filial-button="CER" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                <div class="inline-flex items-center">
+                                    <div class=" w-8">
+                                        <img src="{{ url_for('static', filename='img/CER.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                    </div>
+                                    
+                                    <P class="">Cerdex</P>
+                                </div>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" data-filial-button="EEE" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                <div class="inline-flex items-center">
+                                    <div class=" w-8">
+                                        <img src="{{ url_for('static', filename='img/EEE.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                    </div>
+                                    
+                                    <P class="">Envaca</P>
+                                </div>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" data-filial-button="RES" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                <div class="inline-flex items-center">
+                                    <div class=" w-8">
+                                        <img src="{{ url_for('static', filename='img/RES.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                    </div>
+                                    
+                                    <P class="">Resimon</P>
+                                </div>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" data-filial-button="PPV" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                <div class="inline-flex items-center">
+                                    <div class=" w-8">
+                                        <img src="{{ url_for('static', filename='img/PPV.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                    </div>
+                                    
+                                    <P class="">PPV</P>
+                                </div>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" data-filial-button="TMO" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                <div class="inline-flex items-center">
+                                    <div class=" w-8">
+                                        <img src="{{ url_for('static', filename='img/tiendasMontana.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                    </div>
+                                    
+                                    <P class="">Tiendas Montana</P>
+                                </div>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" data-filial-button="ALL" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                                <div class="inline-flex items-center">
+                                    <div class=" w-8">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-fullscreen-icon lucide-fullscreen"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect width="10" height="8" x="7" y="8" rx="1"/></svg>
+                                    </div>
+                                    
+                                    <P class="">Mostrar todo</P>
+                                </div>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+            </div> <!--Hasta aqui el filtro de la filial-->
+
+            <div class="col-span-1 dropdown-container flex items-center">
+                <div class="flex items-center justify-between w-full">
+                    <button id="dropdown-button-nivel" data-dropdown-toggle="dropdown-search-nivel" class="rounded-xl w-full shrink-0 z-10 inline-flex items-center justify-between py-2.5 px-4 text-sm font-medium text-center text-gray-500 border border-gray-300 bg-gray-50 focus:ring-blue-500 focus:border-blue-500" type="button">
+                        Filtro por Nivel
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                </div>
+
+                <div id="dropdown-search-nivel" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg w-44">
+                    <ul class="py-2 text-sm text-gray-700" aria-labelledby="dropdown-button-nivel">
+                        <li>
+                            <button type="button" data-nivel-button="I" class="NivelComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                                Nivel I
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" data-nivel-button="II" class="NivelComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                                Nivel II
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" data-nivel-button="III" class="NivelComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                                Nivel III
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" data-nivel-button="IV" class="NivelComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                                Nivel IV
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" data-nivel-button="ALL" class="NivelComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                                <div class="inline-flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect width="10" height="8" x="7" y="8" rx="1"/></svg>
+                                    Mostrar todo
+                                </div>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block js %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <script id="distribucion_performance" type="application/json">
+        {{ distribucion_performance | tojson }}
+    </script>
+
+    <script id="promedios_empresas" type="application/json">
+        {{ promedios | tojson }}
+    </script>
+    <script id="meta_performance" type="application/json">
+    {{ meta_performance | tojson }}
+    </script>
+    <script id="promedio_global" type="application/json">
+        {{ promedio_global | tojson }}
+    </script>
+    <script id="promedio_nivel_filial" type="application/json">
+        {{ promedio_nivel_filial | tojson }}
+
+    </script>
+    <script src="{{ url_for('static', filename='js/dashboard_gdd.js') }}"></script>
+{% endblock %}

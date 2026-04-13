@@ -187,7 +187,20 @@ async def inicio_periodo_evaluacion(users):
 async def inicio_etapa_dos(users):
     """Notificación masiva de cierre de periodo"""
     if isinstance(users, list):
-        return await enviar_correo_masivo_async(users, 'Inicio de carga de resultados de los indicadores funcionales y el inicio del proceso de Evaluación de Competencia', "email/evaluacion_etapa2.html", tipo_correo='Inicio_estapa_dos')
+        return await enviar_correo_masivo_async(users, 'Inicio de carga de resultados de los indicadores funcionales e inicio del proceso de Evaluación de Competencia', "email/evaluacion_etapa2.html", tipo_correo='Inicio_estapa_dos')
+    else:
+        return await enviar_correo_masivo_async([users], 'resultados de los indicadores funcionales y el inicio del proceso de Evaluación de Competencia', "email/evaluacion_etapa2.html", tipo_correo='Inicio_estapa_dos')
+
+
+
+async def inicio_CRE(users, texto):
+    """Notificación para la carga de resultados GDD y comienzo de evaluación de competencia"""
+    if isinstance(users, list):
+        return await enviar_correo_masivo_async(users, 
+                                                'Inicio de carga de resultados de los indicadores funcionales e inicio del proceso de Evaluación de Competencia', 
+                                                "email/CRE.html", 
+                                                texto=texto,
+                                                tipo_correo='Inicio_estapa_dos')
     else:
         return await enviar_correo_masivo_async([users], 'resultados de los indicadores funcionales y el inicio del proceso de Evaluación de Competencia', "email/evaluacion_etapa2.html", tipo_correo='Inicio_estapa_dos')
 

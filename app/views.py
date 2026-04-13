@@ -8,8 +8,8 @@ from .forms import LoginForm
 from .forms import GestionUsers
 from .forms import RegistrarUsuarios
 from .forms import formgdi, RegistrarHojaVida
-from .models import  User, Indicadores,HojaVida,Cronograma, Cargos, Evaluacion, Configuracion, Retroalimentacion #,ResultadoFinal
-from .email import welcome_mail, Prueba_mail, inicio_gdd, cierre_gdd, aprobacion_indicadores, indicadores_cargados, Seleccionado_evaluador, procesar_notificaciones_individuales, seleccionado_par, inicio_periodo_evaluacion, inicio_etapa_dos, inicio_avance, cambio_clave
+from .models import  User, Indicadores,HojaVida,Cronograma, Cargos, Evaluacion, Configuracion, Retroalimentacion ,ResultadoFinal
+from .email import welcome_mail, Prueba_mail, inicio_gdd, cierre_gdd, aprobacion_indicadores, indicadores_cargados, Seleccionado_evaluador, procesar_notificaciones_individuales, seleccionado_par, inicio_periodo_evaluacion, inicio_etapa_dos, inicio_avance, cambio_clave, inicio_CRE
 from .servicios import servicio_notificacion
 from . import login_manager
 from .consts import *
@@ -522,10 +522,7 @@ def participantes():
             'comentarios_supervisor': comentarios_supervisor,
             'check': check,
             'comentarios_colaborador': comentarios_colaborador,
-            
-            
-            ''
-            # ✅ DATOS DE EVALUACIÓN PROCESADOS
+            #  DATOS DE EVALUACIÓN PROCESADOS
             'resultados_evaluacion_raw': resultados_evaluacion,  
             'resumen_evaluacion': resumen_evaluacion,  
             'evaluaciones_pendientes': evaluaciones_pendientes,
@@ -791,14 +788,16 @@ def funcion_verificacion_enviar(usuario, año_fiscal):
 
                     sap_exitoso = o.get('success', False)  # True si SAP respondió 200
 
-                    """ResultadoFinal.guardar(
+                    ResultadoFinal.guardar(
                         ficha_usuario=ficha_participante,
-                        año_fiscal=año_fiscal,              # "20252026", no el año_convertido
+                        año_fiscal=año_fiscal,             
                         total_competencias=safe_desempeño,
                         total_indicadores=safe_cumplimiento,
                         total_final=total_desempeño_final,
+                        filial=usuario[0].get('filial') or User.get_by_ficha(ficha_participante).filial,
+                        nivel= usuario[0].get('nivel'),
                         enviado_sap=sap_exitoso
-                    )"""
+                    )
 
                     enviar = True
                 else:
@@ -844,7 +843,7 @@ def menu():
 
     return render_template('/gdd/menu.html', etapa_general=etapa_general, consultar_cargo= consultar_cargo,  titulo= "Menu",usuario=usuario,rest=rest, ficha = ficha, ruta_foto_personal = ruta_foto_personal)
 
-"""
+
 @page.route("/app_crm/gdd/dashboard_gdd", methods=['GET'] )
 @login_required
 def dashboard_gdd():
@@ -856,18 +855,137 @@ def dashboard_gdd():
     etapa_general = variables_configuracion_global.etapa_actual
     etapa_general = int(etapa_general)
     año_fiscal=variables_configuracion_global.año_fiscal
-    print(User.get_by_ficha(ficha).filial)
     #Hasta aqui VARIABLES PARA EL LAYOUT
     distribucion_performance =ResultadoFinal.distribucion_performance(año_fiscal)
     promedios = ResultadoFinal.promedio_por_filial(año_fiscal)
-    meta_performance= 85
+    promedio_global = ResultadoFinal.obtener_promedio_global(año_fiscal)
+    meta_performance=0
+    año_anterior = año_fiscal
+    if año_fiscal.startswith("AF"):
+        año_anterior = "AF" + str(int(año_fiscal[2:]) - 1)
+    else:
+        año_anterior = str(int(año_fiscal) - 1)
+    promedio_global_anterior = ResultadoFinal.obtener_promedio_global(año_anterior)
+    if promedio_global_anterior is not None:
+        promedio_global_anterior= 20  # Valor fijo para pruebas
+    
+    promedio_nivel_filial = ResultadoFinal.promedio_por_nivel_y_filial(año_fiscal)
+    print(promedio_nivel_filial)
+    
     
 
 
 
-    return render_template('/gdd/dashboard_gdd.html', meta_performance=meta_performance, promedios=promedios, variables_configuracion_global=variables_configuracion_global, distribucion_performance=distribucion_performance, etapa_general=etapa_general, consultar_cargo= consultar_cargo,  titulo= "dashboard",usuario=usuario,rest=rest, ficha = ficha, ruta_foto_personal = ruta_foto_personal)
-"""
+    return render_template('/gdd/dashboard_gdd.html', promedio_nivel_filial=promedio_nivel_filial, promedio_global_anterior=promedio_global_anterior, promedio_global= promedio_global, meta_performance=meta_performance, promedios=promedios, variables_configuracion_global=variables_configuracion_global, distribucion_performance=distribucion_performance, etapa_general=etapa_general, consultar_cargo= consultar_cargo,  titulo= "dashboard",usuario=usuario,rest=rest, ficha = ficha, ruta_foto_personal = ruta_foto_personal)
 
+
+
+@page.route("/app_crm/gdd/tablaReporte", methods=['GET'] )
+@login_required
+def tablaReporte():
+    #VARIABLES PARA EL LAYOUT
+    usuario = current_user
+    ficha = current_user.ficha
+    rest = consultar_sap(ficha)
+    variables_configuracion_global = Configuracion.get_data()
+    etapa_general = variables_configuracion_global.etapa_actual
+    etapa_general = int(etapa_general)
+    año_fiscal=variables_configuracion_global.año_fiscal
+    
+    
+
+
+
+    return render_template('/gdd/tabla_reporte.html', variables_configuracion_global=variables_configuracion_global,  etapa_general=etapa_general, consultar_cargo= consultar_cargo,  titulo= "dashboard",usuario=usuario,rest=rest, ficha = ficha, ruta_foto_personal = ruta_foto_personal)
+
+
+
+
+@page.route('/app_crm/gdd/api/tabla-reporte')
+@login_required
+def api_tabla_reporte():
+    """
+    Endpoint JSON que alimenta la tabla de reportes GDD.
+    
+    El año fiscal se toma de la configuración activa.
+    """
+    # Obtener año fiscal activo
+    config = Configuracion.get_data()
+    if not config:
+        return jsonify({'error': 'No hay configuración activa'}), 500
+
+    año_fiscal = config.año_fiscal
+
+    # Filtros opcionales desde query params
+    filial = request.args.get('filial', None)
+    nivel  = request.args.get('nivel', None)
+
+    # Obtener datos estructurados
+    datos = ResultadoFinal.obtener_datos_tabla_reporte(
+        año_fiscal=año_fiscal,
+        filial=filial,
+        nivel=nivel
+    )
+
+    return jsonify({
+        'año_fiscal': año_fiscal,
+        'total':      len(datos),
+        'datos':      datos
+    })
+
+
+
+
+def abreviar_filial(nombre):
+    """Convierte nombre completo a abreviación (CRM, MGR, etc.)"""
+    for full, abbr in ABREVIACIONES_FILIAL.items():
+        if full.lower() == nombre.lower():
+            return abbr
+    return nombre
+
+@page.route("/app_crm/gdd/api/dashboard_data", methods=['GET'])
+@login_required
+def api_dashboard_data():
+    variables_configuracion_global = Configuracion.get_data()
+    año_fiscal = variables_configuracion_global.año_fiscal
+    filial = request.args.get('filial', None)
+    nivel = request.args.get('nivel', None)       
+
+    if filial in (None, '', 'ALL'):
+        filial = None
+    if nivel in (None, '', 'ALL'):                 
+        nivel = None
+
+    filial_completa = FILIAL_POR_ABR.get(filial, filial) if filial else None
+
+    print(f"Filial solicitada: {filial}, Nivel solicitado: {nivel}")
+    distribucion = ResultadoFinal.distribucion_performance(año_fiscal, filial=filial_completa, nivel=nivel)
+
+    if filial:
+        promedios_all = ResultadoFinal.promedio_por_filial(año_fiscal, nivel=nivel)
+        promedios = {k: v for k, v in promedios_all.items() if abreviar_filial(k) == filial}
+    else:
+        promedios = ResultadoFinal.promedio_por_filial(año_fiscal, nivel=nivel)
+
+    promedio_global = ResultadoFinal.obtener_promedio_global(año_fiscal, filial=filial_completa, nivel=nivel)
+
+    if filial:
+        promedio_nivel_filial_all = ResultadoFinal.promedio_por_nivel_y_filial(año_fiscal, nivel=nivel)
+        promedio_nivel_filial = {}
+        for niv, filiales_dict in promedio_nivel_filial_all.items():
+            filtered = {k: v for k, v in filiales_dict.items() if abreviar_filial(k) == filial}
+            if filtered:
+                promedio_nivel_filial[niv] = filtered
+    else:
+        promedio_nivel_filial = ResultadoFinal.promedio_por_nivel_y_filial(año_fiscal, nivel=nivel)
+
+    return jsonify({
+        'distribucion_performance': distribucion,
+        'promedios': promedios,
+        'promedio_global': promedio_global,
+        'promedio_nivel_filial': promedio_nivel_filial,
+    })
+    
 @page.route("/app_crm/test", methods=['GET'])
 @login_required
 def test():
@@ -2327,6 +2445,7 @@ def CorreoMasivo():
     try:
         texto = datos.get('texto')
         tipo = datos.get('tipo')
+        mensaje = ""
         print(texto)
         print(tipo)
         """lista = ['escalona9465@gmail.com', 'eliezer_chirino@corimon.com', 
@@ -2356,8 +2475,8 @@ def CorreoMasivo():
         lista_users = [SimpleUser(email) for email in lista]"""
         lista_users= User.get_by_usuarios()
         
-        app = current_app._get_current_object()
         
+        app = current_app._get_current_object()
         def enviar_en_background():
 
             with app.app_context():
@@ -2368,7 +2487,37 @@ def CorreoMasivo():
                         asyncio.run(inicio_gdd(lista_users, texto))
                     elif tipo == 'avance':
                         asyncio.run(inicio_avance(lista_users, texto))
-
+                    elif tipo == 'InicioEtapaDos':
+                        usuarios = User.get_by_usuarios()
+                        usuarios_notificar = []
+                        
+                        asyncio.run(inicio_CRE(usuarios, texto))
+                        #asyncio.run(inicio_periodo_evaluacion(usuarios))
+                        
+                        """for usuario in usuarios:
+                            usuario_from_sap = consultar_sap(usuario.ficha)
+                            usuario_nivel = usuario_from_sap[0]["nivel"]
+                            ficha_supervisor = procesar_ficha(usuario_from_sap[0]['fichaSuperv']) 
+                            if ficha_supervisor:    
+                                Evaluacion.asignar_supervisor(
+                                    ficha_usuario=usuario.ficha,
+                                    año_fiscal=año_fiscal,
+                                    ficha_supervisor=ficha_supervisor
+                                )
+                            
+                            if usuario_nivel == "I" or (usuario_nivel == "" and usuario.ficha == 3104):
+                                user = User.get_by_ficha(usuario.ficha)     
+                                participantes = participantes_gdd()
+                                equipo = obtener_colaboradores_directos(participantes, usuario.ficha)
+                                usuarios_notificar.append((user, equipo))  
+                        
+                        if usuarios_notificar:
+                            thread = Thread(target=procesar_notificaciones_individuales, args=(app, usuarios_notificar))
+                            thread.start()
+                            
+                            mensaje = f"Proceso iniciado. Se enviarán {len(usuarios_notificar)} notificaciones."
+                        else:
+                            mensaje = "No se encontraron usuarios nivel I para notificar."""
                 except Exception as e:
                     print(f" Error en envío masivo: {e}")
                     import traceback
@@ -2398,46 +2547,15 @@ def mover_etapa():
     variables_configuracion_global = Configuracion.get_data()
     etapa_general = variables_configuracion_global.etapa_actual
     año_fiscal = variables_configuracion_global.año_fiscal
+    mensaje = ""
     try:
         currentActive = datos.get('currentActive')
         print(currentActive)
         Configuracion.actualizar_solo_etapa(currentActive)
-        """
-        if currentActive == 2:
-            usuarios = User.get_by_usuarios()
-            usuarios_notificar = []
-            #asyncio.run(inicio_etapa_dos(usuarios))
-            #asyncio.run(inicio_periodo_evaluacion(usuarios))
-            
-            for usuario in usuarios:
-                usuario_from_sap = consultar_sap(usuario.ficha)
-                usuario_nivel = usuario_from_sap[0]["nivel"]
-                ficha_supervisor = procesar_ficha(usuario_from_sap[0]['fichaSuperv']) 
-                if ficha_supervisor:    
-                    Evaluacion.asignar_supervisor(
-                        ficha_usuario=usuario.ficha,
-                        año_fiscal=año_fiscal,
-                        ficha_supervisor=ficha_supervisor
-                    )
-                
-                if usuario_nivel == "I" or (usuario_nivel == "" and usuario.ficha == 3104):
-                    user = User.get_by_ficha(usuario.ficha)     
-                    participantes = participantes_gdd()
-                    equipo = obtener_colaboradores_directos(participantes, usuario.ficha)
-                    usuarios_notificar.append((user, equipo))  
-            
-            if usuarios_notificar:
-                
-                app = current_app._get_current_object()
-                thread = Thread(target=procesar_notificaciones_individuales, args=(app, usuarios_notificar))
-                thread.start()
-                
-                mensaje = f"Proceso iniciado. Se enviarán {len(usuarios_notificar)} notificaciones."
-            else:
-                mensaje = "No se encontraron usuarios nivel I para notificar."
+        
         
         if currentActive == 3:
-            Configuracion.actualizar_solo_etapa(1)"""
+            Configuracion.actualizar_solo_etapa(1)
         mensaje = "No se encontraron usuarios nivel I para notificar."
         return jsonify({
             "success": True,
@@ -2574,6 +2692,79 @@ def archivo(nombre_archivo):
         return f"Error al servir el archivo: {str(e)}", 500
     
     
+    
+@page.route('/app_crm/verificar', methods=['GET'])
+def consultar_nivel():
+    rest= participantes_gdd()
+    return jsonify(rest)
+FICHAS_EXCLUIDAS = [3141, 2937, 3104]
+
+@page.route('/app_crm/inicializar_resultados/<year_fiscal>', methods=['GET'])
+@login_required
+def inicializar_resultados(year_fiscal):
+    """
+    Inicializa en 0 la tabla resultados_finales para todos los usuarios.
+    Útil para que el dashboard no muestre vacíos mientras el proceso avanza.
+    Los valores reales se sobreescriben después con sincronizar_resultados.
+    Ejecutar: /app_crm/inicializar_resultados/AF26
+    """
+
+    if current_user.nivel_usuario != 'admin' and current_user.nivel_usuario != "Administrador":
+        return jsonify({'error': 'No autorizado'}), 403
+
+    participantes = participantes_gdd()
+    niveles_por_ficha = {
+        int(p['pernr'].lstrip('0')): p.get('nivel')
+        for p in participantes
+        if p.get('pernr')
+    }
+
+    todos_los_usuarios = User.query.all()
+    exitosos = 0
+    omitidos = 0
+    errores  = 0
+
+    for usuario in todos_los_usuarios:
+        ficha = usuario.ficha
+
+        if ficha in FICHAS_EXCLUIDAS:
+            omitidos += 1
+            continue
+
+        ya_existe = ResultadoFinal.query.filter_by(
+            ficha_usuario=ficha,
+            año_fiscal=year_fiscal
+        ).first()
+
+        if ya_existe:
+            omitidos += 1
+            continue
+
+        resultado = ResultadoFinal.guardar(
+            ficha_usuario      = ficha,
+            año_fiscal         = year_fiscal,
+            filial             = usuario.filial,
+            nivel              = niveles_por_ficha.get(ficha),  # lookup directo sin SAP
+            total_competencias = 0,
+            total_indicadores  = 0,
+            total_final        = 0,
+            enviado_sap        = False
+        )
+
+        if resultado:
+            exitosos += 1
+        else:
+            errores += 1
+
+    return jsonify({
+        'success': True,
+        'resumen': {
+            'total_usuarios': len(todos_los_usuarios),
+            'inicializados': exitosos,
+            'omitidos': omitidos,
+            'errores': errores
+        }
+    })
 
 
 @page.route('/app_crm/sincronizar-resultados/<year_fiscal>', methods=['GET'])
@@ -2584,27 +2775,35 @@ def sincronizar_resultados(year_fiscal):
     LO QUE YA DEBERIA ESTAR EN SAP Y PASARLO A LA NUEVA TABLA.
     Solo accesible para administradores.
     Ejecutar: /app_crm/sincronizar-resultados/AF26
-    
+
     pd: es year_fiscal pq el python es gringo y da error con la ñ de año xdd
     """
 
-    if current_user.nivel_usuario != 'admin':
+    if current_user.nivel_usuario != 'admin' and current_user.nivel_usuario != "Administrador":
         return jsonify({'error': 'No autorizado'}), 403
 
-    formatos_busqueda = [year_fiscal]
+    # Una sola llamada a SAP para obtener todos los niveles
+    participantes = participantes_gdd()
+    niveles_por_ficha = {
+        int(p['pernr'].lstrip('0')): p.get('nivel')
+        for p in participantes
+        if p.get('pernr')
+    }
 
+    formatos_busqueda = [year_fiscal]
     if year_fiscal.startswith("AF"):
         año_num = int(year_fiscal[2:])
-        año_numerico = f"20{año_num-1}20{año_num:02d}" 
+        año_numerico = f"20{año_num-1}20{año_num:02d}"
         formatos_busqueda.append(año_numerico)
     else:
-        formatos_busqueda.append(f"AF{year_fiscal[6:8]}")  
+        formatos_busqueda.append(f"AF{year_fiscal[6:8]}")
 
     print(f"Buscando evaluaciones con formatos: {formatos_busqueda}")
 
     evaluaciones = Evaluacion.query.filter(
         Evaluacion.año_fiscal.in_(formatos_busqueda),
-        Evaluacion.total.isnot(None)
+        Evaluacion.total.isnot(None),
+        Evaluacion.total != 0
     ).all()
 
     if not evaluaciones:
@@ -2619,22 +2818,33 @@ def sincronizar_resultados(year_fiscal):
     detalle  = []
 
     for evaluacion in evaluaciones:
-        ficha    = evaluacion.ficha_usuario
-        af_real  = evaluacion.año_fiscal
+        ficha   = evaluacion.ficha_usuario
+        af_real = evaluacion.año_fiscal
+
+        if ficha in FICHAS_EXCLUIDAS:
+            detalle.append({
+                'ficha': ficha,
+                'status': 'excluido',
+                'motivo': 'Ficha en lista de exclusiones'
+            })
+            continue
+
+        # Nivel desde el dict — sin llamada extra a SAP
+        nivel = niveles_por_ficha.get(ficha)
 
         formatos_indicadores = [af_real]
         if af_real.startswith("AF"):
             año_num = int(af_real[2:])
-            formatos_indicadores.append(f"20{año_num-1}20{año_num:02d}")  
+            formatos_indicadores.append(f"20{año_num-1}20{año_num:02d}")
         else:
-            formatos_indicadores.append(f"AF{af_real[6:8]}")             
+            formatos_indicadores.append(f"AF{af_real[6:8]}")
 
         indicadores = Indicadores.query.filter(
             Indicadores.ficha_usuario == ficha,
             Indicadores.año_fiscal.in_(formatos_indicadores)
         ).all()
 
-        print(f"Ficha {ficha} | af_real={af_real} | formatos_indicadores={formatos_indicadores} | indicadores encontrados={len(indicadores)}")
+        print(f"Ficha {ficha} | af_real={af_real} | indicadores encontrados={len(indicadores)}")
 
         safe_cumplimiento = round(
             sum(float(i.cumplimiento) for i in indicadores if i.cumplimiento), 2
@@ -2643,61 +2853,62 @@ def sincronizar_resultados(year_fiscal):
         raw_total      = evaluacion.total
         safe_desempeño = 0 if (raw_total is None or raw_total == '' or raw_total == 0) else raw_total
         total_final    = round(safe_desempeño + safe_cumplimiento, 1)
-        #clasificacion  = ResultadoFinal._clasificar(total_final)
+        clasificacion  = ResultadoFinal._clasificar(total_final)
 
         print(f"  → safe_desempeño={safe_desempeño} | safe_cumplimiento={safe_cumplimiento} | total_final={total_final} | clasificacion={clasificacion}")
 
-        # Si ya existe, omite
-        """ya_existe = ResultadoFinal.query.filter_by(
+        registro_existente = ResultadoFinal.query.filter_by(
             ficha_usuario=ficha,
-            año_fiscal=af_real
+            año_fiscal=af_real,
         ).first()
 
-        if ya_existe:
+        if registro_existente and registro_existente.enviado_sap:
             omitidos += 1
             detalle.append({
                 'ficha': ficha,
                 'status': 'omitido',
-                'motivo': 'Ya existe registro'
+                'motivo': 'Ya tiene datos reales enviados a SAP'
             })
             continue
 
+        usuario = User.get_by_ficha(ficha)
         resultado = ResultadoFinal.guardar(
-            ficha_usuario=ficha,
-            año_fiscal=af_real,
-            total_competencias=safe_desempeño,
-            total_indicadores=safe_cumplimiento,
-            total_final=total_final,
-            filial=User.get_by_ficha(ficha).filial if User.get_by_ficha(ficha) else 'N/A',
-            enviado_sap=True
+            ficha_usuario      = ficha,
+            año_fiscal         = af_real,
+            total_competencias = safe_desempeño,
+            total_indicadores  = safe_cumplimiento,
+            total_final        = total_final,
+            filial             = usuario.filial if usuario else 'N/A',
+            nivel              = nivel,
+            enviado_sap        = True
         )
 
         if resultado:
             exitosos += 1
             detalle.append({
-                'ficha': ficha,
-                'filial': User.get_by_ficha(ficha).filial if User.get_by_ficha(ficha) else 'N/A',
-                'status': 'guardado',
-                'año_fiscal_usado': af_real,
-                'formatos_indicadores_buscados': formatos_indicadores,
-                'indicadores_encontrados': len(indicadores),
-                'total_competencias': safe_desempeño,
-                'total_indicadores': safe_cumplimiento,
-                'total_final': total_final,
-                'clasificacion': clasificacion
+                'ficha'                        : ficha,
+                'filial'                       : usuario.filial if usuario else 'N/A',
+                'nivel'                        : nivel,
+                'status'                       : 'guardado',
+                'año_fiscal_usado'             : af_real,
+                'indicadores_encontrados'      : len(indicadores),
+                'total_competencias'           : safe_desempeño,
+                'total_indicadores'            : safe_cumplimiento,
+                'total_final'                  : total_final,
+                'clasificacion'               : clasificacion
             })
         else:
             errores += 1
-            detalle.append({'ficha': ficha, 'status': 'error'})"""
+            detalle.append({'ficha': ficha, 'status': 'error'})
 
     return jsonify({
         'success': True,
         'formatos_buscados': formatos_busqueda,
         'resumen': {
             'total_evaluaciones': len(evaluaciones),
-            'guardados': exitosos,
-            'omitidos': omitidos,
-            'errores': errores
+            'guardados'         : exitosos,
+            'omitidos'          : omitidos,
+            'errores'           : errores
         },
         'detalle': detalle
     })

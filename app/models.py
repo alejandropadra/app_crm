@@ -1,9 +1,10 @@
 import datetime
+from sqlalchemy import func, case
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash,check_password_hash 
 from sqlalchemy.exc import IntegrityError
 import json
-
+from .consts import ABREVIACIONES_FILIAL
 from . import db
 
 #========Esta es la tabla para manejar los USUARIOS de la aplicacion =====================================
@@ -36,12 +37,21 @@ class User(db.Model, UserMixin):
         """
         return check_password_hash(self.encrypted_password, password)
     
+    
+    
     @classmethod
     def get_by_ficha(cls, ficha):
         """
         Busca un usuario por su nombre de usuario (ficha).
         """
         return cls.query.filter_by(ficha=ficha).first()
+    
+    @classmethod
+    def get_all(cls):
+        """
+        Devuelve una lista de todos los usuarios.
+        """
+        return cls.query.all()
     
     @classmethod
     def get_by_usuarios(cls):
@@ -919,6 +929,7 @@ class Evaluacion(db.Model):
         except Exception as e:
             print(f"Error al obtener evaluaciones detalladas como evaluador: {e}")
             return []
+        
 
 
 # Tabla del resultado de las evaluaciones
@@ -1254,6 +1265,286 @@ class GestionCorreos(db.Model):
             db.session.rollback()
             print(f"Error al marcar como fallido: {e}")
             return False
+
+class ResultadoFinal(db.Model):
+    __tablename__ = 'resultados_finales'
+
+    id = db.Column(db.Integer, primary_key=True)
+    ficha_usuario = db.Column(db.Integer, db.ForeignKey('users.ficha'), nullable=False)
+    filial = db.Column(db.String(50), nullable=True)
+    nivel = db.Column(db.String(10), nullable=True)
+    año_fiscal = db.Column(db.String(50), nullable=False)
+    
+    
+    total_competencias= db.Column(db.Float)
+    total_indicadores = db.Column(db.Float)
+    total_final = db.Column(db.Float)
+    clasificacion = db.Column(db.String(50))
+    
+    enviado_sap = db.Column(db.Boolean, default=False)
+    fecha_registro = db.Column(db.DateTime, default=datetime.datetime.now)
+    __table_args__ = (
+        db.UniqueConstraint('ficha_usuario', 'año_fiscal', name='uq_resultado_usuario_año'),
+    )
+    
+    @classmethod
+    def _clasificar(cls, total):
+        if total <= 80:
+            return 'UP'
+        elif total <= 99:
+            return 'FP-'
+        elif total <= 109:
+            return 'FP'
+        elif total <= 119:
+            return 'FP+'
+        else:
+            return 'O'
+
+    @classmethod
+    def guardar(cls, ficha_usuario, año_fiscal, total_competencias, total_indicadores, total_final, filial=None, nivel=None, enviado_sap=False):
+        try:
+            registro = cls.query.filter_by(
+                ficha_usuario=ficha_usuario,
+                año_fiscal=año_fiscal
+            ).first()
+
+            clasificacion = cls._clasificar(total_final)
+
+            if registro:
+                registro.total_competencias = total_competencias
+                registro.total_indicadores  = total_indicadores
+                registro.total_final        = total_final
+                registro.clasificacion      = clasificacion
+                registro.filial             = filial
+                registro.nivel              = nivel
+
+                registro.enviado_sap        = enviado_sap
+            else:
+                registro = cls(
+                    ficha_usuario      = int(ficha_usuario),
+                    año_fiscal         = año_fiscal,
+                    filial             = filial,
+                    nivel              = nivel,
+                    total_competencias = total_competencias,
+                    total_indicadores  = total_indicadores,
+                    total_final        = total_final,
+                    clasificacion      = clasificacion,
+                    enviado_sap        = enviado_sap
+                )
+                db.session.add(registro)
+
+            db.session.commit()
+            return registro
+
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al guardar ResultadoFinal: {e}")
+            return None
+
+    @classmethod
+    def distribucion_performance(cls, año_fiscal, filial=None, nivel=None):
+
+        distribucion_base = {
+            'O':   {'cantidad': 0, 'porcentaje': 0.0},
+            'FP+': {'cantidad': 0, 'porcentaje': 0.0},
+            'FP':  {'cantidad': 0, 'porcentaje': 0.0},
+            'FP-': {'cantidad': 0, 'porcentaje': 0.0},
+            'UP':  {'cantidad': 0, 'porcentaje': 0.0},
+        }
+
+        query = (
+            db.session.query(
+                cls.clasificacion,
+                func.count().label('cantidad')
+            )
+            .filter(cls.año_fiscal == año_fiscal)
+        )
+
+        if filial:
+            query = query.filter(cls.filial == filial)
+        if nivel:                                      
+            query = query.filter(cls.nivel == nivel)
+
+        resultados = query.group_by(cls.clasificacion).all()
+
+        total_usuarios = sum(cantidad for _, cantidad in resultados)
+        if total_usuarios == 0:
+            return distribucion_base
+
+        for categoria, cantidad in resultados:
+            if categoria in distribucion_base:
+                distribucion_base[categoria] = {
+                    'cantidad': cantidad,
+                    'porcentaje': round((cantidad / total_usuarios) * 100, 1)
+                }
+
+        return distribucion_base
+    
+    @classmethod
+    def get_filiales_disponibles(cls, año_fiscal):
+        resultados = (
+            db.session.query(cls.filial)
+            .filter(cls.año_fiscal == año_fiscal)
+            .filter(cls.filial.isnot(None))
+            .distinct()
+            .all()
+        )
+        return [filial for (filial,) in resultados]
+
+
+
+    @classmethod
+    def promedio_por_filial(cls, año_fiscal, nivel=None):
+        query = (
+            db.session.query(
+                cls.filial,
+                func.round(func.avg(cls.total_final), 1).label('promedio')
+            )
+            .filter(cls.año_fiscal == año_fiscal)
+            .filter(cls.filial.isnot(None))
+        )
+        if nivel:                                     
+            query = query.filter(cls.nivel == nivel)
+
+        resultados = query.group_by(cls.filial).all()
+        return {filial: promedio for filial, promedio in resultados}
+
+
+    @classmethod
+    def obtener_promedio_global(cls, año_fiscal, filial=None, nivel=None):
+        query = db.session.query(
+            func.round(func.avg(cls.total_final), 2)
+        ).filter(cls.año_fiscal == año_fiscal)
+
+        if filial:
+            query = query.filter(cls.filial == filial)
+        if nivel:                                     
+            query = query.filter(cls.nivel == nivel)
+
+        resultado = query.scalar()
+        return resultado or 0
+
+
+    @classmethod
+    def promedio_por_nivel_y_filial(cls, año_fiscal, nivel=None):
+        query = (
+            db.session.query(
+                cls.nivel,
+                cls.filial,
+                func.round(func.avg(cls.total_final), 1).label('promedio')
+            )
+            .filter(cls.año_fiscal == año_fiscal)
+            .filter(cls.nivel.isnot(None))
+            .filter(cls.filial.isnot(None))
+        )
+        if nivel:                                      # ← nuevo
+            query = query.filter(cls.nivel == nivel)
+
+        resultados = query.group_by(cls.nivel, cls.filial).all()
+
+        output = {}
+        for niv, filial, promedio in resultados:
+            if niv not in output:
+                output[niv] = {}
+            output[niv][filial] = promedio
+        return output
+    
+
+    @classmethod
+    def obtener_datos_tabla_reporte(cls, año_fiscal, filial=None, nivel=None):
+        ORDEN_COMPETENCIAS = [
+            'Demostración de Valores',
+            'Foco en Resultados',
+            'Influencia Organizacional',
+            'Liderazgo',
+            'Desarrollo Equipo de Trabajo',
+        ]
+    
+        # ── 1. Query principal: ResultadoFinal + User + Cargos ──
+        query = (
+            db.session.query(cls, User, Cargos)
+            .join(User, User.ficha == cls.ficha_usuario)
+            .outerjoin(Cargos, Cargos.ficha == cls.ficha_usuario)
+            .filter(cls.año_fiscal == año_fiscal)
+        )
+    
+        if filial:
+            query = query.filter(cls.filial == filial)
+        if nivel:
+            query = query.filter(cls.nivel == nivel)
+    
+        registros = query.all()
+    
+        datos = []
+    
+        for resultado, usuario, cargo in registros:
+    
+            # ── 2. Indicadores del usuario para este año fiscal ──
+            indicadores_db = Indicadores.query.filter_by(
+                ficha_usuario=usuario.ficha,
+                año_fiscal=año_fiscal
+            ).all()
+    
+            lista_indicadores = []
+            for ind in indicadores_db:
+                lista_indicadores.append({
+                    'nombre':       ind.nombre_indicador,
+                    'tendencia':    ind.tendencia or '',
+                    'peso':         ind.peso or 0,
+                    'real_af_antes':    ind.real_af_antes,      
+                    'obj_af_actual':    ind.objetivo_af_actual, 
+                    'real_af_actual':   ind.real_af_actual,     
+                    'cumplimiento': ind.cumplimiento or 0,
+                    'desempeno':    ind.desempeno or '',
+                })
+    
+            evaluacion = Evaluacion.query.filter_by(
+                ficha_usuario=usuario.ficha,
+                año_fiscal=año_fiscal
+            ).first()
+    
+            competencias_map = {}
+            if evaluacion:
+                for comp in evaluacion.resultados:
+                    competencias_map[comp.nombre_competencia] = comp.desempeno_eval or ''
+    
+            competencias_lista = [
+                competencias_map.get(nombre, '')
+                for nombre in ORDEN_COMPETENCIAS
+            ]
+    
+
+            if evaluacion:
+                status_raw = (evaluacion.estado or '').strip().upper()
+                status = 'CERRADO' if status_raw in ('CERRADA', 'CERRADO') else 'ABIERTO'
+            else:
+                todos_cerrados = all(
+                    (ind.status or '').strip().upper() in ('CERRADO', 'CERRADA')
+                    for ind in indicadores_db
+                ) if indicadores_db else False
+                status = 'CERRADO' if todos_cerrados else 'ABIERTO'
+    
+            # ── 5. Formatear valores como porcentaje ──
+            def fmt_pct(valor):
+                if valor is None:
+                    return '0%'
+                return f"{round(valor)}%"
+    
+            # ── 6. Construir dict del participante ──
+            datos.append({
+                'area':              cargo.departamento if cargo else (usuario.filial or ''),
+                'nivel':             resultado.nivel or usuario.nivel_usuario or '',
+                'nombre':            f"{usuario.nombre} {usuario.apellido}",
+                'status':            status,
+                'valor_indicadores': fmt_pct(resultado.total_indicadores),
+                'valor_evaluacion':  fmt_pct(resultado.total_competencias),
+                'valor_total':       fmt_pct(resultado.total_final),
+                'competencias':      competencias_lista,
+                'indicadores':       lista_indicadores,
+                'ficha':             usuario.ficha,  # útil para links/acciones
+            })
+    
+        return datos
 
 
 

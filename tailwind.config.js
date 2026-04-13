@@ -10,6 +10,7 @@ module.exports = {
       boxShadow: {
         'custom': 'rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;',
         'checkbox':'rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgb(209, 213, 219) 0px 0px 0px 1px inset;',
+        'light': '0 1px 3px rgba(0, 0, 0, 0.06)',
       },
       colors: {
         'azul-dark': 'var(--azul-dark)', 'valor-azul': '#496fb6', 'rojo-crm': '#e32c24',

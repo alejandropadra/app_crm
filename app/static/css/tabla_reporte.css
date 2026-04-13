@@ -1,0 +1,517 @@
+/* ══════════════════════════════════════════
+   GDD – Tabla de Reportes  ·  UI v2
+   ══════════════════════════════════════════ */
+
+/* ── Variables ── */
+:root {
+    --gdd-primary: #1e3a5f;
+    --gdd-primary-light: #2e5a8a;
+    --gdd-accent: #3b82f6;
+    --gdd-accent-hover: #2563eb;
+    --gdd-surface: #ffffff;
+    --gdd-surface-alt: #f8fafc;
+    --gdd-border: #e2e8f0;
+    --gdd-border-light: #f1f5f9;
+    --gdd-text: #1e293b;
+    --gdd-text-secondary: #64748b;
+    --gdd-text-muted: #94a3b8;
+    --gdd-radius: 12px;
+    --gdd-shadow-sm: 0 1px 3px rgba(0,0,0,.06);
+    --gdd-shadow-md: 0 4px 12px rgba(0,0,0,.08);
+    --gdd-transition: .2s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Summary cards ── */
+.gdd-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px;
+}
+
+.gdd-summary-card {
+    background: var(--gdd-surface);
+    border: 1px solid var(--gdd-border);
+    border-radius: var(--gdd-radius);
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: box-shadow var(--gdd-transition), transform var(--gdd-transition);
+}
+.gdd-summary-card:hover {
+    box-shadow: var(--gdd-shadow-md);
+    transform: translateY(-1px);
+}
+
+.gdd-summary-icon {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    display: grid; place-items: center;
+    flex-shrink: 0;
+    font-size: 18px;
+}
+.gdd-summary-icon.ic-total   { background: #dbeafe; color: #1d4ed8; }
+.gdd-summary-icon.ic-cerrado { background: #d1fae5; color: #059669; }
+.gdd-summary-icon.ic-abierto { background: #fef3c7; color: #d97706; }
+.gdd-summary-icon.ic-prom    { background: #ede9fe; color: #7c3aed; }
+
+.gdd-summary-info { display: flex; flex-direction: column; gap: 2px; }
+
+.gdd-summary-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gdd-text);
+    line-height: 1.1;
+    letter-spacing: -.02em;
+}
+
+.gdd-summary-label {
+    font-size: 12px;
+    color: var(--gdd-text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+/* ── Toolbar / filtros ── */
+.gdd-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.gdd-toolbar .btn-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gdd-text-secondary);
+    background: var(--gdd-surface);
+    border: 1px solid var(--gdd-border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all var(--gdd-transition);
+    min-width: 150px;
+    justify-content: space-between;
+    white-space: nowrap;
+}
+.gdd-toolbar .btn-filter:hover {
+    border-color: var(--gdd-accent);
+    color: var(--gdd-text);
+    box-shadow: 0 0 0 3px rgba(59,130,246,.08);
+}
+
+.gdd-toolbar .search-wrap {
+    display: flex;
+    align-items: center;
+    background: var(--gdd-surface);
+    border: 1px solid var(--gdd-border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color var(--gdd-transition), box-shadow var(--gdd-transition);
+}
+.gdd-toolbar .search-wrap:focus-within {
+    border-color: var(--gdd-accent);
+    box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+}
+
+.gdd-toolbar .search-wrap .icon-search {
+    padding: 0 0 0 12px;
+    color: var(--gdd-text-muted);
+    display: grid; place-items: center;
+}
+
+.gdd-toolbar .search-wrap input {
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--gdd-text);
+    min-width: 180px;
+}
+.gdd-toolbar .search-wrap input::placeholder {
+    color: var(--gdd-text-muted);
+}
+
+.gdd-toolbar .btn-search {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--gdd-accent);
+    border: none;
+    cursor: pointer;
+    transition: background var(--gdd-transition);
+    white-space: nowrap;
+}
+.gdd-toolbar .btn-search:hover { background: var(--gdd-accent-hover); }
+
+.gdd-toolbar .btn-clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gdd-text-secondary);
+    background: transparent;
+    border: 1px dashed var(--gdd-border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all var(--gdd-transition);
+}
+.gdd-toolbar .btn-clear:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: #fef2f2;
+}
+
+.gdd-toolbar .btn-export {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gdd-primary);
+    background: transparent;
+    border: 1px solid var(--gdd-primary);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all var(--gdd-transition);
+}
+.gdd-toolbar .btn-export:hover {
+    background: var(--gdd-primary);
+    color: #fff;
+}
+
+/* ── Dropdown menus ── */
+.dropdown-menu-gdd {
+    background: var(--gdd-surface);
+    border: 1px solid var(--gdd-border);
+    border-radius: 10px;
+    box-shadow: var(--gdd-shadow-md);
+    min-width: 170px;
+    overflow: hidden;
+}
+.dropdown-menu-gdd ul { list-style: none; margin: 0; padding: 4px; }
+.dropdown-menu-gdd li button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--gdd-text);
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background var(--gdd-transition);
+}
+.dropdown-menu-gdd li button:hover {
+    background: #f1f5f9;
+}
+
+/* ── Contenedor tabla ── */
+.gdd-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--gdd-border);
+    border-radius: var(--gdd-radius);
+    background: var(--gdd-surface);
+}
+
+/* Scrollbar */
+.gdd-table-wrap::-webkit-scrollbar { height: 6px; }
+.gdd-table-wrap::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+.gdd-table-wrap::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+.gdd-table-wrap::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ── Tabla base ── */
+#gdd-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    min-width: 1200px;
+}
+
+/* ── Headers ── */
+#gdd-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+#gdd-table th {
+    font-weight: 600;
+    font-size: 11px;
+    padding: 10px 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    white-space: nowrap;
+}
+
+.th-oscuro {
+    background: linear-gradient(180deg, #1e3a5f 0%, #1a3050 100%);
+    color: #fff;
+    border: 0.5px solid #15283f;
+    text-align: center;
+}
+.th-medio {
+    background: linear-gradient(180deg, #6ba3d6 0%, #5a93c6 100%);
+    color: #fff;
+    font-size: 10px !important;
+    border: 0.5px solid #4a83b6;
+    text-align: center;
+    font-weight: 500 !important;
+}
+.th-claro {
+    background: #e8f1fa;
+    color: #1e3a5f;
+    font-size: 10.5px !important;
+    font-weight: 500 !important;
+    border: 0.5px solid #c8ddef;
+    text-align: center;
+}
+
+/* ── Celdas ── */
+#gdd-table td {
+    padding: 8px 10px;
+    border-right: 1px solid var(--gdd-border-light);
+    border-bottom: 1px solid var(--gdd-border-light);
+    vertical-align: middle;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--gdd-text);
+    transition: background var(--gdd-transition);
+}
+
+/* ── Grupo (Área / Nivel / Participante) — rowspan real ── */
+.td-grupo {
+    background: var(--gdd-surface-alt);
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--gdd-text);
+    vertical-align: middle;
+    border-top: 1.5px solid var(--gdd-border);
+    border-bottom: 1.5px solid var(--gdd-border);
+}
+
+/* Acento izquierdo */
+.td-grupo:first-child {
+    border-left: 3px solid var(--gdd-accent) !important;
+}
+
+/* ── Resumen (competencias / totales) — rowspan real ── */
+.td-resumen {
+    background: var(--gdd-surface);
+    vertical-align: middle;
+    border-top: 1.5px solid var(--gdd-border);
+    border-bottom: 1.5px solid var(--gdd-border);
+}
+
+/* ── Indicador (col texto largo) ── */
+.td-ind {
+    background: #fafbfc;
+    text-align: left;
+    min-width: 180px;
+    white-space: normal;
+    word-break: break-word;
+    font-weight: 500;
+}
+
+/* ── Separador visual entre grupos ── */
+.grupo-inicio td:not(.td-grupo):not(.td-resumen) {
+    border-top: 1.5px solid var(--gdd-border);
+}
+
+/* ── Hover ── */
+#gdd-table tbody tr {
+    transition: background var(--gdd-transition);
+}
+#gdd-table tbody tr:hover td {
+    background: #eef4ff !important;
+}
+#gdd-table tbody tr:hover .td-grupo,
+#gdd-table tbody tr:hover .td-ind {
+    background: #e6eef8 !important;
+}
+
+/* ── Badges v2 ── */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+/* Desempeño */
+.b-fpp {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+.b-fp {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+}
+.b-fpm {
+    background: #fef9c3;
+    color: #a16207;
+    border: 1px solid #fde68a;
+}
+.b-o {
+    background: #f3e8ff;
+    color: #7e22ce;
+    border: 1px solid #e9d5ff;
+}
+.b-up {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+.b-nn {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+}
+
+/* Status */
+.b-cerrado {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+.b-cerrado::before { content: '✓ '; font-size: 10px; }
+
+.b-abierto {
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
+}
+.b-abierto::before { content: '○ '; font-size: 10px; }
+
+/* ── Cumplimiento ── */
+.cum-alto {
+    font-weight: 700;
+    color: #15803d;
+}
+.cum-alto::before {
+    content: '';
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #22c55e;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.cum-medio {
+    font-weight: 700;
+    color: #a16207;
+}
+.cum-medio::before {
+    content: '';
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #eab308;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.cum-bajo {
+    font-weight: 700;
+    color: #dc2626;
+}
+.cum-bajo::before {
+    content: '';
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #ef4444;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+/* ── Valor total ── */
+.valor-total {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--gdd-primary);
+}
+
+/* ── Peso column ── */
+.peso-cell {
+    font-weight: 700;
+    color: var(--gdd-primary);
+}
+
+/* ── Animación fade-in de filas ── */
+@keyframes fadeInRow {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+#gdd-table tbody tr {
+    animation: fadeInRow .25s ease-out both;
+}
+#gdd-table tbody tr:nth-child(1)  { animation-delay: .02s; }
+#gdd-table tbody tr:nth-child(2)  { animation-delay: .04s; }
+#gdd-table tbody tr:nth-child(3)  { animation-delay: .06s; }
+#gdd-table tbody tr:nth-child(4)  { animation-delay: .08s; }
+#gdd-table tbody tr:nth-child(5)  { animation-delay: .10s; }
+#gdd-table tbody tr:nth-child(6)  { animation-delay: .12s; }
+#gdd-table tbody tr:nth-child(7)  { animation-delay: .14s; }
+#gdd-table tbody tr:nth-child(8)  { animation-delay: .16s; }
+#gdd-table tbody tr:nth-child(9)  { animation-delay: .18s; }
+#gdd-table tbody tr:nth-child(10) { animation-delay: .20s; }
+
+/* ── Empty state ── */
+.empty {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--gdd-text-muted);
+    font-size: 14px;
+    display: none;
+}
+.empty svg { margin: 0 auto 12px; opacity: .4; }
+
+/* ── Contador de resultados ── */
+.gdd-result-count {
+    font-size: 12px;
+    color: var(--gdd-text-secondary);
+    padding: 6px 0;
+}
+.gdd-result-count strong {
+    color: var(--gdd-text);
+    font-weight: 600;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .gdd-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .gdd-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .gdd-toolbar .btn-export {
+        margin-left: 0;
+    }
+}

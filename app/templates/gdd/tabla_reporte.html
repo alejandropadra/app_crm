@@ -1,0 +1,221 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+{% block estilos %}
+<link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tabla_reporte.css') }}">
+{% endblock %}
+
+
+<div class="bg-white p-5 rounded-[20px] shadow-light flex flex-col gap-5">
+
+    <!-- ═══ Encabezado ═══ -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+            <h3 class="text-lg font-semibold text-gray-800" style="margin:0">Tabla de Reportes</h3>
+            <p class="text-xs text-gray-400 mt-0.5">Gestión del Desempeño y Desarrollo</p>
+        </div>
+    </div>
+
+    <!-- ═══ Summary Cards ═══ -->
+    <div class="gdd-summary">
+        <div class="gdd-summary-card">
+            <div class="gdd-summary-icon ic-total">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+            </div>
+            <div class="gdd-summary-info">
+                <span class="gdd-summary-value" id="sum-total">0</span>
+                <span class="gdd-summary-label">Participantes</span>
+            </div>
+        </div>
+
+        <div class="gdd-summary-card">
+            <div class="gdd-summary-icon ic-cerrado">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+            </div>
+            <div class="gdd-summary-info">
+                <span class="gdd-summary-value" id="sum-cerrados">0</span>
+                <span class="gdd-summary-label">Cerrados</span>
+            </div>
+        </div>
+
+        <div class="gdd-summary-card">
+            <div class="gdd-summary-icon ic-abierto">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+            </div>
+            <div class="gdd-summary-info">
+                <span class="gdd-summary-value" id="sum-abiertos">0</span>
+                <span class="gdd-summary-label">Abiertos</span>
+            </div>
+        </div>
+
+        <div class="gdd-summary-card">
+            <div class="gdd-summary-icon ic-prom">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"/>
+                    <line x1="12" y1="20" x2="12" y2="4"/>
+                    <line x1="6" y1="20" x2="6" y2="14"/>
+                </svg>
+            </div>
+            <div class="gdd-summary-info">
+                <span class="gdd-summary-value" id="sum-promedio">0%</span>
+                <span class="gdd-summary-label">Promedio Total</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ Toolbar ═══ -->
+    <div class="gdd-toolbar">
+
+        <!-- Dropdown: Área -->
+        <button id="btnArea"
+                data-dropdown-toggle="dropdownArea"
+                type="button"
+                class="btn-filter">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5">
+                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+            </svg>
+            <span id="labelArea">Todas las áreas</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.4">
+                <path d="m6 9 6 6 6-6"/>
+            </svg>
+        </button>
+
+        <div id="dropdownArea" class="z-10 hidden dropdown-menu-gdd">
+            <ul>
+                <li><button onclick="setFiltro('area','','Todas las áreas')">Todas las áreas</button></li>
+                <li><button onclick="setFiltro('area','CRM','CRM')">CRM</button></li>
+                <li><button onclick="setFiltro('area','TI','TI')">TI</button></li>
+                <li><button onclick="setFiltro('area','RRHH','RRHH')">RRHH</button></li>
+            </ul>
+        </div>
+
+        <!-- Dropdown: Status -->
+        <button id="btnStatus"
+                data-dropdown-toggle="dropdownStatus"
+                type="button"
+                class="btn-filter">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+            </svg>
+            <span id="labelStatus">Todos los estatus</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.4">
+                <path d="m6 9 6 6 6-6"/>
+            </svg>
+        </button>
+
+        <div id="dropdownStatus" class="z-10 hidden dropdown-menu-gdd">
+            <ul>
+                <li><button onclick="setFiltro('status','','Todos los estatus')">Todos los estatus</button></li>
+                <li><button onclick="setFiltro('status','CERRADO','Cerrado')">Cerrado</button></li>
+                <li><button onclick="setFiltro('status','ABIERTO','Abierto')">Abierto</button></li>
+            </ul>
+        </div>
+
+        <!-- Búsqueda -->
+        <div class="search-wrap">
+            <span class="icon-search">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+            </span>
+            <input id="f-search"
+                   type="search"
+                   placeholder="Buscar participante..."
+                   autocomplete="off">
+        </div>
+
+        <!-- Limpiar -->
+        <button type="button" onclick="limpiarFiltros()" class="btn-clear">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+            Limpiar
+        </button>
+
+        <!-- Exportar -->
+        <button type="button" onclick="exportarExcel()" class="btn-export">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Exportar
+        </button>
+    </div>
+
+    <!-- ═══ Contador resultados ═══ -->
+    <div class="gdd-result-count" id="result-count"></div>
+
+    <!-- ═══ Tabla ═══ -->
+    <div class="gdd-table-wrap">
+        <table id="gdd-table">
+            <thead>
+                <tr>
+                    <th class="th-oscuro" rowspan="3" style="min-width:55px">Área</th>
+                    <th class="th-oscuro" rowspan="3" style="min-width:45px">Nivel</th>
+                    <th class="th-oscuro" rowspan="3" style="min-width:120px">Participante</th>
+                    <th class="th-oscuro" colspan="8">INDICADORES</th>
+                    <th class="th-oscuro" rowspan="3" style="min-width:60px">Valor<br>Indic.</th>
+                    <th class="th-medio"  rowspan="3" style="min-width:75px">DEMOSTRACIÓN<br>VALORES</th>
+                    <th class="th-medio"  rowspan="3" style="min-width:75px">FOCO EN<br>RESULTADOS</th>
+                    <th class="th-medio"  rowspan="3" style="min-width:75px">INFLUENCIA<br>ORGANIZACIONAL</th>
+                    <th class="th-medio"  rowspan="3" style="min-width:65px">LIDERAZGO</th>
+                    <th class="th-medio"  rowspan="3" style="min-width:75px">DESARROLLO<br>EQUIPO</th>
+                    <th class="th-oscuro" rowspan="3" style="min-width:60px">Valor<br>Eval.</th>
+                    <th class="th-oscuro" rowspan="3" style="min-width:65px">Valor<br>Total</th>
+                    <th class="th-oscuro" rowspan="3" style="min-width:75px">Status</th>
+                </tr>
+                <tr>
+                    <th class="th-claro" style="min-width:180px">Indicador</th>
+                    <th class="th-claro" style="min-width:70px">Tendencia</th>
+                    <th class="th-claro" style="min-width:55px">Peso</th>
+                    <th class="th-claro" style="min-width:65px">Real AF23</th>
+                    <th class="th-claro" style="min-width:80px">Ppto/Obj AF24</th>
+                    <th class="th-claro" style="min-width:65px">Real AF24</th>
+                    <th class="th-claro" style="min-width:80px">Cumplimiento</th>
+                    <th class="th-claro" style="min-width:75px">Desempeño</th>
+                </tr>
+                <tr></tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+        </table>
+
+        <!-- Empty state -->
+        <div class="empty" id="empty-msg" style="flex-direction:column; align-items:center;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <line x1="8" y1="11" x2="14" y2="11"/>
+            </svg>
+            <span>Sin resultados para los filtros aplicados</span>
+        </div>
+    </div>
+
+</div>
+
+
+{% endblock %}
+
+{% block js %}
+<script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+<script src="{{ url_for('static', filename='js/tabla_reporte.js') }}"></script>
+{% endblock %}
