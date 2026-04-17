@@ -502,18 +502,35 @@ const GraficoHeatmap = {
             return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
         });
 
-        // Construir data: [empresaIndex, nivelIndex, valor]
-        const heatData = [];
+        // PRIMERA PASADA: calcular maxVal
         let maxVal = 0;
+        niveles.forEach((nivel) => {
+            empresas.forEach((emp) => {
+                const val = data[nivel]?.[emp] ?? null;
+                if (val !== null && val > maxVal) maxVal = val;
+            });
+        });
+
+        // SEGUNDA PASADA: construir heatData con color de label por celda
+        const heatData = [];
+        const rangoMax = maxVal || 100;
 
         niveles.forEach((nivel, ni) => {
             empresas.forEach((emp, ei) => {
                 const val = data[nivel]?.[emp] ?? null;
                 if (val !== null) {
-                    heatData.push([ei, ni, val]);
-                    if (val > maxVal) maxVal = val;
+                    const posicion = val / rangoMax;
+                    // Si la posición supera el 55% del rango, el fondo es oscuro → texto blanco
+                    const colorTexto = posicion >= 0.55 ? '#ffffff' : '#374151';
+                    heatData.push({
+                        value: [ei, ni, val],
+                        label: { color: colorTexto },
+                    });
                 } else {
-                    heatData.push([ei, ni, '-']);   // marcador de "no aplica"
+                    heatData.push({
+                        value: [ei, ni, '-'],
+                        label: { color: '#9ca3af' },
+                    });
                 }
             });
         });
@@ -529,9 +546,10 @@ const GraficoHeatmap = {
                 padding:         [8, 12],
                 textStyle:       { color: '#374151', fontSize: 12 },
                 formatter: p => {
-                    const emp   = empresas[p.data[0]];
-                    const nivel = niveles[p.data[1]];
-                    const val   = p.data[2];
+                    const emp   = empresas[p.data.value[0]];
+                    const nivel = niveles[p.data.value[1]];
+                    const val   = p.data.value[2];
+                    if (val === '-') return '';
                     return `
                         <div style="font-weight:600;font-size:12px;margin-bottom:4px">
                             ${emp}
@@ -596,18 +614,9 @@ const GraficoHeatmap = {
                 label: {
                     show:      true,
                     fontSize:  10,
-                    formatter: p => p.data[2] === '-' ? '—' : `${p.data[2].toFixed(1)}%`,
-                    color: (params) => {
-                        const val = params.data[2];
-                        if (val === '-' || val === null) return '#9ca3af';
-                        
-                        // Calcular la posición del valor en el rango [0, maxVal]
-                        // Los colores oscuros (#0284c7, #1e3a5f) ocupan el 60%+ superior del rango
-                        const rangoMax = maxVal || 100;
-                        const posicion = val / rangoMax;
-                        
-                        // Si la posición supera el 55%, el fondo es oscuro → texto blanco
-                        return posicion >= 0.55 ? '#ffffff' : '#374151';
+                    formatter: p => {
+                        const val = p.data.value[2];
+                        return val === '-' ? '—' : `${val.toFixed(1)}%`;
                     },
                 },
                 itemStyle: {
