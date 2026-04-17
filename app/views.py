@@ -896,7 +896,7 @@ def tablaReporte():
 
 
 
-    return render_template('/gdd/tabla_reporte.html', variables_configuracion_global=variables_configuracion_global,  etapa_general=etapa_general, consultar_cargo= consultar_cargo,  titulo= "dashboard",usuario=usuario,rest=rest, ficha = ficha, ruta_foto_personal = ruta_foto_personal)
+    return render_template('/gdd/tabla_reporte.html', variables_configuracion_global=variables_configuracion_global,  etapa_general=etapa_general, consultar_cargo= consultar_cargo,  titulo= "Reporte",usuario=usuario,rest=rest, ficha = ficha, ruta_foto_personal = ruta_foto_personal)
 
 
 
@@ -2030,7 +2030,7 @@ def evaluacion():
 
     except Exception as e:
         flash("Hubo un error registrando la evaluación", "error")
-        print(f"❌ Error en el backend: {str(e)}")
+        print(f" Error en el backend: {str(e)}")
         return jsonify({"success": False, "message": f"Error inesperado: {str(e)}"}), 500
     
     

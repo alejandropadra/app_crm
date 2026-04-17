@@ -1,8 +1,4 @@
-/* ══════════════════════════════════════════
-   GDD – Tabla de Reportes  ·  UI v2
-   ══════════════════════════════════════════ */
 
-/* ── Variables ── */
 :root {
     --gdd-primary: #1e3a5f;
     --gdd-primary-light: #2e5a8a;
@@ -502,6 +498,114 @@
     font-weight: 600;
 }
 
+/* ── Paginación ── */
+.gdd-pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 4px 4px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.pag-per-page {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--gdd-text-secondary);
+}
+
+.pag-per-page select {
+    padding: 5px 28px 5px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--gdd-text);
+    background: var(--gdd-surface);
+    border: 1px solid var(--gdd-border);
+    border-radius: 8px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color var(--gdd-transition), box-shadow var(--gdd-transition);
+    appearance: auto;
+}
+.pag-per-page select:hover {
+    border-color: var(--gdd-accent);
+}
+.pag-per-page select:focus {
+    border-color: var(--gdd-accent);
+    box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+}
+
+.pag-controles {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pag-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 8px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    color: var(--gdd-text-secondary);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all var(--gdd-transition);
+    user-select: none;
+}
+
+.pag-btn:hover:not(.disabled):not(.pag-activa) {
+    background: #f1f5f9;
+    border-color: var(--gdd-border);
+    color: var(--gdd-text);
+}
+
+.pag-activa {
+    background: var(--gdd-accent) !important;
+    color: #fff !important;
+    border-color: var(--gdd-accent) !important;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(59,130,246,.25);
+}
+
+.pag-nav {
+    color: var(--gdd-text-secondary);
+}
+.pag-nav.disabled {
+    opacity: .35;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.pag-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 34px;
+    font-size: 14px;
+    color: var(--gdd-text-muted);
+    letter-spacing: 2px;
+    user-select: none;
+}
+
+
+.gdd-table-wrap {
+    cursor: grab;
+}
+.gdd-table-wrap.grabbing {
+    cursor: grabbing;
+    user-select: none;
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
     .gdd-summary {
@@ -513,5 +617,13 @@
     }
     .gdd-toolbar .btn-export {
         margin-left: 0;
+    }
+    .gdd-pagination-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    .pag-controles {
+        justify-content: center;
     }
 }

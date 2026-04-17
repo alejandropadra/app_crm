@@ -7,7 +7,7 @@
 {% endblock %}
 
 
-<div class="bg-white p-5 rounded-[20px] shadow-light flex flex-col gap-5">
+<div class="bg-white p-5 rounded-[20px] shadow-light flex flex-col gap-5  max-h-screen overflow-hidden">
 
     <!-- ═══ Encabezado ═══ -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -60,6 +60,9 @@
             </div>
         </div>
 
+
+        
+
         <div class="gdd-summary-card">
             <div class="gdd-summary-icon ic-prom">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -78,7 +81,7 @@
     <!-- ═══ Toolbar ═══ -->
     <div class="gdd-toolbar">
 
-        <!-- Dropdown: Área -->
+        <!-- Dropdown: Área 
         <button id="btnArea"
                 data-dropdown-toggle="dropdownArea"
                 type="button"
@@ -93,8 +96,8 @@
                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.4">
                 <path d="m6 9 6 6 6-6"/>
             </svg>
-        </button>
-
+        </button>-->
+        {#}
         <div id="dropdownArea" class="z-10 hidden dropdown-menu-gdd">
             <ul>
                 <li><button onclick="setFiltro('area','','Todas las áreas')">Todas las áreas</button></li>
@@ -102,7 +105,7 @@
                 <li><button onclick="setFiltro('area','TI','TI')">TI</button></li>
                 <li><button onclick="setFiltro('area','RRHH','RRHH')">RRHH</button></li>
             </ul>
-        </div>
+        </div>#}
 
         <!-- Dropdown: Status -->
         <button id="btnStatus"
@@ -127,6 +130,120 @@
                 <li><button onclick="setFiltro('status','ABIERTO','Abierto')">Abierto</button></li>
             </ul>
         </div>
+
+        <div class="dropdown-container flex items-center"><!--Filtro de la filial-->
+            <div class="flex items-center justify-between w-full">
+                <button id="dropdown-button-2" data-dropdown-toggle="dropdown-search-city" class=" btn-filter" type="button">
+                    Filtro por Filial
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down-icon lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+            </div>
+
+            <div id="dropdown-search-city" class="dropdown-menu-gdd hidden z-10">
+                <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdown-button-2">
+                    <li>
+                        <button type="button" data-filial-button="CRM" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                            <div class="inline-flex items-center">
+                                <div class=" w-8">
+                                    <img src="{{ url_for('static', filename='img/Corimon_logo.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                </div>
+                                
+                                <P class="">Corimon, C.A</P>
+                            </div>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" data-filial-button="MGR" class=" FilialComparar inline-flex w-full px-4  gap-1 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                            <div class="inline-flex items-center">
+                                <div class=" w-8">
+                                    <img src="{{ url_for('static', filename='img/mg.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                </div>
+                                
+                                <P class="">Montana Gráfica</P>
+                            </div>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" data-filial-button="CRP" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                            <div class="inline-flex items-center">
+                                <div class=" w-8">
+                                    <img src="{{ url_for('static', filename='img/CRP.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                </div>
+                                
+                                <P class="">Corimon Pinturas</P>
+                            </div>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" data-filial-button="CER" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                            <div class="inline-flex items-center">
+                                <div class=" w-8">
+                                    <img src="{{ url_for('static', filename='img/CER.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                </div>
+                                
+                                <P class="">Cerdex</P>
+                            </div>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" data-filial-button="EEE" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                            <div class="inline-flex items-center">
+                                <div class=" w-8">
+                                    <img src="{{ url_for('static', filename='img/EEE.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                </div>
+                                
+                                <P class="">Envaca</P>
+                            </div>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" data-filial-button="RES" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                            <div class="inline-flex items-center">
+                                <div class=" w-8">
+                                    <img src="{{ url_for('static', filename='img/RES.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                </div>
+                                
+                                <P class="">Resimon</P>
+                            </div>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" data-filial-button="PPV" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                            <div class="inline-flex items-center">
+                                <div class=" w-8">
+                                    <img src="{{ url_for('static', filename='img/PPV.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                </div>
+                                
+                                <P class="">PPV</P>
+                            </div>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" data-filial-button="TMO" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                            <div class="inline-flex items-center">
+                                <div class=" w-8">
+                                    <img src="{{ url_for('static', filename='img/tiendasMontana.png') }}" class="w-full h-full object-cover rounded-full   "  alt="User Image">
+                                </div>
+                                
+                                <P class="">Tiendas Montana</P>
+                            </div>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" data-filial-button="ALL" class=" FilialComparar inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
+                            <div class="inline-flex items-center">
+                                <div class=" w-8">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-fullscreen-icon lucide-fullscreen"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect width="10" height="8" x="7" y="8" rx="1"/></svg>
+                                </div>
+                                
+                                <P class="">Mostrar todo</P>
+                            </div>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+        </div> <!--Hasta aqui el filtro de la filial-->
 
         <!-- Búsqueda -->
         <div class="search-wrap">
@@ -162,15 +279,13 @@
         </button>
     </div>
 
-    <!-- ═══ Contador resultados ═══ -->
-    <div class="gdd-result-count" id="result-count"></div>
 
     <!-- ═══ Tabla ═══ -->
     <div class="gdd-table-wrap">
         <table id="gdd-table">
             <thead>
                 <tr>
-                    <th class="th-oscuro" rowspan="3" style="min-width:55px">Área</th>
+                    <th class="th-oscuro" rowspan="3" style="min-width:55px">Filial</th>
                     <th class="th-oscuro" rowspan="3" style="min-width:45px">Nivel</th>
                     <th class="th-oscuro" rowspan="3" style="min-width:120px">Participante</th>
                     <th class="th-oscuro" colspan="8">INDICADORES</th>
@@ -182,15 +297,16 @@
                     <th class="th-medio"  rowspan="3" style="min-width:75px">DESARROLLO<br>EQUIPO</th>
                     <th class="th-oscuro" rowspan="3" style="min-width:60px">Valor<br>Eval.</th>
                     <th class="th-oscuro" rowspan="3" style="min-width:65px">Valor<br>Total</th>
+                    <th class="th-oscuro" rowspan="3" style="min-width:75px">Clasif.</th>
                     <th class="th-oscuro" rowspan="3" style="min-width:75px">Status</th>
                 </tr>
                 <tr>
                     <th class="th-claro" style="min-width:180px">Indicador</th>
                     <th class="th-claro" style="min-width:70px">Tendencia</th>
                     <th class="th-claro" style="min-width:55px">Peso</th>
-                    <th class="th-claro" style="min-width:65px">Real AF23</th>
-                    <th class="th-claro" style="min-width:80px">Ppto/Obj AF24</th>
-                    <th class="th-claro" style="min-width:65px">Real AF24</th>
+                    <th class="th-claro" style="min-width:65px">Real <span class="año_anterior"> </span></th>
+                    <th class="th-claro" style="min-width:80px">Ppto/Obj <span class="año_actual"> </span></th>
+                    <th class="th-claro" style="min-width:65px">Real <span class="año_actual"> </span></th>
                     <th class="th-claro" style="min-width:80px">Cumplimiento</th>
                     <th class="th-claro" style="min-width:75px">Desempeño</th>
                 </tr>
@@ -210,12 +326,31 @@
         </div>
     </div>
 
+    <!-- ═══ Barra de paginación ═══ -->
+    <div class="gdd-pagination-bar">
+        <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+            <div class="pag-per-page">
+                <label for="sel-por-pagina">Mostrar</label>
+                <select id="sel-por-pagina" onchange="cambiarPorPagina(this.value)">
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                </select>
+                <span>por página</span>
+            </div>
+            <div class="gdd-result-count" id="result-count"></div>
+        </div>
+        <div class="pag-controles" id="paginacion"></div>
+    </div>
+
 </div>
 
 
 {% endblock %}
 
 {% block js %}
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 <script src="{{ url_for('static', filename='js/tabla_reporte.js') }}"></script>
 {% endblock %}

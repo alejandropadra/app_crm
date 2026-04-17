@@ -596,8 +596,14 @@ const GraficoHeatmap = {
                 label: {
                     show:      true,
                     fontSize:  10,
-                    color:     '#374151',
                     formatter: p => p.data[2] === '-' ? '—' : `${p.data[2].toFixed(1)}%`,
+                    color: (params) => {
+                        const val = params.data[2];
+                        if (val === '-' || val === null) return '#9ca3af';
+                        // Umbral: si el valor supera el 60% del máximo, usar texto blanco
+                        const umbral = (maxVal || 100) * 0.6;
+                        return val >= umbral ? '#ffffff' : '#374151';
+                    },
                 },
                 itemStyle: {
                     borderWidth:  3,
@@ -612,7 +618,7 @@ const GraficoHeatmap = {
 };
 
 /* ============================================================
-   5. MÓDULO: Filtros del Dashboard (fetch + re-render)
+    5. MÓDULO: Filtros del Dashboard (fetch + re-render)
    ============================================================ */
 const FiltroDashboard = {
     filialActual: null,

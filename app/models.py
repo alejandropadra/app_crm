@@ -1437,7 +1437,7 @@ class ResultadoFinal(db.Model):
             .filter(cls.nivel.isnot(None))
             .filter(cls.filial.isnot(None))
         )
-        if nivel:                                      # ← nuevo
+        if nivel:                                     
             query = query.filter(cls.nivel == nivel)
 
         resultados = query.group_by(cls.nivel, cls.filial).all()
@@ -1460,6 +1460,10 @@ class ResultadoFinal(db.Model):
             'Desarrollo Equipo de Trabajo',
         ]
     
+        if año_fiscal.startswith("AF"):
+            año_anterior = "AF" + str(int(año_fiscal[2:]) - 1)
+        else:
+            año_anterior = str(int(año_fiscal) - 1)
         # ── 1. Query principal: ResultadoFinal + User + Cargos ──
         query = (
             db.session.query(cls, User, Cargos)
@@ -1474,17 +1478,19 @@ class ResultadoFinal(db.Model):
             query = query.filter(cls.nivel == nivel)
     
         registros = query.all()
+
     
         datos = []
     
         for resultado, usuario, cargo in registros:
-    
+            
             # ── 2. Indicadores del usuario para este año fiscal ──
-            indicadores_db = Indicadores.query.filter_by(
-                ficha_usuario=usuario.ficha,
-                año_fiscal=año_fiscal
+            años_equivalentes = ['AF26', '20252026'] if año_fiscal in ('AF26', '20252026') else [año_fiscal]
+            indicadores_db = Indicadores.query.filter(
+                Indicadores.ficha_usuario == usuario.ficha,
+                Indicadores.año_fiscal.in_(años_equivalentes)
             ).all()
-    
+
             lista_indicadores = []
             for ind in indicadores_db:
                 lista_indicadores.append({
@@ -1497,10 +1503,14 @@ class ResultadoFinal(db.Model):
                     'cumplimiento': ind.cumplimiento or 0,
                     'desempeno':    ind.desempeno or '',
                 })
+            
+            total_ind = resultado.total_indicadores
+            if not total_ind:
+                total_ind = sum(ind.cumplimiento or 0 for ind in indicadores_db)
     
-            evaluacion = Evaluacion.query.filter_by(
-                ficha_usuario=usuario.ficha,
-                año_fiscal=año_fiscal
+            evaluacion = Evaluacion.query.filter(
+                Evaluacion.ficha_usuario == usuario.ficha,
+                Evaluacion.año_fiscal.in_(años_equivalentes)
             ).first()
     
             competencias_map = {}
@@ -1529,19 +1539,22 @@ class ResultadoFinal(db.Model):
                 if valor is None:
                     return '0%'
                 return f"{round(valor)}%"
-    
+            print(año_anterior)
             # ── 6. Construir dict del participante ──
             datos.append({
-                'area':              cargo.departamento if cargo else (usuario.filial or ''),
+                'filial':             resultado.filial or usuario.filial or '',
                 'nivel':             resultado.nivel or usuario.nivel_usuario or '',
                 'nombre':            f"{usuario.nombre} {usuario.apellido}",
                 'status':            status,
-                'valor_indicadores': fmt_pct(resultado.total_indicadores),
+                'valor_indicadores': fmt_pct(resultado.total_indicadores or total_ind),
                 'valor_evaluacion':  fmt_pct(resultado.total_competencias),
                 'valor_total':       fmt_pct(resultado.total_final),
+                'valor_clasificacion': resultado.clasificacion or '',
                 'competencias':      competencias_lista,
                 'indicadores':       lista_indicadores,
                 'ficha':             usuario.ficha,  # útil para links/acciones
+                'año_fiscal':        resultado.año_fiscal,  
+                'año_anterior':      año_anterior,
             })
     
         return datos
