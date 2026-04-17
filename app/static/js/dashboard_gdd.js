@@ -600,9 +600,14 @@ const GraficoHeatmap = {
                     color: (params) => {
                         const val = params.data[2];
                         if (val === '-' || val === null) return '#9ca3af';
-                        // Umbral: si el valor supera el 30% del máximo, usar texto blanco
-                        const umbral = (maxVal || 100) * 0.3;
-                        return val >= umbral ? '#ffffff' : '#374151';
+                        
+                        // Calcular la posición del valor en el rango [0, maxVal]
+                        // Los colores oscuros (#0284c7, #1e3a5f) ocupan el 60%+ superior del rango
+                        const rangoMax = maxVal || 100;
+                        const posicion = val / rangoMax;
+                        
+                        // Si la posición supera el 55%, el fondo es oscuro → texto blanco
+                        return posicion >= 0.55 ? '#ffffff' : '#374151';
                     },
                 },
                 itemStyle: {
