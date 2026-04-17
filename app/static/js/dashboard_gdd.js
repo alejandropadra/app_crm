@@ -396,7 +396,7 @@ const GraficoGauge = {
             animationEasing:   'cubicInOut',
             series: [{
                 type:       'gauge',
-                center:     ['50%', '60%'],
+                center:     ['50%', '50%'],
                 radius:     '100%',
                 startAngle: 200,
                 endAngle:   -20,
@@ -601,7 +601,7 @@ const GraficoHeatmap = {
                         const val = params.data[2];
                         if (val === '-' || val === null) return '#9ca3af';
                         // Umbral: si el valor supera el 60% del máximo, usar texto blanco
-                        const umbral = (maxVal || 100) * 0.6;
+                        const umbral = (maxVal || 100) * 0.5;
                         return val >= umbral ? '#ffffff' : '#374151';
                     },
                 },
