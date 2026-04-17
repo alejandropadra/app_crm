@@ -600,8 +600,8 @@ const GraficoHeatmap = {
                     color: (params) => {
                         const val = params.data[2];
                         if (val === '-' || val === null) return '#9ca3af';
-                        // Umbral: si el valor supera el 60% del máximo, usar texto blanco
-                        const umbral = (maxVal || 100) * 0.5;
+                        // Umbral: si el valor supera el 30% del máximo, usar texto blanco
+                        const umbral = (maxVal || 100) * 0.3;
                         return val >= umbral ? '#ffffff' : '#374151';
                     },
                 },
