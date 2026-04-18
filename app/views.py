@@ -543,6 +543,7 @@ def participantes():
 @login_required
 def detalles_usuarios(ficha_get):
     variables_configuracion_global = Configuracion.get_data()
+    sin_equipo = False
     etapa_general = variables_configuracion_global.etapa_actual
     etapa_general = int(etapa_general)
     año_fiscal = variables_configuracion_global.año_fiscal
@@ -560,8 +561,7 @@ def detalles_usuarios(ficha_get):
         ficha_supervisor=ficha_supervisor
     )
     
-    print(evaluacion)
-    #print(rest)
+    print(rest[0]['nivel'])
     participantes = participantes_gdd()
     indicadores = Indicadores.obtener_indicador_usuario(ficha_get)
     total_peso = sum(float(i.peso) for i in indicadores if i.peso)
@@ -573,7 +573,15 @@ def detalles_usuarios(ficha_get):
     colaboradores =obtener_colaboradores_directos( participantes=participantes, ficha_superior=usuario_dueño_indicador[0]['fichaSuperv'] )
     colaboradores_json = json.dumps(colaboradores, ensure_ascii=False)
     equipo = obtener_colaboradores_directos(participantes,ficha_get)
+
+    if len(equipo) == 0 and usuario_dueño_indicador[0]['nivel'] == 'I':
+        sin_equipo = True
+        print("si, este pana no tiene equipo ")
+        # Si no tiene colaboradores directos, usamos a todos los participantes
+        equipo = [p.copy() for p in participantes]
+        flash('El participante no tiene colaboradores directos. Puedes seleccionar de todos los participantes disponibles.', 'info')
     equipo_json =  json.dumps(equipo, ensure_ascii=False)
+
     usuario_par = None
     usuario_subordinado = None
     nombre_apellido_usuario_par= None
@@ -597,7 +605,7 @@ def detalles_usuarios(ficha_get):
             if not usuario_subordinado:
                 usuario_subordinado_from_sap = consultar_sap(registro_evaluacion.par_evaluador)
                 nombre_apellido_usuario_subordinado= usuario_subordinado_from_sap[0]['ename']
-                print(nombre_apellido_usuario_subordinado)
+
             
     
     
@@ -650,7 +658,7 @@ def detalles_usuarios(ficha_get):
 
             
     
-    return render_template('/auth/detalles_list_user.html', etapa_general= etapa_general, nombre_apellido_usuario_subordinado = nombre_apellido_usuario_subordinado ,  nombre_apellido_usuario_par= nombre_apellido_usuario_par,  usuario_subordinado = usuario_subordinado,  usuario_par= usuario_par, registro_evaluacion= registro_evaluacion, equipo = equipo, equipo_json= equipo_json, colaboradores=colaboradores, colaboradores_json = colaboradores_json,  consultar_cargo= consultar_cargo,  titulo= "Detalles" ,usuario=usuario,rest=rest, participantes= participantes, indicadores = indicadores, total_cumplimiento= total_cumplimiento, total_peso=total_peso, ficha_get= ficha_get, ficha=ficha, ruta_foto_personal= ruta_foto_personal, usuario_dueño_indicador = usuario_dueño_indicador, recortar_ficha= recortar_ficha, consultar_sap= consultar_sap )
+    return render_template('/auth/detalles_list_user.html', sin_equipo=sin_equipo, etapa_general= etapa_general, nombre_apellido_usuario_subordinado = nombre_apellido_usuario_subordinado ,  nombre_apellido_usuario_par= nombre_apellido_usuario_par,  usuario_subordinado = usuario_subordinado,  usuario_par= usuario_par, registro_evaluacion= registro_evaluacion, equipo = equipo, equipo_json= equipo_json, colaboradores=colaboradores, colaboradores_json = colaboradores_json,  consultar_cargo= consultar_cargo,  titulo= "Detalles" ,usuario=usuario,rest=rest, participantes= participantes, indicadores = indicadores, total_cumplimiento= total_cumplimiento, total_peso=total_peso, ficha_get= ficha_get, ficha=ficha, ruta_foto_personal= ruta_foto_personal, usuario_dueño_indicador = usuario_dueño_indicador, recortar_ficha= recortar_ficha, consultar_sap= consultar_sap )
 #-------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------- GDD-----------------------------------------------------------------------------------
 
