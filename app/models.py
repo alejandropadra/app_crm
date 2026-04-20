@@ -629,7 +629,6 @@ class Evaluacion(db.Model):
         :return: El objeto Evaluacion actualizado o None si hay error
         """
         try:
-            print('asdas')
             # --- Paso 1: Buscar evaluación existente ---
             evaluacion = cls.query.filter_by(
                 ficha_usuario=ficha_usuario,
@@ -1031,7 +1030,7 @@ class Retroalimentacion(db.Model):
     __tablename__ = 'Retroalimentacion'
 
     id = db.Column(db.Integer, primary_key=True)
-    año_fiscal = db.Column(db.String(50), nullable=False, unique=True)
+    año_fiscal = db.Column(db.String(50), nullable=False, unique=False)
     ficha_usuario = db.Column(db.Integer, db.ForeignKey('users.ficha'), nullable=False)
     comentarios_supervisor = db.Column(db.Text, nullable=True)
     comentarios_colaborador = db.Column(db.Text, nullable=True)
@@ -1055,7 +1054,10 @@ class Retroalimentacion(db.Model):
                 - created: True si se creó, False si se actualizó
         """
         try:
-            retroalimentacion = cls.query.filter_by(año_fiscal=año_fiscal).first()
+            retroalimentacion = cls.query.filter_by(
+                año_fiscal=año_fiscal,
+                ficha_usuario=ficha_usuario  
+            ).first()
             
             if retroalimentacion:
                 retroalimentacion.ficha_usuario = ficha_usuario
