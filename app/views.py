@@ -561,7 +561,6 @@ def detalles_usuarios(ficha_get):
         ficha_supervisor=ficha_supervisor
     )
     
-    print(rest[0]['nivel'])
     participantes = participantes_gdd()
     indicadores = Indicadores.obtener_indicador_usuario(ficha_get)
     total_peso = sum(float(i.peso) for i in indicadores if i.peso)
@@ -571,8 +570,11 @@ def detalles_usuarios(ficha_get):
     )
     
     colaboradores =obtener_colaboradores_directos( participantes=participantes, ficha_superior=usuario_dueño_indicador[0]['fichaSuperv'] )
+    if usuario_dueño_indicador[0]['nivel'] == 'I' :
+        colaboradores=obtener_colaboradores_mismo_nivel(participantes, ficha_get)
     colaboradores_json = json.dumps(colaboradores, ensure_ascii=False)
     equipo = obtener_colaboradores_directos(participantes,ficha_get)
+
 
     if len(equipo) == 0 and usuario_dueño_indicador[0]['nivel'] == 'I':
         sin_equipo = True
@@ -2383,6 +2385,33 @@ def obtener_colaboradores_directos(participantes, ficha_superior):
     
     return colaboradores
 
+def obtener_colaboradores_mismo_nivel(participantes, ficha_superior):
+    """
+    Obtiene todos los participantes que tienen el mismo nivel_usuario
+    que la persona identificada por ficha_superior.
+
+    """
+    # Normalizamos la ficha del superior
+    ficha_normalizada = str(int(ficha_superior)) if ficha_superior else None
+
+    # Buscamos el participante referencia para obtener su nivel
+    referencia = next(
+        (p for p in participantes if p.get('pernr') and str(int(p['pernr'])) == ficha_normalizada),
+        None
+    )
+
+    if not referencia:
+        return []
+
+    nivel_referencia = referencia.get('nivel')
+
+    if nivel_referencia is None:
+        return []
+
+    return [
+        p.copy() for p in participantes
+        if p.get('nivel') == nivel_referencia
+    ]
 def consultar_cargo(ficha):
     registro = Cargos.select_by_ficha(ficha)
     #print(registro)
