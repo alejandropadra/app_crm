@@ -1543,11 +1543,11 @@ class ResultadoFinal(db.Model):
     @classmethod
     def obtener_datos_tabla_reporte(cls, año_fiscal, filial=None, nivel=None):
         ORDEN_COMPETENCIAS = [
-            'Demostración de Valores',
+            'Demostración Valores Corporativos',
             'Foco en Resultados',
             'Influencia Organizacional',
             'Liderazgo',
-            'Desarrollo Equipo de Trabajo',
+            'Desarrollo del Equipo de Trabajo',
         ]
     
         if año_fiscal.startswith("AF"):

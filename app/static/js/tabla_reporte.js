@@ -116,7 +116,7 @@ function actualizarSummary(datos) {
 
 
 /* ══════════════════════════════════════════
-   Render tabla
+Render tabla
    ══════════════════════════════════════════ */
 
 function renderTabla(datos) {
@@ -249,10 +249,10 @@ function renderPaginacion() {
 
     // ── Botón anterior ──
     html += `<button class="pag-btn pag-nav ${paginaActual === 0 ? 'disabled' : ''}"
-                     onclick="cambiarPagina(${paginaActual - 1})"
-                     ${paginaActual === 0 ? 'disabled' : ''}>
+                    onclick="cambiarPagina(${paginaActual - 1})"
+                    ${paginaActual === 0 ? 'disabled' : ''}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="15 18 9 12 15 6"/>
                 </svg>
             </button>`;
@@ -287,8 +287,8 @@ function renderPaginacion() {
 
     // ── Botón siguiente ──
     html += `<button class="pag-btn pag-nav ${paginaActual === totalPag - 1 ? 'disabled' : ''}"
-                     onclick="cambiarPagina(${paginaActual + 1})"
-                     ${paginaActual === totalPag - 1 ? 'disabled' : ''}>
+                    onclick="cambiarPagina(${paginaActual + 1})"
+                    ${paginaActual === totalPag - 1 ? 'disabled' : ''}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="9 18 15 12 9 6"/>
