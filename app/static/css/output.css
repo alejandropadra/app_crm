@@ -2013,6 +2013,10 @@ input:checked + .toggle-bg {
   height: 3rem;
 }
 
+.h-14 {
+  height: 3.5rem;
+}
+
 .h-16 {
   height: 4rem;
 }
@@ -2085,8 +2089,8 @@ input:checked + .toggle-bg {
   height: 100vh;
 }
 
-.h-14 {
-  height: 3.5rem;
+.\!h-\[70px\] {
+  height: 70px !important;
 }
 
 .max-h-0 {
@@ -2121,6 +2125,10 @@ input:checked + .toggle-bg {
   min-height: 3rem;
 }
 
+.min-h-\[100px\] {
+  min-height: 100px;
+}
+
 .min-h-\[250px\] {
   min-height: 250px;
 }
@@ -2131,6 +2139,10 @@ input:checked + .toggle-bg {
 
 .min-h-screen {
   min-height: 100vh;
+}
+
+.min-h-24 {
+  min-height: 6rem;
 }
 
 .w-1\/12 {
@@ -2335,10 +2347,6 @@ input:checked + .toggle-bg {
 
 .max-w-7xl {
   max-width: 80rem;
-}
-
-.max-w-80 {
-  max-width: 20rem;
 }
 
 .max-w-\[12rem\] {
@@ -2707,6 +2715,10 @@ input:checked + .toggle-bg {
   white-space: pre-line;
 }
 
+.whitespace-pre-wrap {
+  white-space: pre-wrap;
+}
+
 .break-words {
   overflow-wrap: break-word;
 }
@@ -2838,6 +2850,10 @@ input:checked + .toggle-bg {
 
 .border-l-0 {
   border-left-width: 0px;
+}
+
+.border-l-4 {
+  border-left-width: 4px;
 }
 
 .border-r {
@@ -2978,6 +2994,11 @@ input:checked + .toggle-bg {
 .border-valor-azul {
   --tw-border-opacity: 1;
   border-color: rgb(73 111 182 / var(--tw-border-opacity, 1));
+}
+
+.border-yellow-500 {
+  --tw-border-opacity: 1;
+  border-color: rgb(194 120 3 / var(--tw-border-opacity, 1));
 }
 
 .border-yellow-600 {
@@ -3226,6 +3247,11 @@ input:checked + .toggle-bg {
 
 .bg-white\/50 {
   background-color: rgb(255 255 255 / 0.5);
+}
+
+.bg-yellow-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(253 246 178 / var(--tw-bg-opacity, 1));
 }
 
 .bg-yellow-200 {
@@ -3552,10 +3578,6 @@ input:checked + .toggle-bg {
   font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
-.\!text-\[15px\] {
-  font-size: 15px !important;
-}
-
 .\!text-\[16px\] {
   font-size: 16px !important;
 }
@@ -3880,6 +3902,16 @@ input:checked + .toggle-bg {
 .text-yellow-600 {
   --tw-text-opacity: 1;
   color: rgb(159 88 10 / var(--tw-text-opacity, 1));
+}
+
+.text-yellow-700 {
+  --tw-text-opacity: 1;
+  color: rgb(142 75 16 / var(--tw-text-opacity, 1));
+}
+
+.text-yellow-800 {
+  --tw-text-opacity: 1;
+  color: rgb(114 59 19 / var(--tw-text-opacity, 1));
 }
 
 .text-zinc-200 {

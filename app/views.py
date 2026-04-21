@@ -539,7 +539,7 @@ def participantes():
     return render_template('/auth/list_users.html', etapa_general= etapa_general, participantes_procesados= participantes_procesados, ruta_foto_personal= ruta_foto_personal, año_fiscal= año_fiscal,  resultados_evaluacion = Evaluacion.obtener_resultados,  obtener_indicador_usuario = Indicadores.obtener_indicador_usuario,  consultar_cargo= consultar_cargo, ficha = ficha,  titulo= "participantes", participantes = participantes,usuario=usuario,rest=rest)
 
 
-@page.route("/app_crm/detalles_usuarios/<int:ficha_get>", methods=['GET','POST'] )
+@page.route("/app_crm/detalles_usuarios/<int:ficha_get>", methods=['GET','POST'])
 @login_required
 def detalles_usuarios(ficha_get):
     variables_configuracion_global = Configuracion.get_data()
@@ -549,121 +549,221 @@ def detalles_usuarios(ficha_get):
     año_fiscal = variables_configuracion_global.año_fiscal
     usuario = current_user
     if usuario.nivel_usuario == "Medio":
-        return redirect(url_for('.menu'))  
-    usuario_dueño_indicador= consultar_sap(ficha_get)
+        return redirect(url_for('.menu'))
+
+    usuario_dueño_indicador = consultar_sap(ficha_get)
     ficha = current_user.ficha
     rest = consultar_sap(ficha)
-    print(consultar_sap(ficha_get))
-    ficha_supervisor = procesar_ficha(rest[0]['fichaSuperv'])     
+
+    # Asignar supervisor a la evaluación del dueño (si no existe aún)
+    ficha_supervisor = procesar_ficha(usuario_dueño_indicador[0]['fichaSuperv'])
     evaluacion = Evaluacion.asignar_supervisor(
         ficha_usuario=ficha_get,
         año_fiscal=año_fiscal,
         ficha_supervisor=ficha_supervisor
     )
-    
-    participantes = participantes_gdd()
+
+    # Indicadores del usuario, filtrados por año fiscal activo
     indicadores = Indicadores.obtener_indicador_usuario(ficha_get)
-    total_peso = sum(float(i.peso) for i in indicadores if i.peso)
+    indicadores_filtrados = []
+    for indicador in indicadores:
+        if indicador.año_fiscal == año_fiscal or \
+           (indicador.año_fiscal == "20252026" and año_fiscal == "AF26"):
+            indicadores_filtrados.append(indicador)
+
+    total_peso = sum(float(i.peso) for i in indicadores_filtrados if i.peso)
     total_cumplimiento = round(
-        sum(float(i.cumplimiento) for i in indicadores if i.cumplimiento),
+        sum(float(i.cumplimiento) for i in indicadores_filtrados if i.cumplimiento),
         2
     )
-    
-    colaboradores =obtener_colaboradores_directos( participantes=participantes, ficha_superior=usuario_dueño_indicador[0]['fichaSuperv'] )
-    if usuario_dueño_indicador[0]['nivel'] == 'I' :
-        colaboradores=obtener_colaboradores_mismo_nivel(participantes, ficha_get)
+
+    # Participantes GDD (para colaboradores/equipo y asignación de evaluadores)
+    participantes = participantes_gdd()
+
+    colaboradores = obtener_colaboradores_directos(
+        participantes=participantes,
+        ficha_superior=usuario_dueño_indicador[0]['fichaSuperv']
+    )
+    if usuario_dueño_indicador[0]['nivel'] == 'I':
+        colaboradores = obtener_colaboradores_mismo_nivel(participantes, ficha_get)
     colaboradores_json = json.dumps(colaboradores, ensure_ascii=False)
-    equipo = obtener_colaboradores_directos(participantes,ficha_get)
 
-
+    equipo = obtener_colaboradores_directos(participantes, ficha_get)
     if len(equipo) == 0 and usuario_dueño_indicador[0]['nivel'] == 'I':
         sin_equipo = True
         print("si, este pana no tiene equipo ")
-        # Si no tiene colaboradores directos, usamos a todos los participantes
         equipo = [p.copy() for p in participantes]
         flash('El participante no tiene colaboradores directos. Puedes seleccionar de todos los participantes disponibles.', 'info')
-    equipo_json =  json.dumps(equipo, ensure_ascii=False)
+    equipo_json = json.dumps(equipo, ensure_ascii=False)
 
+    # Registro de evaluación del usuario (para mostrar par/subordinado asignados)
     usuario_par = None
     usuario_subordinado = None
-    nombre_apellido_usuario_par= None
+    nombre_apellido_usuario_par = None
     nombre_apellido_usuario_subordinado = None
-    registro_evaluacion= None
     registro_evaluacion = Evaluacion.obtener_evaluaciones_por_usuario(
         ficha_usuario=ficha_get
     )
-    
+
     if registro_evaluacion:
-        
         if registro_evaluacion.par_evaluador:
             usuario_par = User.get_by_ficha(registro_evaluacion.par_evaluador)
             if not usuario_par:
                 usuario_par_from_sap = consultar_sap(registro_evaluacion.par_evaluador)
-                nombre_apellido_usuario_par= usuario_par_from_sap[0]['ename']
-                print(nombre_apellido_usuario_par)
+                nombre_apellido_usuario_par = usuario_par_from_sap[0]['ename']
 
         if registro_evaluacion.subordinado_evaluador:
             usuario_subordinado = User.get_by_ficha(registro_evaluacion.subordinado_evaluador)
             if not usuario_subordinado:
                 usuario_subordinado_from_sap = consultar_sap(registro_evaluacion.par_evaluador)
-                nombre_apellido_usuario_subordinado= usuario_subordinado_from_sap[0]['ename']
+                nombre_apellido_usuario_subordinado = usuario_subordinado_from_sap[0]['ename']
 
-            
-    
-    
-    
+    # ============================================================
+    # DATOS DE ETAPA 2 (SOLO LECTURA PARA RH)
+    # ============================================================
+    cumplimientos = {f'numero_{i}': None for i in range(1, 6)}
+    autoevaluaciones = {f'numero_{i}': None for i in range(1, 6)}
+    supervisor_evaluaciones = {f'numero_{i}': None for i in range(1, 6)}
+    par_evaluaciones = {f'numero_{i}': None for i in range(1, 6)}
+    subordinado_eval = {f'numero_{i}': None for i in range(1, 6)}
+    desempeños = {f'numero_{i}': None for i in range(1, 6)}
+
+    total_desempeño = ""
+    retroalimentacion_resultados = ""
+    evaluacion_completada = True
+
+    if etapa_general == 2:
+        resultados = Evaluacion.obtener_resultados(
+            ficha_usuario=ficha_get,
+            año_fiscal=año_fiscal
+        )
+
+        actualizar_diccionario_evaluaciones(autoevaluaciones, resultados, 'autoeval')
+        actualizar_diccionario_evaluaciones(supervisor_evaluaciones, resultados, 'superv_eval')
+        actualizar_diccionario_evaluaciones(par_evaluaciones, resultados, 'par_eval')
+        actualizar_diccionario_evaluaciones(subordinado_eval, resultados, 'subordinado_eval')
+        actualizar_diccionario_evaluaciones(cumplimientos, resultados, 'cumplimiento_eval')
+        actualizar_diccionario_evaluaciones(desempeños, resultados, 'desempeno_eval')
+
+        registro_eval_etapa2 = Evaluacion.obtener_evaluaciones_por_usuario(
+            ficha_usuario=ficha_get,
+            año_fiscal=año_fiscal
+        )
+        if registro_eval_etapa2:
+            total_desempeño = registro_eval_etapa2.total
+
+        retroalimentacion_resultados = Retroalimentacion.obtener_por_ficha_y_año(
+            ficha_usuario=ficha_get,
+            año_fiscal=año_fiscal
+        )
+
+        # Determinar si la evaluación está completada (para mostrar/ocultar bloques dependientes)
+        autoeval_completado = False
+        supervisor_completado = False
+        par_completado = False
+        subordinado_completado = False
+
+        if resultados and isinstance(resultados, list):
+            for competencia in resultados:
+                if competencia.get('autoeval') and competencia['autoeval'].strip():
+                    autoeval_completado = True
+                if competencia.get('superv_eval') and competencia['superv_eval'].strip():
+                    supervisor_completado = True
+                if competencia.get('par_eval') and competencia['par_eval'].strip():
+                    par_completado = True
+                if competencia.get('subordinado_eval') and competencia['subordinado_eval'].strip():
+                    subordinado_completado = True
+
+            if not autoeval_completado or not supervisor_completado:
+                evaluacion_completada = False
+
+            if usuario_dueño_indicador[0].get('nivel') == 'I':
+                if not par_completado or not subordinado_completado:
+                    evaluacion_completada = False
+        else:
+            evaluacion_completada = False
+
+    # ============================================================
+    # MANEJO DE POST (RH puede editar estado GDD e indicadores)
+    # ============================================================
     if request.method == 'POST':
-        lista_ids= []
+        lista_ids = []
+        datos = request.get_json()
 
-        datos = request.get_json() 
-
-        
-        # Caso 1: Si datos es un diccionario y contiene la clave 'accion'
+        # Caso 1: datos es un diccionario con 'accion' (ej: actualizar estado GDD)
         if isinstance(datos, dict) and 'accion' in datos:
             accion = datos['accion']
             print(f"Acción recibida: {accion}")
-            
+
             if accion == 'actualizar' and 'estado' in datos:
                 nuevo_estado = datos['estado']
                 print(f"Actualizando estado a: {nuevo_estado}")
                 User.update_estado_gdd(ficha_get, nuevo_estado)
                 return jsonify({"status": "ok", "message": f"Estado actualizado a {nuevo_estado}"})
-        
+
             return jsonify({"status": "ok", "message": f"Acción {accion} procesada"})
-        
-        # Caso 2: Si datos es una lista 
+
+        # Caso 2: datos es una lista (abrir/cerrar indicadores)
         elif isinstance(datos, list) and len(datos) > 0:
             aprobacion = None
-            
             for item in datos:
                 if isinstance(item, dict) and 'id' in item and 'estado' in item:
                     id = item['id']
-                    aprobacion = item['estado']  
-                    print(id)
-                    print(aprobacion)
+                    aprobacion = item['estado']
                     lista_ids.append(id)
-                    print(lista_ids)
-            
+
             if lista_ids and aprobacion is not None:
                 if aprobacion == "Cerrado":
                     Indicadores.actualizar_indicadores_usuario(ficha_get, lista_ids, nuevo_status="Cerrado")
                 else:
                     Indicadores.actualizar_indicadores_usuario(ficha_get, lista_ids, nuevo_status="Abierto")
-                
+
                 return jsonify({"status": "ok", "message": f"Indicadores actualizados con estado {aprobacion}"})
             else:
                 return jsonify({"status": "error", "message": "No se pudo procesar la lista de indicadores"})
-        
-        # Si ninguno de los casos anteriores aplica
+
         return jsonify({"status": "error", "message": "Formato de datos no reconocido"})
-    
 
-            
-    
-    return render_template('/auth/detalles_list_user.html', sin_equipo=sin_equipo, etapa_general= etapa_general, nombre_apellido_usuario_subordinado = nombre_apellido_usuario_subordinado ,  nombre_apellido_usuario_par= nombre_apellido_usuario_par,  usuario_subordinado = usuario_subordinado,  usuario_par= usuario_par, registro_evaluacion= registro_evaluacion, equipo = equipo, equipo_json= equipo_json, colaboradores=colaboradores, colaboradores_json = colaboradores_json,  consultar_cargo= consultar_cargo,  titulo= "Detalles" ,usuario=usuario,rest=rest, participantes= participantes, indicadores = indicadores, total_cumplimiento= total_cumplimiento, total_peso=total_peso, ficha_get= ficha_get, ficha=ficha, ruta_foto_personal= ruta_foto_personal, usuario_dueño_indicador = usuario_dueño_indicador, recortar_ficha= recortar_ficha, consultar_sap= consultar_sap )
-#-------------------------------------------------------------------------------------------------------------------------------------
-#-------------------------------------------- GDD-----------------------------------------------------------------------------------
-
+    return render_template(
+        '/auth/detalles_list_user.html',
+        sin_equipo=sin_equipo,
+        etapa_general=etapa_general,
+        nombre_apellido_usuario_subordinado=nombre_apellido_usuario_subordinado,
+        nombre_apellido_usuario_par=nombre_apellido_usuario_par,
+        usuario_subordinado=usuario_subordinado,
+        usuario_par=usuario_par,
+        registro_evaluacion=registro_evaluacion,
+        equipo=equipo,
+        equipo_json=equipo_json,
+        colaboradores=colaboradores,
+        colaboradores_json=colaboradores_json,
+        consultar_cargo=consultar_cargo,
+        titulo="Detalles",
+        usuario=usuario,
+        rest=rest,
+        participantes=participantes,
+        indicadores=indicadores_filtrados,
+        total_cumplimiento=total_cumplimiento,
+        total_peso=total_peso,
+        ficha_get=ficha_get,
+        ficha=ficha,
+        ruta_foto_personal=ruta_foto_personal,
+        usuario_dueño_indicador=usuario_dueño_indicador,
+        recortar_ficha=recortar_ficha,
+        consultar_sap=consultar_sap,
+        # Variables de etapa 2 (solo lectura)
+        autoevaluaciones=autoevaluaciones,
+        supervisor_evaluaciones=supervisor_evaluaciones,
+        par_evaluaciones=par_evaluaciones,
+        subordinado_eval=subordinado_eval,
+        cumplimientos=cumplimientos,
+        desempeños=desempeños,
+        total_desempeño=total_desempeño,
+        retroalimentacion_resultados=retroalimentacion_resultados,
+        evaluacion_completada=evaluacion_completada,
+        # Alias para que el HTML copiado de detalles_gestion_equipo funcione sin cambios
+        usuario_dueño_evaluacion=usuario_dueño_indicador
+    )
 
 def funcion_verificacion_enviar(usuario, año_fiscal):
     enviar = False
@@ -1164,6 +1264,7 @@ def Seleccionar_evaluar():
     
     
     fichas_a_evaluar = Evaluacion.obtener_evaluaciones_como_evaluador(current_user.ficha)
+    print(fichas_a_evaluar)
     fichas_a_evaluar_json =  json.dumps(fichas_a_evaluar, ensure_ascii=False)
 
     return render_template('/gdd/seleccionar_evaluar.html', etapa_general= etapa_general, recortar_ficha= recortar_ficha, equipo = equipo, fichas_a_evaluar= fichas_a_evaluar, fichas_a_evaluar_json = fichas_a_evaluar_json,  consultar_cargo= consultar_cargo,  titulo= "Seleccionar quien evaluar",usuario=usuario,rest=rest, ficha = ficha, procesar_ficha= procesar_ficha, ruta_foto_personal= ruta_foto_personal, consultar_sap= consultar_sap)
@@ -1312,7 +1413,7 @@ def gestion_equipo_detalles(ficha_get):
         'numero_4': None,
         'numero_5': None
     }
-    estado_evaluacion = ""
+    
     retroalimentacion_resultados =""
     total_desempeño =""
     if etapa_general == 2:
@@ -2949,3 +3050,19 @@ def sincronizar_resultados(year_fiscal):
         },
         'detalle': detalle
     })
+    
+
+@page.route('/app_crm/corregir_supervisores/<year_fiscal>', methods=['GET'])
+@login_required
+def corregir_supervisores(year_fiscal):
+    print(current_user.nivel_usuario)  
+    if current_user.nivel_usuario != 'admin' and current_user.nivel_usuario != "Administrador":
+        return jsonify({'error': 'No autorizado'}), 403
+
+    resultado = Evaluacion.corregir_supervisores_masivo(
+        año_fiscal=year_fiscal,
+        participantes_gdd_fn=participantes_gdd,   
+        procesar_ficha_fn=procesar_ficha
+    )
+
+    return jsonify(resultado)

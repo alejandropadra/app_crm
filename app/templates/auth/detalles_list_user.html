@@ -3,7 +3,6 @@
 
 {% block body %}
 
-
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <input type="hidden" value={{ficha_get}} id="ficha_get">
 <input type="hidden" value={{usuario.habilitacion_gdd}} name="" id="status_actual">
@@ -23,7 +22,6 @@
 </style>
 
 <div class="flex w-full justify-start my-7 mx-7 items-center gap-3">
-
     <button onclick="window.history.back()" class=" bg-slate-600 flex justify-center  w-10 h-10 rounded-[50%] items-center text-white hover:bg-slate-400 p-4  outline-none focus:outline-none ease-linear transition-all duration-150" type="button">
         <span class="">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
@@ -33,39 +31,15 @@
 </div>
 
 
-
-
-
-
+{# ============ TARJETA DE PERFIL + CONTROL GDD ============ #}
 <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 mb-5">
     {% include "components/tarjeta_perfil.html" %}
-
-
-    <!-- 
-    <div class="opado flex flex-col gap-5 max-w-80 bg-white rounded-[30px] shadow-custom p-4 items-center justify-center" >
-        <h3 class=" !text-[15px] text-center">Habilitar / bloquear proceso de GDD  </h3>
-        <div>Estdao actual: <span id="estadoActual" class=" font-bold {%if usuario.habilitacion_gdd == 'Abierto' or usuario.habilitacion_gdd=='AFACTIVO' %} text-[#047c54] {%else%} text-[#e32c24] {%endif%}"> {%if usuario.habilitacion_gdd == 'Abierto' or usuario.habilitacion_gdd == 'AFACTIVO'%} Abierto {%else%} Cerrado {%endif%}  </span></div>
-        <input id="inpLock" type="checkbox"  >
-        <label class="btn-lock" for="inpLock">
-            <svg width="36" height="40" viewBox="0 0 36 40">
-                <path class="lockb" d="M27 27C27 34.1797 21.1797 40 14 40C6.8203 40 1 34.1797 1 27C1 19.8203 6.8203 14 14 14C21.1797 14 27 19.8203 27 27ZM15.6298 26.5191C16.4544 25.9845 17 25.056 17 24C17 22.3431 15.6569 21 14 21C12.3431 21 11 22.3431 11 24C11 25.056 11.5456 25.9845 12.3702 26.5191L11 32H17L15.6298 26.5191Z"></path>
-                <path class="lock" d="M6 21V10C6 5.58172 9.58172 2 14 2V2C18.4183 2 22 5.58172 22 10V21"></path>
-                <path class="bling" d="M29 20L31 22"></path>
-                <path class="bling" d="M31.5 15H34.5"></path>
-                <path class="bling" d="M29 10L31 8"></path>
-            </svg>
-        </label>
-    </div>-->
-
-
 
     <div class=" flex p-5 gap-4 bg-white shadow-custom rounded-2xl flex-col opado">
         <h3 class=" text-center">Habilitar / bloquear proceso de GDD</h3>
         <div class=" flex flex-col">
-            <p class=" font-semibold text-center"> Estado Actual GDD:  <span id="spanGDD" class=" font-bold {%if status_actual == 'Abierto'%} text-[#047c54] {%else%} text-[#e32c24] {%endif%}"  " > {{status_actual}}</span></p>
-            
+            <p class=" font-semibold text-center"> Estado Actual GDD:  <span id="spanGDD" class=" font-bold {%if status_actual == 'Abierto'%} text-[#047c54] {%else%} text-[#e32c24] {%endif%}"> {{status_actual}}</span></p>
         </div>
-        
 
         <div class="flex gap-4 justify-center">
             <div class=" px-[7px] py-2 rounded-full ">
@@ -78,11 +52,10 @@
                         <path class="bling" d="M31.5 15H34.5"></path>
                         <path class="bling" d="M29 10L31 8"></path>
                     </svg>
-                    
                     <span class="name">Cerrar</span>
                 </label>
             </div>
-    
+
             <div class=" px-[7px] py-2 rounded-full ">
                 <label class="radioCheck dos text-white font-semibold">
                     <input  name="radio" type="radio" value="Abierto"  id="inputradio"/>
@@ -93,43 +66,30 @@
                         <path class="bling" d="M31.5 15H34.5"></path>
                         <path class="bling" d="M29 10L31 8"></path>
                     </svg>
-                    
                     <span class="name">Abrir</span>
                 </label>
             </div>
-    
-    
+
             <div class=" px-[7px] py-2 rounded-full ">
                 <label class="radioCheck tres text-white font-semibold">
                     <input  name="radio" type="radio" value="AFACTIVO"  id="inputradioTres"/>
                     <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-power-icon lucide-square-power !m-0"><path d="M12 7v4"/><path d="M7.998 9.003a5 5 0 1 0 8-.005"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-                    
                     <span class="name">AF Actual</span>
                 </label>
             </div>
         </div>
-        
-
-
-
     </div>
-
 </div>
 
+
+{# ============ TABLA DE INDICADORES (RH PUEDE APROBAR/BLOQUEAR) ============ #}
 <div class="bg-white p-5 rounded-[20px] shadow-custom  opado" id="tarjetaprincipalgdi" >
     <form action="" method="post">
-
         <div class="rounded-t mb-0 px-4 py-3 border-0 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <!-- Contenedor del título con flex-grow para ocupar el espacio a la izquierda -->
             <div class="relative px-0 md:px-4 flex-grow flex gap-5">
                 <h3 class="text-left opado">Aprobacion de Indicadores Funcionales</h3>
-                <!--<button id="autoayuda" type="button" class=" opado absolute md:static top-[-30px] right-[-35px] autoayuda bg-slate-600 flex justify-center  w-8 h-8 rounded-[50%] items-center text-white hover:bg-slate-400 p-4  outline-none focus:outline-none ease-linear transition-all duration-150" type="button">
-                    <span class="">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#fff" stroke-width="2.5" viewBox="0 0 256 256"><path d="M192,96c0,28.51-24.47,52.11-56,55.56V160a8,8,0,0,1-16,0V144a8,8,0,0,1,8-8c26.47,0,48-17.94,48-40s-21.53-40-48-40S80,73.94,80,96a8,8,0,0,1-16,0c0-30.88,28.71-56,64-56S192,65.12,192,96Zm-64,96a16,16,0,1,0,16,16A16,16,0,0,0,128,192Z"></path></svg>
-                </button>-->
             </div>
-        
-            <!-- Contenedor de botones, alineados a la derecha -->
+
             <div class="flex space-x-2 items-center">
                 <button type="button" id="boton_bloquear" class="opado cursor-pointer text-zinc-200 flex gap-2 items-center bg-rojo-crm px-4 py-2 rounded-lg font-medium text-sm hover:bg-red-300 transition-all ease-in duration-200">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-keyhole-icon lucide-lock-keyhole"><circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg>
@@ -140,7 +100,6 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-keyhole-open-icon lucide-lock-keyhole-open"><circle cx="12" cy="16" r="1"/><rect width="18" height="12" x="3" y="10" rx="2"/><path d="M7 10V7a5 5 0 0 1 9.33-2.5"/></svg>
                     <p class="text-white">Abrir Indicador(es)</p>
                 </button>
-                
             </div>
         </div>
 
@@ -154,41 +113,17 @@
                                 <label for="checkbox-all-search" class="sr-only">checkbox</label>
                             </div>
                         </th>
-                        <th scope="col" class="px-6 py-3 min-w-[300px] max-w-[280px] break-words whitespace-normal " id="indicadorAyuda">
-                            Indicadores
-                        </th>
-                        <th scope="col" class="px-6 py-3 min-w-[70px] max-w-[280px] text-center" id="tendenciaIndicador">
-                            Tendencia
-                        </th>
-                        <th scope="col" class="px-6 py-3 min-w-[100px] max-w-[280px] text-center" id="pesoIndicador">
-                            Peso
-                        </th>
-                        <th scope="col" class="px-6 py-3  min-w-[120px] max-w-[280px] text-center" id="realafIndicador">
-                            Real AF25
-                        </th>
-                        <th scope="col" class="px-6 py-3 min-w-[160px] max-w-[280px] text-center" id="objetivoAFIndicador">
-                            PPTO U OBJETIVO AF26
-                        </th>
-                        <th scope="col" class="px-6 py-3 min-w-[160px] max-w-[280px] text-center" id="REAlAFAyuda">
-                            REAL AF26
-                        </th>
-                        <th scope="col" class="px-6 py-3 min-w-[100px] max-w-[280px] text-center" id="cumplimientoIndicador">
-                            Cumplimiento
-                        </th>
-                        <th scope="col" class="px-6 py-3 min-w-[100px] max-w-[280px] text-center" id="desempeñoIndicador">
-                            Desempeño
-                        </th>
-                        <th scope="col" class="px-6 py-3 min-w-[120px] max-w-[280px] text-center" id="estatusIndicador">
-                            Estado
-                        </th>
-
-                        <th scope="col" class="px-6 py-3 min-w-[120px] max-w-[280px] text-center" id="estatusIndicador">
-                            Estado del proceso
-                        </th>
-                        <th scope="col" class="px-6 py-3 min-w-[120px] max-w-[280px] text-center" id="archivosAyuda">
-                            Archivos
-                        </th>
-
+                        <th scope="col" class="px-6 py-3 min-w-[300px] max-w-[280px] break-words whitespace-normal" id="indicadorAyuda">Indicadores</th>
+                        <th scope="col" class="px-6 py-3 min-w-[70px] max-w-[280px] text-center" id="tendenciaIndicador">Tendencia</th>
+                        <th scope="col" class="px-6 py-3 min-w-[100px] max-w-[280px] text-center" id="pesoIndicador">Peso</th>
+                        <th scope="col" class="px-6 py-3 min-w-[120px] max-w-[280px] text-center" id="realafIndicador">Real AF25</th>
+                        <th scope="col" class="px-6 py-3 min-w-[160px] max-w-[280px] text-center" id="objetivoAFIndicador">PPTO U OBJETIVO AF26</th>
+                        <th scope="col" class="px-6 py-3 min-w-[160px] max-w-[280px] text-center" id="REAlAFAyuda">REAL AF26</th>
+                        <th scope="col" class="px-6 py-3 min-w-[100px] max-w-[280px] text-center" id="cumplimientoIndicador">Cumplimiento</th>
+                        <th scope="col" class="px-6 py-3 min-w-[100px] max-w-[280px] text-center" id="desempeñoIndicador">Desempeño</th>
+                        <th scope="col" class="px-6 py-3 min-w-[120px] max-w-[280px] text-center" id="estatusIndicador">Estado</th>
+                        <th scope="col" class="px-6 py-3 min-w-[120px] max-w-[280px] text-center" id="estatusIndicador">Estado del proceso</th>
+                        <th scope="col" class="px-6 py-3 min-w-[120px] max-w-[280px] text-center" id="archivosAyuda">Archivos</th>
                         <th class="hidden"></th>
                     </tr>
                 </thead>
@@ -202,63 +137,39 @@
                                 <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
                             </div>
                         </td>
-        
-                        <td class="px-4 py-3 text-sm text-gray-700  text-left break-words whitespace-normal align-center">
-                            {{indicador.nombre_indicador}}
-                        </td>
-        
-                        <td class="px-6 py-4 text-sm text-gray-700 text-center">
-                            {{indicador.tendencia}}
-                        </td>
-        
-                        <td class="px-6 py-4 text-sm text-gray-700 text-center font-bold">
-                            {{indicador.peso|int}}%
-                        </td>
-        
-                        <td class="px-6 py-4 text-sm text-gray-700 text-center">
-                            {% if indicador.real_af_antes%} {{indicador.real_af_antes}} {%else%} N/A {%endif%}
-                        </td>
-        
-                        <td class="px-6 py-4 text-sm text-gray-700 text-center">
-                            {% if indicador.objetivo_af_actual%} {{indicador.objetivo_af_actual}} {%else%} N/A {%endif%}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-700 text-center">
-                            {% if indicador.real_af_actual%} {{indicador.real_af_actual}} {%elif indicador.real_af_actual == 0%} 0{%else%} N/A {%endif%}
-                        </td>
-                        <td class="px-6 py-4 text-gray-700 font-extrabold text-center">
-        
-                        {% if indicador.cumplimiento%} {{indicador.cumplimiento}}% {%else%} 0% {%endif%}
-                        </td>
-        
-                        <td class=" px-6 py-4  text-center font-bold text-[#333]">
-                            <span class="{% if indicador.desempeno == 'O'%} bg-blue-300  
-                                            {% elif indicador.desempeno == 'UP'%} bg-red-300 
-                                            {% elif indicador.desempeno == 'FP-'%} bg-yellow-300 
-                                            {% elif indicador.desempeno == 'FP'%} bg-green-300 
-                                            {% elif indicador.desempeno == 'FP+'%} bg-green-300 
-                                            {% else %} bg-slate-300 text-slate-600 {%endif%}
-                                            font-bold
-                                            p-3 rounded-2xl">{% if indicador.desempeno%} {{indicador.desempeno}} {%else%} NN {%endif%}</span>
-                        </td>
-        
-                        <td class=" px-6 py-4  text-center">
 
+                        <td class="px-4 py-3 text-sm text-gray-700 text-left break-words whitespace-normal align-center">{{indicador.nombre_indicador}}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 text-center">{{indicador.tendencia}}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 text-center font-bold">{{indicador.peso|int}}%</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 text-center">{% if indicador.real_af_antes%} {{indicador.real_af_antes}} {%else%} N/A {%endif%}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 text-center">{% if indicador.objetivo_af_actual%} {{indicador.objetivo_af_actual}} {%else%} N/A {%endif%}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 text-center">{% if indicador.real_af_actual%} {{indicador.real_af_actual}} {%elif indicador.real_af_actual == 0%} 0{%else%} N/A {%endif%}</td>
+                        <td class="px-6 py-4 text-gray-700 font-extrabold text-center">{% if indicador.cumplimiento%} {{indicador.cumplimiento}}% {%else%} 0% {%endif%}</td>
+
+                        <td class=" px-6 py-4  text-center font-bold text-[#333]">
+                            <span class="{% if indicador.desempeno == 'O'%} bg-blue-300
+                                            {% elif indicador.desempeno == 'UP'%} bg-red-300
+                                            {% elif indicador.desempeno == 'FP-'%} bg-yellow-300
+                                            {% elif indicador.desempeno == 'FP'%} bg-green-300
+                                            {% elif indicador.desempeno == 'FP+'%} bg-green-300
+                                            {% else %} bg-slate-300 text-slate-600 {%endif%}
+                                            font-bold p-3 rounded-2xl">{% if indicador.desempeno%} {{indicador.desempeno}} {%else%} NN {%endif%}</span>
+                        </td>
+
+                        <td class=" px-6 py-4  text-center">
                             {% if indicador.status_aprobacion%}
-                                <span class=" p-3 rounded-xl text-center {% if indicador.status_aprobacion == 'A'%} bg-green-300  
-                                            {% elif indicador.status_aprobacion == 'R'%} bg-red-300 
-                                            {% elif indicador.status_aprobacion == 'C'%} bg-blue-300 
-                                            {%endif%} font-bold  text-[#333]" >{{indicador.status_aprobacion}}</span> 
+                                <span class=" p-3 rounded-xl text-center {% if indicador.status_aprobacion == 'A'%} bg-green-300
+                                            {% elif indicador.status_aprobacion == 'R'%} bg-red-300
+                                            {% elif indicador.status_aprobacion == 'C'%} bg-blue-300
+                                            {%endif%} font-bold  text-[#333]" >{{indicador.status_aprobacion}}</span>
                             {%else%}
                                 N/A
                             {%endif%}
-
                         </td>
 
-                                
                         <td class=" px-6 py-4  text-center">
-
-                            <span class=" flex flex-col items-center justify-center p-3 rounded-xl text-center {% if indicador.status == 'Abierto'%} bg-green-600  
-                                {% elif indicador.status == 'Cerrado'%} bg-rojo-crm  
+                            <span class=" flex flex-col items-center justify-center p-3 rounded-xl text-center {% if indicador.status == 'Abierto'%} bg-green-600
+                                {% elif indicador.status == 'Cerrado'%} bg-rojo-crm
                                 {%endif%} font-bold  text-[#333]" >
                                 {% if indicador.status == 'Abierto'%}
                                     <p class="small !text-white ">{{indicador.status}}</p>
@@ -267,48 +178,32 @@
                                     <p class="small !text-white ">{{indicador.status}}</p>
                                     <svg  xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-keyhole-icon lucide-lock-keyhole text-white"><circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg>
                                 {%endif%}
-                            </span> 
+                            </span>
                         </td>
-        
+
                         <td class="p-2">
                             <div class="flex flex-col gap-5">
                                 <div class="w-full">
-                                    <!-- Botón con tooltip -->
-                                    <a data-tooltip-target="tooltip-default{{loop.index0}}" href="{{ url_for('.hoja_vida', indicador=indicador.id) }}" class="p-2 w-full bg-azul-dark text-white rounded-xl" id="hojavida" aria-disabled="true">
-                                        Hoja de Vida
-                                    </a>
-
-                                    <div id="tooltip-default{{loop.index0}}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                    <a data-tooltip-target="tooltip-default{{loop.index0}}" href="{{ url_for('.hoja_vida', indicador=indicador.id) }}" class="p-2 w-full bg-azul-dark text-white rounded-xl" id="hojavida" aria-disabled="true">Hoja de Vida</a>
+                                    <div id="tooltip-default{{loop.index0}}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700">
                                         Ver hoja de Vida
                                         <div class="tooltip-arrow" data-popper-arrow></div>
                                     </div>
-                                    
                                 </div>
-        
+
                                 <div class="w-full">
-                                    <!-- Botón con tooltip -->
-                                    <a data-tooltip-target="tooltip-default-cr{{loop.index0}}" href="{{ url_for('.cronograma', indicador=indicador.id) }}" class="p-2 w-full bg-azul-dark text-white rounded-xl" id="cronograma">
-                                        Cronograma
-                                    </a>
-                                    
+                                    <a data-tooltip-target="tooltip-default-cr{{loop.index0}}" href="{{ url_for('.cronograma', indicador=indicador.id) }}" class="p-2 w-full bg-azul-dark text-white rounded-xl" id="cronograma">Cronograma</a>
                                     <div id="tooltip-default-cr{{loop.index0}}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700">
                                         Ver Cronograma
                                         <div class="tooltip-arrow" data-popper-arrow></div>
                                     </div>
-                                    
                                 </div>
-                                
                             </div>
                         </td>
-        
-                        <td class=" hidden">"
-                            {{indicador.id}}
-                        </td>
-        
-                    </tr>
 
+                        <td class=" hidden">{{indicador.id}}</td>
+                    </tr>
                     {%endfor%}
-                    
                 </tbody>
                 <tfoot>
                     <tr>
@@ -320,29 +215,23 @@
                         <td></td>
                         <td></td>
                         <td class="pr-4 align-middle border text-xs whitespace-nowrap p-4 text-center font-extrabold text-gray-700
-                        
-                                {% if total_cumplimiento < 50%}
-                                    bg-blue-200 
-                                {% elif total_cumplimiento >= 50%}
-                                    bg-green-300 
+                                {% if total_cumplimiento < 50%} bg-blue-200
+                                {% elif total_cumplimiento >= 50%} bg-green-300
                             {%endif%}" id="footerCumplimiento">{{total_cumplimiento}}%
                         </td>
                         <td></td>
                         <td></td>
                         <td></td>
                         <td></td>
-                        
                     </tr>
                 </tfoot>
             </table>
         </div>
-
     </form>
 </div>
 
 
-
-
+{# ============ FORMULARIO DE ASIGNAR EVALUADORES (RH) ============ #}
 <div class=" w-full  py-5 gap-6">
     <form enctype="multipart/form-data" action="{{ url_for('.establecer_evaluadores') }}" method="post" id="formEstablecerEvaluadores">
         <div class=" bg-white opado shadow-custom p-5 rounded-2xl  ">
@@ -352,21 +241,18 @@
                 <div class="blanco p-3 rounded-xl shadow-sm border border-gray-200 flex flex-col gap-4">
                     <div class="flex items-center flex-col gap-3">
                         <h4 class=" text-base text-center">Supervisor</h4>
-                        <!-- Input de búsqueda -->
-                        <div class="relative"> 
+                        <div class="relative">
                             <input disabled placeholder="Establecido por defecto"  class="input shadow-lg focus:border-2 border-gray-300 px-5 py-2 pr-12 rounded-xl w-full transition-all focus:w-[102%] outline-none"  name="search"  type="search"  autocomplete="off" />
-
                         </div>
                     </div>
 
-                    <!--Supervisor inmediato-->
-                    <div class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3 bg-[--verde]"> 
+                    <div class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3 bg-[--verde]">
                         <div class="w-[20%]  aspect-square">
                             {%set ficha_seupervisor = recortar_ficha(usuario_dueño_indicador[0].fichaSuperv)%}
                             {% set ruta = ruta_foto_personal(ficha_seupervisor) %}
-                                <img src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
-                                        class="w-full h-full object-cover rounded-full border border-solid  " 
-                                        alt="User Image">
+                            <img src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}"
+                                    class="w-full h-full object-cover rounded-full border border-solid"
+                                    alt="User Image">
                         </div>
                         <div  class=" flex flex-col gap-1">
                             <h5 class=" text-base font-normal">{{usuario_dueño_indicador[0].nombreSuperv |title}}</h5>
@@ -375,65 +261,53 @@
                     </div>
                 </div>
 
-                
                 {%if usuario_dueño_indicador[0].nivel == 'I'%}
                     <div class="blanco p-3 rounded-xl shadow-sm border border-gray-200 flex flex-col gap-4">
                         <div class=" flex items-center flex-col gap-3 w-full justify-between ">
                             <h4 class=" text-base text-center ">Evaluador Par</h4>
                             <div class="relative">
-                                <!-- Input de búsqueda -->
-                                <div class="relative"> 
+                                <div class="relative">
                                     <input  id="searchInput" placeholder="Buscar"  class="input shadow-lg focus:border-2 border-gray-300 px-5 py-2 pr-12 rounded-xl w-full transition-all focus:w-[102%] outline-none"  name="search"  type="search"  autocomplete="off" />
-                                    <svg class="size-5 absolute top-3 right-3 text-gray-500 pointer-events-none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" >
+                                    <svg class="size-5 absolute top-3 right-3 text-gray-500 pointer-events-none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" stroke-linejoin="round" stroke-linecap="round"></path>
                                     </svg>
                                 </div>
 
-                                <!-- Dropdown Menu -->
-                                <div id="dropdown" class="dropdown-closed absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg mt-1 z-10 overflow-hidden transition-all duration-200" >
+                                <div id="dropdown" class="dropdown-closed absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg mt-1 z-10 overflow-hidden transition-all duration-200">
                                     <div class="max-h-60 overflow-y-auto">
-                                        <div id="dropdownContent">
-                                        </div>
-                                        <div id="noResults" class="hidden px-4 py-3 text-gray-500 text-center">
-                                            No se encontraron colaboradores
-                                        </div>
+                                        <div id="dropdownContent"></div>
+                                        <div id="noResults" class="hidden px-4 py-3 text-gray-500 text-center">No se encontraron colaboradores</div>
                                     </div>
                                 </div>
-                                <!-- Campo oculto para almacenar el colaborador seleccionado -->
                                 <input type="hidden" id="selectedColaborador" name="colaborador_id" />
                             </div>
                         </div>
 
-
-                        <!--Evaluador par-->
                         {%if registro_evaluacion.par_evaluador or registro_evaluacion.par_evaluador != None %}
-                            <div class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3 bg-[--verde]"> 
+                            <div class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3 bg-[--verde]">
                                 <div class="w-[20%]  aspect-square">
                                     {%set ficha_par_evaluador = recortar_ficha(registro_evaluacion.par_evaluador)%}
                                     {% set ruta = ruta_foto_personal(ficha_par_evaluador) %}
-                                    <img  id="selectedImage" src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
-                                                class="w-full h-full object-cover rounded-full border border-solid  " 
+                                    <img  id="selectedImage" src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}"
+                                                class="w-full h-full object-cover rounded-full border border-solid"
                                                 alt="User Image">
                                 </div>
                                 <div  class=" flex flex-col gap-1">
                                     <h5 id="selectedName" class=" text-base font-normal ">
-
                                         {%if not usuario_par %}
                                             {{nombre_apellido_usuario_par | title}}
                                         {%else%}
                                             {{usuario_par.apellido|title }}, {{usuario_par.nombre |title}}
                                         {%endif%}
-                                    
                                     </h5>
                                     <h6 class=" small "> Evaluador Par</h6>
                                 </div>
                             </div>
-                        
                         {%else%}
                             <div id="selectedPar" class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3">
                                 <div class="w-[20%]  aspect-square">
-                                    <img id="selectedImage" src="{{ url_for('static', filename='img/notfoundUser.png') }}" 
-                                        class="w-full h-full object-cover rounded-full border border-solid  " 
+                                    <img id="selectedImage" src="{{ url_for('static', filename='img/notfoundUser.png') }}"
+                                        class="w-full h-full object-cover rounded-full border border-solid"
                                         alt="User Image">
                                 </div>
                                 <div  class=" flex flex-col gap-1">
@@ -447,47 +321,40 @@
                     <div class="blanco p-3 rounded-xl shadow-sm border border-gray-200 flex flex-col gap-4">
                         <div class=" flex items-center gap-3 flex-col w-full justify-between ">
                             <h4 class=" text-base text-center ">Evaluador Colaborador</h4>
+                            <div class="relative">
                                 <div class="relative">
-                                    <!-- Input de búsqueda -->
-                                    <div class="relative">
-                                        <input id="searchInputSubordinado" placeholder="Buscar "  
-                                            class="input shadow-lg focus:border-2 border-gray-300 px-5 py-2 pr-12 rounded-xl w-full transition-all focus:w-[102%] outline-none"  
-                                            name="search"  
-                                            type="search"  
-                                            autocomplete="off" />
-                                        <svg class="size-5 absolute top-3 right-3 text-gray-500 pointer-events-none" 
-                                            stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none" 
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" 
-                                                stroke-linejoin="round" stroke-linecap="round"></path>
-                                        </svg>
-                                    </div>
-
-                                    <!-- Dropdown Menu para subordinados -->
-                                    <div id="dropdownSubordinado" class="dropdown-closed absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg mt-1 z-10 overflow-hidden transition-all duration-200">
-                                        <div class="max-h-60 overflow-y-auto">
-                                            <div id="dropdownContentSubordinado">
-                                            </div>
-                                            <div id="noResultsSubordinado" class="hidden px-4 py-3 text-gray-500 text-center">
-                                                No se encontraron colaboradores
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Campo oculto para almacenar el colaborador subordinado seleccionado -->
-                                    <input type="hidden" id="selectedColaboradorSubordinado" name="colaborador_subordinado" />
+                                    <input id="searchInputSubordinado" placeholder="Buscar "
+                                        class="input shadow-lg focus:border-2 border-gray-300 px-5 py-2 pr-12 rounded-xl w-full transition-all focus:w-[102%] outline-none"
+                                        name="search"
+                                        type="search"
+                                        autocomplete="off" />
+                                    <svg class="size-5 absolute top-3 right-3 text-gray-500 pointer-events-none"
+                                        stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                                            stroke-linejoin="round" stroke-linecap="round"></path>
+                                    </svg>
                                 </div>
-                        </div>
-                        <!--Evaluador par-->
-                        {%if registro_evaluacion.subordinado_evaluador or registro_evaluacion.subordinado_evaluador != None %}
 
+                                <div id="dropdownSubordinado" class="dropdown-closed absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg mt-1 z-10 overflow-hidden transition-all duration-200">
+                                    <div class="max-h-60 overflow-y-auto">
+                                        <div id="dropdownContentSubordinado"></div>
+                                        <div id="noResultsSubordinado" class="hidden px-4 py-3 text-gray-500 text-center">No se encontraron colaboradores</div>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" id="selectedColaboradorSubordinado" name="colaborador_subordinado" />
+                            </div>
+                        </div>
+
+                        {%if registro_evaluacion.subordinado_evaluador or registro_evaluacion.subordinado_evaluador != None %}
                             <div id="selectedPar" class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3">
                                 <div class="w-[20%]  aspect-square">
                                     {%set ficha_subordinado_evaluador = recortar_ficha(registro_evaluacion.subordinado_evaluador)%}
-                                        {% set ruta = ruta_foto_personal(ficha_subordinado_evaluador) %}
-                                            <img  id="selectedImageSubordinado" src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}" 
-                                                    class="w-full h-full object-cover rounded-full border border-solid  " 
-                                                    alt="User Image">
+                                    {% set ruta = ruta_foto_personal(ficha_subordinado_evaluador) %}
+                                    <img  id="selectedImageSubordinado" src="{{ url_for('static', filename=ruta if ruta else 'img/notfoundUser.png') }}"
+                                                class="w-full h-full object-cover rounded-full border border-solid"
+                                                alt="User Image">
                                 </div>
                                 <div class=" flex flex-col gap-1">
                                     <h5 id="selectedNameSubordinado" class=" text-base font-normal">
@@ -496,19 +363,15 @@
                                         {%else%}
                                             {{usuario_subordinado.apellido|title }}, {{usuario_subordinado.nombre |title}}
                                         {%endif%}
-                                    
                                     </h5>
                                     <h6 class=" small "> Evaluador subordinado</h6>
                                 </div>
                             </div>
-
                         {%else%}
-
-        
                             <div id="selectedPar" class=" bg-white shadow p-3 rounded-3xl flex items-center gap-3">
                                 <div class="w-[20%]  aspect-square">
-                                    <img id="selectedImageSubordinado" src="{{ url_for('static', filename='img/notfoundUser.png') }}" 
-                                        class="w-full h-full object-cover rounded-full border border-solid  " 
+                                    <img id="selectedImageSubordinado" src="{{ url_for('static', filename='img/notfoundUser.png') }}"
+                                        class="w-full h-full object-cover rounded-full border border-solid"
                                         alt="User Image">
                                 </div>
                                 <div  class=" flex flex-col gap-1">
@@ -516,49 +379,234 @@
                                     <h6 class=" small "> Evaluador Par</h6>
                                 </div>
                             </div>
-                    
-                    {%endif%}
-
+                        {%endif%}
                     </div>
                 {%endif%}
             </div>
-
 
             {%if usuario_dueño_indicador[0].nivel == 'I'%}
                 <div class=" flex justify-end items-center">
                     <button type="button" class=" mt-3 cursor-pointer text-zinc-200 flex gap-2 items-center bg-valor-azul px-4 py-2 rounded-lg font-medium text-sm hover:bg-azul-dark transition-all ease-in duration-200" id="enviarEvaluadores">
                         Guardar evaluadores
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 0 18 0Z" />
                         </svg>
-
                     </button>
                 </div>
             {%endif%}
         </div>
-
-
     </form>
 </div>
 
 
-    
+{# ========================================================================= #}
+{# ============ VISTA DE ETAPA 2 (SOLO LECTURA — COPIADO DE             ===== #}
+{# ============ detalles_gestion_equipo.html, SIN FORMS NI EDICIÓN)     ===== #}
+{# ========================================================================= #}
 
-    <!-- 
-    <div class=" col-span-2 bg-white opado shadow-custom p-5 rounded-2xl">
-        {%if usuario_dueño_indicador[0].nivel == 'II'%}
-        <h3>Evaluación 180</h3>
-        <p>El usuario es evaluado por su supervisor</p>
-        {%endif%}
-    </div>-->
+{%if etapa_general == 2 %}
+<div class="tarjeta-base bg-white overflow-x-auto sombra w-full shadow-custom z-0 mt-8 flex flex-col gap-4 p-3">
+    <h3 class="opado p-3">Resultados Evaluación de Competencias</h3>
+    <table class="table-auto w-full border-collapse opado" id="tabla-HV">
+        <thead>
+            <tr>
+                <td class="w-1/4 px-3 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 whitespace-nowrap font-semibold text-left"></td>
+                <td class="w-1/12 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">Peso %</td>
+                <td class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">Auto Evaluación</td>
+                <td class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">Supervisor</td>
+                {%if usuario_dueño_evaluacion[0].nivel == 'I' %}
+                    <td class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">Par</td>
+                    <td class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">Colaborador</td>
+                {%endif%}
+                <td class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">Cumplimiento</td>
+                <td class="w-1/6 px-2 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-base border-l-0 border-r-0 font-semibold text-left">Desempeño</td>
+            </tr>
+        </thead>
+        <tbody>
+            {# Macro local para evitar repetir el mismo bloque de color 30+ veces #}
+            {% macro celda_eval(valor) %}
+                <td class="border border-solid h-full p-0 text-center relative">
+                    {% if valor and valor != '' %}
+                        <span class="p-3 rounded-2xl h-full text-center font-bold text-[#333]
+                            {% if valor == 'UP' %} bg-red-300
+                            {% elif valor == 'FP-' %} bg-yellow-300
+                            {% elif valor == 'FP' %} bg-slate-300
+                            {% elif valor == 'FP+' %} bg-green-300
+                            {% elif valor == 'O' %} bg-blue-300
+                            {% endif %}">{{ valor }}</span>
+                    {% else %}
+                        <span class="p-3 rounded-2xl h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                    {% endif %}
+                </td>
+            {% endmacro %}
 
+            {% set competencias_lista = [
+                ('Demostración Valores Corporativos', 1),
+                ('Foco en Resultados', 2),
+                ('Influencia Organizacional', 3),
+                ('Liderazgo', 4),
+                ('Desarrollo del Equipo de Trabajo', 5)
+            ] %}
+
+            {% for nombre_comp, idx in competencias_lista %}
+            <tr class="!h-[90px]">
+                <td class="border border-solid h-full p-0">
+                    <div class="p-4">
+                        <h4 class="font-normal text-[#000000]">{{ nombre_comp }}</h4>
+                    </div>
+                </td>
+                <td class="border border-solid h-full p-0">
+                    <input type="text" class="w-full peso h-full p-2 border-none" value="4%" readonly>
+                </td>
+                {{ celda_eval(autoevaluaciones['numero_' ~ idx]) }}
+                {{ celda_eval(supervisor_evaluaciones['numero_' ~ idx]) }}
+                {% if usuario_dueño_evaluacion[0].nivel == 'I' %}
+                    {{ celda_eval(par_evaluaciones['numero_' ~ idx]) }}
+                    {{ celda_eval(subordinado_eval['numero_' ~ idx]) }}
+                {% endif %}
+                {{ celda_eval(cumplimientos['numero_' ~ idx]) }}
+                {{ celda_eval(desempeños['numero_' ~ idx]) }}
+            </tr>
+            {% endfor %}
+
+            {# Fila total de desempeño - el valor siempre cae en la última columna (Desempeño) #}
+            {% if usuario_dueño_evaluacion[0].nivel != 'I' %}
+            <tr class="!h-[70px]">
+                {# 1: nombre #}<td></td>
+                {# 2: peso %  #}<td></td>
+                {# 3: auto eval #}<td></td>
+                {# 4: supervisor #}<td></td>
+                {# 5: cumplimiento #}
+                <td class="border border-solid p-3 text-center">
+                    {% if total_desempeño and total_desempeño != '' %}
+                        <span class="resultado_span_desempeño p-3 rounded-2xl text-center font-bold text-[#333]">{{ total_desempeño | float }}%</span>
+                    {% else %}
+                        <span class="p-3 rounded-2xl text-center font-bold text-[#333] bg-gray-400">---</span>
+                    {% endif %}
+                </td>
+                {# 6: desempeño (aquí va el total) #}
+                <td></td>
+            </tr>
+            {% else %}
+            <tr class="!h-[70px]">
+                {# 1: nombre #}<td></td>
+                {# 2: peso %  #}<td></td>
+                {# 3: auto eval #}<td></td>
+                {# 4: supervisor #}<td></td>
+                {# 5: par #}<td></td>
+                {# 6: colaborador #}<td></td>
+                {# 7: cumplimiento #}
+                                <td class="border border-solid p-3 text-center">
+                    {% if total_desempeño and total_desempeño != '' %}
+                        <span class="resultado_span_desempeño p-3 rounded-2xl text-center font-bold text-[#333]">{{ total_desempeño }}%</span>
+                    {% else %}
+                        <span class="p-3 rounded-2xl text-center font-bold text-[#333] bg-gray-400">---</span>
+                    {% endif %}
+                </td>
+                {# 8: desempeño (aquí va el total) #}
+                <td></td>
+                
+
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
 </div>
+{%endif%}
 
 
+{# ============ RESULTADO FINAL Y CUALITATIVO (ETAPA 2) ============ #}
+{%if etapa_general == 2 %}
+{% set safe_desempeño = 0 if (total_desempeño is none or total_desempeño == '---' or total_desempeño == '') else total_desempeño %}
+{% set safe_cumplimiento = 0 if (total_cumplimiento is none or total_cumplimiento == '---' or total_cumplimiento == '') else total_cumplimiento %}
+{% set totalDempeños = (safe_desempeño + safe_cumplimiento) | round(1) %}
+
+<div class=" w-full   flex items-center justify-end opado mt-5 p-3 gap-4">
+    <div class=" bg-white shadow-custom w-auto flex items-center p-4 rounded-xl gap-3 ">
+        <h3>Resultado Final:</h3>
+        <div class=" text-lg font-semibold {%if totalDempeños < 30%} text-yellow-400 {%elif totalDempeños < 60%} text-green-600 {%else%} text-blue-600 {%endif%}">{{totalDempeños}}%</div>
+    </div>
+
+    <div class=" bg-white shadow-custom w-auto flex items-center p-4 rounded-xl gap-3 ">
+        <h3>Resultado Cualitativo:</h3>
+        <div class=" text-lg font-semibold {%if totalDempeños < 30%} text-yellow-400 {%elif totalDempeños < 60%} text-green-600 {%else%} text-blue-600 {%endif%}">
+            {%if totalDempeños <=80 %}<span>UP</span>
+            {%elif totalDempeños >=81 and totalDempeños <=99%}<span>FP-</span>
+            {%elif totalDempeños >=100 and totalDempeños <=109%}<span>FP</span>
+            {%elif totalDempeños >=110  and totalDempeños <=119 %}<span>FP+</span>
+            {%elif totalDempeños >=120 %}<span>O</span>
+            {%endif%}
+        </div>
+    </div>
+</div>
+{%endif%}
 
 
+{# ============ RETROALIMENTACIÓN (ETAPA 2 — SOLO LECTURA PARA RH) ============ #}
+{%if etapa_general == 2 %}
+<div class="tarjeta-base bg-white !shadow-custom mt-5 opado">
+    <div class=" p-4">
+        <h3>Retroalimentación</h3>
+
+        {# Coletilla cuando el usuario no ha completado el proceso #}
+        {% if not retroalimentacion_resultados %}
+        <div class="mt-3 p-4 bg-yellow-100 border-l-4 border-yellow-500 rounded-md">
+            <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-700">
+                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                    <path d="M12 9v4"/>
+                    <path d="M12 17h.01"/>
+                </svg>
+                <p class="text-yellow-800 font-semibold m-0">Este usuario aún no ha completado el proceso de retroalimentación.</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="py-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+                {# Feedback sí/no en modo solo lectura #}
+                <div class="col-span-2 rounded-2xl p-5 flex flex-col blanco">
+                    <label class="font-semibold mb-2">¿Recibió el feedback correspondiente de su supervisor?</label>
+                    <div class="mt-2">
+                        {% if retroalimentacion_resultados and retroalimentacion_resultados.feedback %}
+                            <span class="p-3 rounded-xl text-white font-bold
+                                {% if retroalimentacion_resultados.feedback == 'Sí' %} bg-green-500
+                                {% else %} bg-red-500 {% endif %}">
+                                {{ retroalimentacion_resultados.feedback }}
+                            </span>
+                        {% else %}
+                            <span class="p-3 rounded-xl bg-gray-200 text-gray-500 italic">Sin respuesta</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# Comentario del colaborador (solo lectura) #}
+                <div class="w-full p-5 bg-blue-100 rounded-xl">
+                    <div class="flex items-center mb-2 text-[#333]">
+                        <label class="block text-sm font-bold">Observaciones del colaborador</label>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-pen-icon lucide-user-round-pen"><path d="M2 21a8 8 0 0 1 10.821-7.487"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="8" r="5"/></svg>
+                    </div>
+                    <div class="bg-white w-full rounded-xl p-3 min-h-[100px] whitespace-pre-wrap">{% if retroalimentacion_resultados and retroalimentacion_resultados.comentarios_colaborador %}{{ retroalimentacion_resultados.comentarios_colaborador }}{% else %}<span class="text-gray-400 italic">Sin comentarios</span>{% endif %}</div>
+                </div>
+
+                {# Comentario del supervisor (solo lectura) #}
+                <div class="w-full p-5 bg-blue-100 rounded-xl">
+                    <div class="flex items-center mb-2 text-[#333]">
+                        <label class="block text-sm font-bold">Observaciones del Supervisor</label>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-glasses-icon lucide-glasses"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M14 15a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/><path d="M2.5 13 5 7c.7-1.3 1.4-2 3-2"/><path d="M21.5 13 19 7c-.7-1.3-1.5-2-3-2"/></svg>
+                    </div>
+                    <div class="bg-white w-full rounded-xl p-3 min-h-[100px] whitespace-pre-wrap">{% if retroalimentacion_resultados and retroalimentacion_resultados.comentarios_supervisor %}{{ retroalimentacion_resultados.comentarios_supervisor }}{% else %}<span class="text-gray-400 italic">Sin comentarios</span>{% endif %}</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{%endif%}
 
 
+{# ============ MODAL DE CONFIRMACIÓN (PARA BLOQUEAR/ABRIR INDICADORES) ============ #}
 <div id="popup-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative p-4 w-full max-w-md max-h-full">
         <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
@@ -586,16 +634,8 @@
     </div>
 </div>
 
-
-
-
-
-
-
-
 {% endblock %}
 
 {% block js%}
-
 <script src="{{ url_for('static', filename='js/detalles_list_user.js') }}"></script>
 {% endblock %}

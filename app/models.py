@@ -929,6 +929,88 @@ class Evaluacion(db.Model):
             print(f"Error al obtener evaluaciones detalladas como evaluador: {e}")
             return []
         
+    @classmethod
+    def corregir_supervisores_masivo(cls, año_fiscal, participantes_gdd_fn, procesar_ficha_fn):
+        # Construir ambos formatos equivalentes del año fiscal
+        formatos_busqueda = [año_fiscal]
+        if año_fiscal.startswith("AF"):
+            año_num = int(año_fiscal[2:])
+            año_numerico = f"20{año_num-1}20{año_num:02d}"
+            formatos_busqueda.append(año_numerico)
+        else:
+            formatos_busqueda.append(f"AF{año_fiscal[6:8]}")
+
+        # 1. UNA sola llamada a SAP para traer todos los participantes
+        try:
+            participantes = participantes_gdd_fn()
+            if isinstance(participantes, str):  # si devolvió "Error 404"
+                return {'success': False, 'error': 'No se pudo obtener participantes desde SAP'}
+        except Exception as e:
+            return {'success': False, 'error': f'Error consultando SAP: {str(e)}'}
+
+        # 2. Construir diccionario {ficha_normalizada: fichaSuperv_raw} para lookups rápidos
+        mapa_supervisores = {}
+        for p in participantes:
+            ficha_raw = p.get('pernr', '')
+            ficha_superv_raw = p.get('fichaSuperv', '')
+            if not ficha_raw:
+                continue
+            # Normalizamos la ficha del empleado (sin ceros a la izquierda) para usar como clave
+            ficha_normalizada = int(ficha_raw.lstrip('0')) if ficha_raw.lstrip('0') else 0
+            mapa_supervisores[ficha_normalizada] = ficha_superv_raw
+
+        # 3. Traer evaluaciones de ambos formatos
+        evaluaciones = cls.query.filter(
+            cls.año_fiscal.in_(formatos_busqueda)
+        ).all()
+
+        exitosos = 0
+        errores = []
+
+        for evaluacion in evaluaciones:
+            ficha = evaluacion.ficha_usuario
+            try:
+                # 4. Lookup en el diccionario, NO llamada a SAP
+                ficha_superv_raw = mapa_supervisores.get(ficha)
+
+                if ficha_superv_raw is None:
+                    errores.append({
+                        'ficha': ficha,
+                        'error': 'Usuario no encontrado en la nómina de participantes GDD'
+                    })
+                    continue
+
+                ficha_supervisor = procesar_ficha_fn(ficha_superv_raw)
+
+                # Detectar supervisores inválidos (todos ceros o vacíos)
+                if not ficha_supervisor or ficha_supervisor.strip('0') == '':
+                    errores.append({
+                        'ficha': ficha,
+                        'error': f'Supervisor inválido en SAP: "{ficha_superv_raw}"'
+                    })
+                    continue
+
+                evaluacion.supervisor_evaluador = str(ficha_supervisor)
+                exitosos += 1
+            except Exception as e:
+                errores.append({'ficha': ficha, 'error': str(e)})
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return {'success': False, 'error': str(e)}
+
+        return {
+            'success': True,
+            'resumen': {
+                'total_evaluaciones': len(evaluaciones),
+                'corregidos': exitosos,
+                'errores': len(errores)
+            },
+            'errores_detalle': errores
+        }
+        
 
 
 # Tabla del resultado de las evaluaciones
@@ -1023,6 +1105,8 @@ class Configuracion(db.Model):
             bool: True si se actualizó correctamente, False en caso de error
         """
         return cls.actualizar_configuracion(año_fiscal=nuevo_año)
+    
+    
     
     
     
@@ -1525,16 +1609,19 @@ class ResultadoFinal(db.Model):
                 for nombre in ORDEN_COMPETENCIAS
             ]
     
+            retroalimentacion = Retroalimentacion.query.filter(
+                Retroalimentacion.ficha_usuario == usuario.ficha,
+                Retroalimentacion.año_fiscal.in_(años_equivalentes)
+            ).first()
 
-            if evaluacion:
-                status_raw = (evaluacion.estado or '').strip().upper()
-                status = 'CERRADO' if status_raw in ('CERRADA', 'CERRADO') else 'ABIERTO'
-            else:
-                todos_cerrados = all(
-                    (ind.status or '').strip().upper() in ('CERRADO', 'CERRADA')
-                    for ind in indicadores_db
-                ) if indicadores_db else False
-                status = 'CERRADO' if todos_cerrados else 'ABIERTO'
+            status = 'CERRADO' if (
+                resultado.total_indicadores and
+                resultado.total_competencias and
+                resultado.total_final and
+                retroalimentacion and
+                retroalimentacion.comentarios_supervisor and
+                retroalimentacion.comentarios_colaborador
+            ) else 'ABIERTO'
     
             # ── 5. Formatear valores como porcentaje ──
             def fmt_pct(valor):

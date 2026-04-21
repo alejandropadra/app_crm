@@ -277,6 +277,27 @@
             </svg>
             Exportar
         </button>
+
+        
+    </div>
+
+    <div>
+        <!-- ═══ Barra de paginación ═══ -->
+        <div class="gdd-pagination-bar">
+            <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+                <div class="pag-per-page">
+                    <label for="sel-por-pagina">Mostrar</label>
+                    <select id="sel-por-pagina" onchange="cambiarPorPagina(this.value)">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                    </select>
+                    <span>por página</span>
+                </div>
+                <div class="gdd-result-count" id="result-count"></div>
+            </div>
+        </div>
     </div>
 
 
@@ -324,25 +345,15 @@
             </svg>
             <span>Sin resultados para los filtros aplicados</span>
         </div>
+        
     </div>
 
-    <!-- ═══ Barra de paginación ═══ -->
-    <div class="gdd-pagination-bar">
-        <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
-            <div class="pag-per-page">
-                <label for="sel-por-pagina">Mostrar</label>
-                <select id="sel-por-pagina" onchange="cambiarPorPagina(this.value)">
-                    <option value="5">5</option>
-                    <option value="10" selected>10</option>
-                    <option value="20">20</option>
-                    <option value="50">50</option>
-                </select>
-                <span>por página</span>
-            </div>
-            <div class="gdd-result-count" id="result-count"></div>
-        </div>
+    <div style="display:flex; justify-content:flex-end; padding-top:8px;">
         <div class="pag-controles" id="paginacion"></div>
     </div>
+    
+
+
 
 </div>
 

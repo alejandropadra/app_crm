@@ -43,7 +43,7 @@
         <div class="grid grid-cols-4 gap-4 ">
             {%set ns= namespace(contador=0)%}
             {%for evaluador in fichas_a_evaluar%}
-                {%if evaluador.rol_evaluador[0] == "par"%}
+                {%if "par" in evaluador.rol_evaluador%}
 
                     {%set respuesta= consultar_sap(evaluador.ficha_evaluado)%}
                     <div class="  blanco rounded-xl  p-4 flex flex-col items-center justify-center shadow gap-3">
@@ -89,7 +89,7 @@
         <div class="grid grid-cols-4 gap-4 ">
             {%set na= namespace(contador=0)%}
             {%for evaluador in fichas_a_evaluar%}
-                {%if evaluador.rol_evaluador[0] == "subordinado"%}
+                {%if "subordinado" in evaluador.rol_evaluador%}
 
                     {%set respuesta= consultar_sap(evaluador.ficha_evaluado)%}
                     <div class="  blanco rounded-xl  p-4 flex flex-col items-center justify-center shadow gap-3">
