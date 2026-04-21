@@ -138,40 +138,52 @@ document.addEventListener('DOMContentLoaded', function () {
     
     enviarRetroalimentacion.addEventListener("click", () => {
 
+        // Determinar qué rol está enviando según estado_evaluacion
+        const esSupervisor = (estado_evaluacion === "supervisorEvaluacion");
 
         const respuestaSeleccionada = document.querySelector('input[name="respuesta"]:checked');
-        if (estado_evaluacion !== "supervisorEvaluacion"&& !respuestaSeleccionada) {
-            showAlert("Por favor seleccione si acepta los términos", "error");
 
+        // VALIDACIÓN: feedback solo es obligatorio para el colaborador (el supervisor no lo toca)
+        if (!esSupervisor && !respuestaSeleccionada) {
+            showAlert("Por favor seleccione si recibió el feedback", "error");
             errorSpan.style.display = 'block';
             return;
         }
 
-
-
+        // VALIDACIÓN: el comentario del rol que envía no puede estar vacío
+        if (esSupervisor) {
+            if (!ComentarioSuperv || !ComentarioSuperv.value.trim()) {
+                showAlert("Debe escribir su observación como supervisor antes de enviar", "error");
+                return;
+            }
+        } else {
+            if (!ComentarioColab.value.trim()) {
+                showAlert("Debe escribir su observación antes de enviar", "error");
+                return;
+            }
+        }
 
         errorSpan.style.display = 'none';
 
+        // Armar payload: cada rol envía SOLO su campo
         const datos = [];
 
-        if (ComentarioSuperv) {
+        if (esSupervisor) {
+            // Supervisor: solo su comentario. NO toca feedback ni comentario del colaborador.
             datos.push({
                 ficha: ficha_get,
-                ComentarioSuperv: ComentarioSuperv.value,
-                ComentarioColabr: ComentarioColab.value,
-                feedback: respuestaSeleccionada.value,
-                feedbackTexto: respuestaSeleccionada.value === "si" ? "Sí" : "No"
+                ComentarioSuperv: ComentarioSuperv.value.trim()
             });
         } else {
+            // Colaborador: su comentario + feedback.
             datos.push({
                 ficha: ficha_get,
-                ComentarioColabr: ComentarioColab.value,
+                ComentarioColabr: ComentarioColab.value.trim(),
                 feedback: respuestaSeleccionada.value,
                 feedbackTexto: respuestaSeleccionada.value === "si" ? "Sí" : "No"
             });
         }
 
-        
         fetch("/app_crm/Retroalimentacion", {
             method: "POST",
             headers: {
@@ -183,18 +195,15 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => {
             if (!response.ok) {
                 throw new Error('Error en la solicitud');
-                window.location.reload()
             }
             return response.json();
         })
         .then(result => {
             console.log('Respuesta del servidor:', result);
-            window.location.reload()
-            
+            window.location.reload();
         })
         .catch(error => {
             console.error('Error:', error);
-            
         });
     });
 

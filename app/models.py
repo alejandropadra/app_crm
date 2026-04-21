@@ -1122,20 +1122,24 @@ class Retroalimentacion(db.Model):
     usuario = db.relationship('User', back_populates='Retroalimentacion')
 
     @classmethod
-    def crear_o_actualizar(cls, año_fiscal, ficha_usuario, comentarios_supervisor, comentarios_colaborador, feedback):
+    def crear_o_actualizar(cls, año_fiscal, ficha_usuario, 
+                        comentarios_supervisor=None, 
+                        comentarios_colaborador=None, 
+                        feedback=None):
         """
-        Crea una nueva retroalimentación o actualiza una existente.
+        Crea una nueva retroalimentación o actualiza una existente SELECTIVAMENTE.
+        Solo actualiza los campos que se pasen explícitamente (no None).
+        Así un rol no sobrescribe los datos del otro.
         
         Args:
             año_fiscal (str): Año fiscal de la retroalimentación
             ficha_usuario (int): Ficha del usuario
-            comentarios_supervisor (str): Comentarios del supervisor
-            comentarios_colaborador (str): Comentarios del colaborador
+            comentarios_supervisor (str, opcional): Comentarios del supervisor. Si es None, no se toca.
+            comentarios_colaborador (str, opcional): Comentarios del colaborador. Si es None, no se toca.
+            feedback (str, opcional): Feedback del colaborador. Si es None, no se toca.
             
         Returns:
             tuple: (retroalimentacion_instance, created)
-                - retroalimentacion_instance: La instancia creada o actualizada
-                - created: True si se creó, False si se actualizó
         """
         try:
             retroalimentacion = cls.query.filter_by(
@@ -1144,30 +1148,30 @@ class Retroalimentacion(db.Model):
             ).first()
             
             if retroalimentacion:
-                retroalimentacion.ficha_usuario = ficha_usuario
-                retroalimentacion.comentarios_supervisor = comentarios_supervisor
-                retroalimentacion.comentarios_colaborador = comentarios_colaborador
-                retroalimentacion.feedback = feedback
+                # Actualización SELECTIVA: solo tocar los campos que llegaron (no None)
+                if comentarios_supervisor is not None:
+                    retroalimentacion.comentarios_supervisor = comentarios_supervisor
+                if comentarios_colaborador is not None:
+                    retroalimentacion.comentarios_colaborador = comentarios_colaborador
+                if feedback is not None:
+                    retroalimentacion.feedback = feedback
                 created = False
             else:
-
+                # Creación: los campos que no llegaron quedan como NULL en la BD
                 retroalimentacion = cls(
                     año_fiscal=año_fiscal,
                     ficha_usuario=ficha_usuario,
                     comentarios_supervisor=comentarios_supervisor,
                     comentarios_colaborador=comentarios_colaborador,
-                    feedback =feedback
+                    feedback=feedback
                 )
                 db.session.add(retroalimentacion)
                 created = True
             
-            # Confirmar los cambios
             db.session.commit()
-            
             return retroalimentacion, created
             
         except Exception as e:
-
             db.session.rollback()
             raise e
     @classmethod

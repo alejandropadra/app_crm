@@ -2751,29 +2751,42 @@ def Retroalimentacion_ruta():
         rest = consultar_sap(ficha_usuario)
         variables_configuracion_global = Configuracion.get_data()
         año_fiscal = variables_configuracion_global.año_fiscal
+    
         comentario_supervisor = primer_item.get('ComentarioSuperv')
         comentario_colaborador = primer_item.get('ComentarioColabr')
         feedback = primer_item.get('feedbackTexto')
-        print(comentario_colaborador)
-        print(comentario_supervisor)
-        print(ficha_usuario)
-        print(feedback)
+        
+        # Normalizar: "" o "   " equivalen a None (no tocar ese campo)
+        if comentario_supervisor is not None and not comentario_supervisor.strip():
+            comentario_supervisor = None
+        if comentario_colaborador is not None and not comentario_colaborador.strip():
+            comentario_colaborador = None
+        if feedback is not None and not feedback.strip():
+            feedback = None
 
-        resultado =Retroalimentacion.crear_o_actualizar(
+        print(f"Payload recibido -> ficha: {ficha_usuario}, superv: {comentario_supervisor}, colab: {comentario_colaborador}, feedback: {feedback}")
+
+        # Validación: si TODOS los campos vinieron None/vacíos, no tiene sentido el POST
+        if comentario_supervisor is None and comentario_colaborador is None and feedback is None:
+            return jsonify({
+                "success": False,
+                "message": "No se recibió ningún comentario ni feedback para guardar."
+            }), 400
+
+        resultado = Retroalimentacion.crear_o_actualizar(
             año_fiscal=año_fiscal,
             ficha_usuario=ficha_usuario,
             comentarios_supervisor=comentario_supervisor,
-            comentarios_colaborador= comentario_colaborador,
-            feedback = feedback
+            comentarios_colaborador=comentario_colaborador,
+            feedback=feedback
         )
+        flash("Retroalimentación guardada correctamente", "success")
         
         funcion_verificacion_enviar(rest, año_fiscal)
 
-
-        
         return jsonify({
             "success": True,
-            "message": "Correo procesado correctamente"
+            "message": "Retroalimentación guardada correctamente"
         }), 200
 
     except Exception as e:
@@ -2783,7 +2796,6 @@ def Retroalimentacion_ruta():
             "success": False,
             "message": f"Error inesperado: {str(e)}"
         }), 500
-        
 
 
 @page.route('/app_crm/gdd/documentacion', methods=['GET'])
