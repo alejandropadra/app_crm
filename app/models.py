@@ -1542,6 +1542,7 @@ class ResultadoFinal(db.Model):
 
     @classmethod
     def obtener_datos_tabla_reporte(cls, año_fiscal, filial=None, nivel=None):
+        print(f"Obteniendo datos para reporte - Año Fiscal: {año_fiscal}, Filial: {filial}, Nivel: {nivel}")
         ORDEN_COMPETENCIAS = [
             'Demostración Valores Corporativos',
             'Foco en Resultados',
@@ -1632,7 +1633,6 @@ class ResultadoFinal(db.Model):
                 if valor is None:
                     return '0%'
                 return f"{round(valor)}%"
-            print(año_anterior)
             # ── 6. Construir dict del participante ──
             datos.append({
                 'filial':             resultado.filial or usuario.filial or '',

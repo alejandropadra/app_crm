@@ -1019,6 +1019,17 @@ def api_tabla_reporte():
     
     El año fiscal se toma de la configuración activa.
     """
+    
+    ABREVIACIONES_FILIALES = {
+        'CER': 'CERDEX C.A.',
+        'CRP': 'CORIMON PINTURAS C.A.',
+        'MGR': 'MONTANA GRÁFICA C.A.',
+        'RES': 'RESIMON C.A.',
+        'TMO': 'TIENDAS MONTANA C.A.',
+        'PPV': 'PURAS PINTURAS VENEZOLANAS C.A.',
+        'EEE': 'ENVACA C.A.',
+        'CRM': 'CORIMON C.A.',
+    }
     # Obtener año fiscal activo
     config = Configuracion.get_data()
     if not config:
@@ -1029,6 +1040,9 @@ def api_tabla_reporte():
     # Filtros opcionales desde query params
     filial = request.args.get('filial', None)
     nivel  = request.args.get('nivel', None)
+    
+    if filial and filial in ABREVIACIONES_FILIALES:
+        filial = ABREVIACIONES_FILIALES[filial]
 
     # Obtener datos estructurados
     datos = ResultadoFinal.obtener_datos_tabla_reporte(

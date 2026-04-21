@@ -8,6 +8,7 @@ let porPagina      = 10;
 async function cargarDatos(filial = null, nivel = null) {
     try {
         const params = new URLSearchParams();
+        console.log("Cargando datos con filtros:", { filial, nivel });
         if (filial) params.set('filial', filial);
         if (nivel)  params.set('nivel', nivel);
 
@@ -337,17 +338,14 @@ function setFiltro(tipo, valor, label) {
 }
 
 function filtrar() {
-    const fa = filtros.filial;
     const fs = filtros.status;
     const fq = document.getElementById('f-search').value.toLowerCase().trim();
 
     const filtrados = DATOS.filter(p =>
-        (!fa || p.filial   === fa) &&
         (!fs || p.status === fs) &&
         (!fq || p.nombre.toLowerCase().includes(fq))
     );
 
-    // Resetear a primera página con cada cambio de filtro
     paginaActual = 0;
     aplicarPaginacion(filtrados);
 }
@@ -359,9 +357,8 @@ function limpiarFiltros() {
     document.getElementById('labelStatus').textContent = 'Todos los estatus';
     document.getElementById('f-search').value = '';
     paginaActual = 0;
-    filtrar();
+    cargarDatos();  
 }
-
 function exportarExcel() {
     const datos = datosFiltrados.length > 0 ? datosFiltrados : DATOS;
 
@@ -429,15 +426,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (filialCode === 'ALL') {
                 filtros.filial = '';
                 document.getElementById('dropdown-button-2').childNodes[0].textContent = 'Filtro por Filial';
+                cargarDatos();  // sin filtro
             } else {
                 filtros.filial = filialCode;
-
                 const nombre = btn.querySelector('P')?.textContent?.trim() || filialCode;
                 document.getElementById('dropdown-button-2').childNodes[0].textContent = nombre;
+                cargarDatos(filialCode);  // ← pide al backend solo esa filial
             }
 
+            // Cerrar el dropdown manualmente
+            document.getElementById('dropdown-search-city').classList.add('hidden');
+
             paginaActual = 0;
-            filtrar();
         });
     });
 
