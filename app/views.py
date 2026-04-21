@@ -1416,6 +1416,7 @@ def gestion_equipo_detalles(ficha_get):
     
     retroalimentacion_resultados =""
     total_desempeño =""
+    estado_evaluacion = ""
     if etapa_general == 2:
         print('asasdasd')
         resultados = Evaluacion.obtener_resultados(

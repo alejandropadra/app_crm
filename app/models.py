@@ -940,7 +940,7 @@ class Evaluacion(db.Model):
         else:
             formatos_busqueda.append(f"AF{año_fiscal[6:8]}")
 
-        # 1. UNA sola llamada a SAP para traer todos los participantes
+        # 1. UNA sola llamada a SAP 
         try:
             participantes = participantes_gdd_fn()
             if isinstance(participantes, str):  # si devolvió "Error 404"
