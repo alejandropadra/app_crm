@@ -1,5 +1,5 @@
 import datetime
-from sqlalchemy import func, case
+from sqlalchemy import func, case, cast, Integer
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash,check_password_hash 
 from sqlalchemy.exc import IntegrityError
@@ -887,33 +887,52 @@ class Evaluacion(db.Model):
     @classmethod
     def obtener_evaluaciones_como_evaluador(cls, ficha_evaluador):
         """
-        Versión más detallada que retorna información completa de las evaluaciones
-        donde una ficha específica aparece como evaluador.
+        Retorna información de las evaluaciones donde una ficha aparece como evaluador
+        (supervisor, par o subordinado).
+        
+        La comparación se hace por valor numérico (CAST a Integer) para manejar
+        formatos inconsistentes en BD: '4', '004', '0004' todos se consideran
+        iguales al valor 4. Esto es un parche defensivo mientras los datos estén
+        mezclados — se puede eliminar el CAST cuando se normalice la tabla con LPAD.
         
         :param ficha_evaluador: La ficha del usuario que actúa como evaluador
-        :return: Lista de diccionarios con información detallada de las evaluaciones
+        :return: Lista de diccionarios con información detallada
         """
+        
         try:
-            ficha_str = str(ficha_evaluador)
-            
+            ficha_int = int(ficha_evaluador)
+
+            # Comparación numérica para manejar padding inconsistente en BD
             evaluaciones = cls.query.filter(
                 db.or_(
-                    cls.supervisor_evaluador == ficha_str,
-                    cls.par_evaluador == ficha_str,
-                    cls.subordinado_evaluador == ficha_str
+                    cast(cls.supervisor_evaluador, Integer) == ficha_int,
+                    cast(cls.par_evaluador, Integer) == ficha_int,
+                    cast(cls.subordinado_evaluador, Integer) == ficha_int
                 )
             ).all()
             
             resultado = []
             for evaluacion in evaluaciones:
-                # Determinar el rol del evaluador
+                # Determinar roles comparando como int también, para ser consistente
                 roles = []
-                if evaluacion.supervisor_evaluador == ficha_str:
-                    roles.append('supervisor')
-                if evaluacion.par_evaluador == ficha_str:
-                    roles.append('par')
-                if evaluacion.subordinado_evaluador == ficha_str:
-                    roles.append('subordinado')
+                
+                try:
+                    if evaluacion.supervisor_evaluador and int(evaluacion.supervisor_evaluador) == ficha_int:
+                        roles.append('supervisor')
+                except (ValueError, TypeError):
+                    pass
+                
+                try:
+                    if evaluacion.par_evaluador and int(evaluacion.par_evaluador) == ficha_int:
+                        roles.append('par')
+                except (ValueError, TypeError):
+                    pass
+                
+                try:
+                    if evaluacion.subordinado_evaluador and int(evaluacion.subordinado_evaluador) == ficha_int:
+                        roles.append('subordinado')
+                except (ValueError, TypeError):
+                    pass
                 
                 resultado.append({
                     'ficha_evaluado': evaluacion.ficha_usuario,

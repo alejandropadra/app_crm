@@ -1280,7 +1280,7 @@ def Seleccionar_evaluar():
     fichas_a_evaluar = Evaluacion.obtener_evaluaciones_como_evaluador(current_user.ficha)
     print(fichas_a_evaluar)
     fichas_a_evaluar_json =  json.dumps(fichas_a_evaluar, ensure_ascii=False)
-
+    
     return render_template('/gdd/seleccionar_evaluar.html', etapa_general= etapa_general, recortar_ficha= recortar_ficha, equipo = equipo, fichas_a_evaluar= fichas_a_evaluar, fichas_a_evaluar_json = fichas_a_evaluar_json,  consultar_cargo= consultar_cargo,  titulo= "Seleccionar quien evaluar",usuario=usuario,rest=rest, ficha = ficha, procesar_ficha= procesar_ficha, ruta_foto_personal= ruta_foto_personal, consultar_sap= consultar_sap)
 
 
@@ -1318,7 +1318,7 @@ def gestion_equipo():
 
 
 
-@page.route("/app_crm/gdd/gestion_equipo/<int:ficha_get>", methods=['GET', 'POST'] )
+@page.route("/app_crm/gdd/gestion_equipo/<int:ficha_get>", methods=['GET', 'POST'])
 @login_required
 def gestion_equipo_detalles(ficha_get):
     if request.method == 'POST':
@@ -1326,204 +1326,157 @@ def gestion_equipo_detalles(ficha_get):
         dueño_indicadores = User.get_by_ficha(ficha_get)
         nombre_dueño_indicador = dueño_indicadores.nombre
         apellido_dueño_indicador = dueño_indicadores.apellido
-        lista_datos_correo =[]
-        datos = request.get_json() 
+        lista_datos_correo = []
+        datos = request.get_json()
         for item in datos:
             id = item['id']
             nombre = item['nombre_indicador']
-            aprobacion = item['aprobacion']  
-            print(aprobacion)
+            aprobacion = item['aprobacion']
             Indicadores.actualizar_aprobacion_indicadores_usuario(ficha_get, id, nuevo_status=aprobacion)
             lista_datos_correo.append({
                 'nombre': nombre,
                 'aprobacion': aprobacion
             })
-        
+
         aprobacion_indicadores(user, nombre_dueño_indicador, apellido_dueño_indicador, lista_datos_correo, dueño_indicadores.email)
-        
         flash("Datos recibidos", "success")
         return jsonify({'status': 'success'})
-    
+
+
     variables_configuracion_global = Configuracion.get_data()
-    etapa_general = variables_configuracion_global.etapa_actual
-    etapa_general = int(etapa_general)
+    etapa_general = int(variables_configuracion_global.etapa_actual)
     año_fiscal = variables_configuracion_global.año_fiscal
     usuario = current_user
     ficha = current_user.ficha
-    variables_configuracion_global = Configuracion.get_data()
-    etapa_general = variables_configuracion_global.etapa_actual
-    etapa_general = int(etapa_general)
     rest = consultar_sap(ficha)
-    usuario_dueño_indicador= consultar_sap(ficha_get)
-    print(rest)
+    usuario_dueño_indicador = consultar_sap(ficha_get)
     participantes = participantes_gdd()
+
+    # ============================================================
+    # INDICADORES FILTRADOS POR AÑO FISCAL
+    # ============================================================
     indicadores = Indicadores.obtener_indicador_usuario(ficha_get)
-    
     indicadores_filtrados = []
-    # Crear un atributo temporal para mostrar en el frontend
     for indicador in indicadores:
         if indicador.año_fiscal == año_fiscal:
             indicador.año_fiscal_display = año_fiscal
-            
         else:
             indicador.año_fiscal_display = indicador.año_fiscal
-        print(indicador.año_fiscal_display)
+
         if indicador.año_fiscal_display == año_fiscal or \
-        (indicador.año_fiscal_display == "20252026" and año_fiscal == "AF26"):
+            (indicador.año_fiscal_display == "20252026" and año_fiscal == "AF26"):
             indicadores_filtrados.append(indicador)
-    total_peso = sum(float(i.peso) for i in indicadores if i.peso)
+
+    total_peso = sum(float(i.peso) for i in indicadores_filtrados if i.peso)
     total_cumplimiento = round(
         sum(float(i.cumplimiento) for i in indicadores_filtrados if i.cumplimiento),
         2
     )
+
+    # ============================================================
+    # VARIABLES DE ETAPA 2 
+    # ============================================================
+    ficha_evaluador_supervisor = procesar_ficha(usuario_dueño_indicador[0]['fichaSuperv'])
+    cumplimientos = {f'numero_{i}': None for i in range(1, 6)}
+    autoevaluaciones = {f'numero_{i}': None for i in range(1, 6)}
+    supervisor_evaluaciones = {f'numero_{i}': None for i in range(1, 6)}
+    par_evaluaciones = {f'numero_{i}': None for i in range(1, 6)}
+    subordinado_eval = {f'numero_{i}': None for i in range(1, 6)}
+    desempeños = {f'numero_{i}': None for i in range(1, 6)}
+
+    retroalimentacion_resultados = ""
+    total_desempeño = ""
+    estado_evaluacion = ""
     evaluacion_completada = True
 
-    ficha_evaluador_supervisor = procesar_ficha(usuario_dueño_indicador[0]['fichaSuperv'])
-    cumplimientos ={
-        'numero_1': None,
-        'numero_2': None,
-        'numero_3': None,
-        'numero_4': None,
-        'numero_5': None
-    }
-    
-            
-    autoevaluaciones = {
-        'numero_1': None,
-        'numero_2': None,
-        'numero_3': None,
-        'numero_4': None,
-        'numero_5': None
-    }
-    
-    supervisor_evaluaciones ={
-        'numero_1': None,
-        'numero_2': None,
-        'numero_3': None,
-        'numero_4': None,
-        'numero_5': None
-    }
-    
-    par_evaluaciones ={
-        'numero_1': None,
-        'numero_2': None,
-        'numero_3': None,
-        'numero_4': None,
-        'numero_5': None
-    }
-    
-    subordinado_eval ={
-        'numero_1': None,
-        'numero_2': None,
-        'numero_3': None,
-        'numero_4': None,
-        'numero_5': None
-    }
-    
-    desempeños ={
-        'numero_1': None,
-        'numero_2': None,
-        'numero_3': None,
-        'numero_4': None,
-        'numero_5': None
-    }
-    
-    retroalimentacion_resultados =""
-    total_desempeño =""
-    estado_evaluacion = ""
     if etapa_general == 2:
-        print('asasdasd')
         resultados = Evaluacion.obtener_resultados(
             ficha_usuario=ficha_get,
-            año_fiscal= año_fiscal
+            año_fiscal=año_fiscal
         )
-        
-        def actualizar_diccionario_evaluaciones(diccionario, resultados_lista, columna):
-            for i, resultado in enumerate(resultados_lista):
-                key = f'numero_{i + 1}'
-                if key in diccionario:
-                    diccionario[key] = resultado[columna]
-
-
 
         actualizar_diccionario_evaluaciones(autoevaluaciones, resultados, 'autoeval')
-        
         actualizar_diccionario_evaluaciones(supervisor_evaluaciones, resultados, 'superv_eval')
-
         actualizar_diccionario_evaluaciones(par_evaluaciones, resultados, 'par_eval')
-        
         actualizar_diccionario_evaluaciones(subordinado_eval, resultados, 'subordinado_eval')
-        
         actualizar_diccionario_evaluaciones(cumplimientos, resultados, 'cumplimiento_eval')
-
         actualizar_diccionario_evaluaciones(desempeños, resultados, 'desempeno_eval')
-        
+
         registro_evaluacion = Evaluacion.obtener_evaluaciones_por_usuario(
             ficha_usuario=ficha_get,
-            año_fiscal= año_fiscal
+            año_fiscal=año_fiscal
+        )
+        # FIX: proteger contra None (antes crasheaba si no había registro)
+        if registro_evaluacion:
+            total_desempeño = registro_evaluacion.total
+        
+
+        retroalimentacion_resultados = Retroalimentacion.obtener_por_ficha_y_año(
+            ficha_usuario=ficha_get,
+            año_fiscal=año_fiscal
         )
 
-        total_desempeño = registro_evaluacion.total
-        retroalimentacion_resultados = Retroalimentacion.obtener_por_ficha_y_año(ficha_usuario=ficha_get, año_fiscal=año_fiscal)
-        if ficha != ficha_get and ficha== int(ficha_evaluador_supervisor):
+        if ficha != ficha_get and ficha == int(ficha_evaluador_supervisor):
             estado_evaluacion = "supervisorEvaluacion"
-            
-            
-        resultados_evaluacion = resultados
-    
-        evaluaciones_pendientes = []
+        
+        print(f"Estado de la evaluación: {estado_evaluacion}")
 
+        # Chequeo de evaluaciones completadas
         supervisor_completado = False
         subordinado_completado = False
         par_completado = False
         autoeval_completado = False
-        
-        # Contadores para cada tipo de evaluación
-        autoeval_count = 0
-        supervisor_count = 0
-        par_count = 0
-        subordinado_count = 0
-        
-        if resultados_evaluacion and isinstance(resultados_evaluacion, list):
-            for competencia in resultados_evaluacion:
+
+        if resultados and isinstance(resultados, list):
+            for competencia in resultados:
                 if competencia.get('autoeval') and competencia['autoeval'].strip():
                     autoeval_completado = True
-                    autoeval_count += 1
-                
                 if competencia.get('superv_eval') and competencia['superv_eval'].strip():
                     supervisor_completado = True
-                    supervisor_count += 1
-                
                 if competencia.get('par_eval') and competencia['par_eval'].strip():
                     par_completado = True
-                    par_count += 1
-                    
                 if competencia.get('subordinado_eval') and competencia['subordinado_eval'].strip():
                     subordinado_completado = True
-                    subordinado_count += 1
-            
-            # Determinar qué evaluaciones faltan
-            if not autoeval_completado:
-                evaluaciones_pendientes.append('Autoevaluación')
-                evaluacion_completada = False
-                
-            if not supervisor_completado:
-                evaluaciones_pendientes.append('Evaluación del Supervisor')
-                evaluacion_completada = False
-                
-            if rest[0].get('nivel') == 'I':
-                if not subordinado_completado:
-                    evaluaciones_pendientes.append('Evaluación del Subordinado')
-                    evaluacion_completada = False
-                    
-                if not par_completado:
-                    evaluaciones_pendientes.append('Evaluación del Par')
-                    evaluacion_completada = False
-        print(evaluacion_completada)
 
-            
-    return render_template('/gdd/detalles_gestion_equipo.html', evaluacion_completada = evaluacion_completada, ficha_evaluador_supervisor= ficha_evaluador_supervisor, estado_evaluacion = estado_evaluacion,  retroalimentacion_resultados= retroalimentacion_resultados,  total_desempeño= total_desempeño, cumplimientos= cumplimientos, desempeños=desempeños, autoevaluaciones= autoevaluaciones, supervisor_evaluaciones= supervisor_evaluaciones, par_evaluaciones=par_evaluaciones, subordinado_eval=subordinado_eval,  etapa_general= etapa_general, año_fiscal=año_fiscal, consultar_cargo= consultar_cargo,  titulo= "Detalles" ,usuario=usuario,rest=rest, participantes= participantes, indicadores = indicadores_filtrados, total_cumplimiento= total_cumplimiento, total_peso=total_peso, ficha_get= ficha_get, ficha=ficha, usuario_dueño_indicador = usuario_dueño_indicador, usuario_dueño_evaluacion= usuario_dueño_indicador, ruta_foto_personal = ruta_foto_personal )
+            if not autoeval_completado or not supervisor_completado:
+                evaluacion_completada = False
 
+
+            if usuario_dueño_indicador[0].get('nivel') == 'I':
+                if not par_completado or not subordinado_completado:
+                    evaluacion_completada = False
+        else:
+            evaluacion_completada = False
+
+    return render_template(
+        '/gdd/detalles_gestion_equipo.html',
+        evaluacion_completada=evaluacion_completada,
+        ficha_evaluador_supervisor=ficha_evaluador_supervisor,
+        estado_evaluacion=estado_evaluacion,
+        retroalimentacion_resultados=retroalimentacion_resultados,
+        total_desempeño=total_desempeño,
+        cumplimientos=cumplimientos,
+        desempeños=desempeños,
+        autoevaluaciones=autoevaluaciones,
+        supervisor_evaluaciones=supervisor_evaluaciones,
+        par_evaluaciones=par_evaluaciones,
+        subordinado_eval=subordinado_eval,
+        etapa_general=etapa_general,
+        año_fiscal=año_fiscal,
+        consultar_cargo=consultar_cargo,
+        titulo="Detalles",
+        usuario=usuario,
+        rest=rest,
+        participantes=participantes,
+        indicadores=indicadores_filtrados,
+        total_cumplimiento=total_cumplimiento,
+        total_peso=total_peso,
+        ficha_get=ficha_get,
+        ficha=ficha,
+        usuario_dueño_indicador=usuario_dueño_indicador,
+        usuario_dueño_evaluacion=usuario_dueño_indicador,
+        ruta_foto_personal=ruta_foto_personal
+    )
 @page.route("/app_crm/gdd/indicadores", methods=['GET', 'POST'] )
 @login_required 
 def gdi():
@@ -2534,21 +2487,37 @@ def consultar_cargo(ficha):
     return registro 
 
 def ruta_foto_personal(numero):
-        ejemplo_dir = 'app/static/img/fotos_personal'
-        extensiones = ['.png', '.jpg', '.jpeg']
-        num_str = str(numero)
-        try:
-            contenido = os.listdir(ejemplo_dir)
-            for archivo in contenido:
-                nombre, ext = os.path.splitext(archivo)
-                if nombre == num_str and ext.lower() in extensiones:
-                    return f"img/fotos_personal/{archivo}"
-            print(f"No se encontró imagen para el número {numero}")
-            return None
-            
-        except Exception as e:
-            #print(f"Error al acceder al directorio: {e}")
-            return None
+
+    ejemplo_dir = 'app/static/img/fotos_personal'
+    extensiones = ['.png', '.jpg', '.jpeg']
+    
+    if numero is None or str(numero).strip() == '':
+        return None
+    
+    num_str = str(numero).strip()
+    
+    variantes = [num_str]
+    try:
+        num_int = int(num_str)
+        variantes.append(str(num_int))           # sin ceros: '44'
+        variantes.append(str(num_int).zfill(3))  # padding 3:  '044'
+        variantes.append(str(num_int).zfill(4))  # padding 4:  '0044'
+    except ValueError:
+        pass  # la ficha no es numérica, solo probamos como viene
+    
+    variantes = list(dict.fromkeys(variantes))
+    
+    try:
+        contenido = os.listdir(ejemplo_dir)
+        for archivo in contenido:
+            nombre, ext = os.path.splitext(archivo)
+            if nombre in variantes and ext.lower() in extensiones:
+                return f"img/fotos_personal/{archivo}"
+        
+        return None
+        
+    except Exception as e:
+        return None
         
 def recortar_ficha(ficha):
 
