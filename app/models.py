@@ -1477,6 +1477,7 @@ class ResultadoFinal(db.Model):
         resultados = query.group_by(cls.clasificacion).all()
 
         total_usuarios = sum(cantidad for _, cantidad in resultados)
+        print(f"Total de usuarios: {total_usuarios}")
         if total_usuarios == 0:
             return distribucion_base
 

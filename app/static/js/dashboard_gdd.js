@@ -106,7 +106,9 @@ const GraficoPerformance = {
     renderDonut(data, keys, total) {
         const el    = document.getElementById('chart-parametros');
         el.innerHTML = ''
-        const chart = echarts.init(el, null, { renderer: 'svg' });
+        const chart = echarts.init(el, null, { renderer: 'svg' });+
+
+        console.log('Datos para gráfico de performance:', data);
 
         const seriesData = keys.map(key => ({
             name:      this.PARAMETROS[key].label,

@@ -127,7 +127,7 @@ function renderTabla(datos) {
     datos.forEach(persona => {
         const inds = persona.indicadores;
         const n    = inds.length || 1;
-
+        const estado_persona = persona.status === 'CERRADO' ? 'Sin culminar' : 'Culminado';
         if (inds.length === 0) {
             const tr = document.createElement('tr');
             tr.classList.add('grupo-inicio');
@@ -184,7 +184,7 @@ function renderTabla(datos) {
                 <td class="td-resumen valor-total" rowspan="${n}">${persona.valor_total}</td>
                 <td class="td-resumen" rowspan="${n}">${badgeDesemp(persona.valor_clasificacion)}</td>
                 <td class="td-resumen" rowspan="${n}">
-                    <span class="badge ${persona.status === 'CERRADO' ? 'b-cerrado' : 'b-abierto'}">${persona.status}</span>
+                    <span class="badge ${persona.status === 'CERRADO' ? 'b-cerrado' : 'b-abierto'}">${estado_persona}</span>
                 </td>
             ` : '';
 
