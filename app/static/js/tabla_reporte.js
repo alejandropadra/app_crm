@@ -96,9 +96,9 @@ function fmtValor(v) {
 
 
 function actualizarSummary(datos) {
-    const total    = datos.length;
-    const cerrados = datos.filter(p => p.status === 'CERRADO').length;
-    const abiertos = datos.filter(p => p.status === 'ABIERTO').length;
+    const total      = datos.length;
+    const culminados = datos.filter(p => p.status === 'CULMINADO').length;
+    const pendientes = datos.filter(p => p.status === 'NO CULMINADO').length;
 
     const promedioTotal = total > 0
         ? Math.round(datos.reduce((s, p) => s + parseFloat(p.valor_total), 0) / total)
@@ -110,8 +110,8 @@ function actualizarSummary(datos) {
     const elPromedio = document.getElementById('sum-promedio');
 
     if (elTotal)    animarNumero(elTotal, total);
-    if (elCerrado)  animarNumero(elCerrado, cerrados);
-    if (elAbierto)  animarNumero(elAbierto, abiertos);
+    if (elCerrado)  animarNumero(elCerrado, culminados);
+    if (elAbierto)  animarNumero(elAbierto, pendientes);
     if (elPromedio) animarNumero(elPromedio, promedioTotal, '%');
 }
 
@@ -127,11 +127,11 @@ function renderTabla(datos) {
     datos.forEach(persona => {
         const inds = persona.indicadores;
         const n    = inds.length || 1;
-        const estado_persona = persona.status === 'CERRADO' ? 'Sin culminar' : 'Culminado';
+        
         if (inds.length === 0) {
             const tr = document.createElement('tr');
             tr.classList.add('grupo-inicio');
-            tr.dataset.filial   = persona.filial;
+            tr.dataset.filial = persona.filial;
             tr.dataset.status = persona.status;
             tr.dataset.nombre = persona.nombre.toLowerCase();
             tr.innerHTML = `
@@ -145,7 +145,7 @@ function renderTabla(datos) {
                 <td class="td-resumen valor-total">${persona.valor_total}</td>
                 <td class="td-resumen">${badgeDesemp(persona.valor_clasificacion)}</td>
                 <td class="td-resumen">
-                    <span class="badge ${persona.status === 'CERRADO' ? 'b-cerrado' : 'b-abierto'}">${persona.status}</span>
+                    <span class="badge ${persona.status === 'CULMINADO' ? 'b-cerrado' : 'b-abierto'}">${persona.status}</span>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -156,7 +156,7 @@ function renderTabla(datos) {
             const esFirst = i === 0;
             const tr = document.createElement('tr');
             if (esFirst) tr.classList.add('grupo-inicio');
-            tr.dataset.filial   = persona.filial;
+            tr.dataset.filial = persona.filial;
             tr.dataset.status = persona.status;
             tr.dataset.nombre = persona.nombre.toLowerCase();
 
@@ -184,7 +184,7 @@ function renderTabla(datos) {
                 <td class="td-resumen valor-total" rowspan="${n}">${persona.valor_total}</td>
                 <td class="td-resumen" rowspan="${n}">${badgeDesemp(persona.valor_clasificacion)}</td>
                 <td class="td-resumen" rowspan="${n}">
-                    <span class="badge ${persona.status === 'CERRADO' ? 'b-cerrado' : 'b-abierto'}">${estado_persona}</span>
+                    <span class="badge ${persona.status === 'CULMINADO' ? 'b-cerrado' : 'b-abierto'}">${persona.status}</span>
                 </td>
             ` : '';
 

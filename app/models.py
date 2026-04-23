@@ -1594,7 +1594,6 @@ class ResultadoFinal(db.Model):
         datos = []
     
         for resultado, usuario, cargo in registros:
-            
             # ── 2. Indicadores del usuario para este año fiscal ──
             años_equivalentes = ['AF26', '20252026'] if año_fiscal in ('AF26', '20252026') else [año_fiscal]
             indicadores_db = Indicadores.query.filter(
@@ -1618,42 +1617,31 @@ class ResultadoFinal(db.Model):
             total_ind = resultado.total_indicadores
             if not total_ind:
                 total_ind = sum(ind.cumplimiento or 0 for ind in indicadores_db)
-    
+
             evaluacion = Evaluacion.query.filter(
                 Evaluacion.ficha_usuario == usuario.ficha,
                 Evaluacion.año_fiscal.in_(años_equivalentes)
             ).first()
-    
+
             competencias_map = {}
             if evaluacion:
                 for comp in evaluacion.resultados:
                     competencias_map[comp.nombre_competencia] = comp.desempeno_eval or ''
-    
+
             competencias_lista = [
                 competencias_map.get(nombre, '')
                 for nombre in ORDEN_COMPETENCIAS
             ]
-    
-            retroalimentacion = Retroalimentacion.query.filter(
-                Retroalimentacion.ficha_usuario == usuario.ficha,
-                Retroalimentacion.año_fiscal.in_(años_equivalentes)
-            ).first()
+            
+            status = 'CULMINADO' if resultado.enviado_sap else 'NO CULMINADO'
 
-            status = 'CERRADO' if (
-                resultado.total_indicadores and
-                resultado.total_competencias and
-                resultado.total_final and
-                retroalimentacion and
-                retroalimentacion.comentarios_supervisor and
-                retroalimentacion.comentarios_colaborador
-            ) else 'ABIERTO'
-    
-            # ── 5. Formatear valores como porcentaje ──
+            # ── Formatear valores como porcentaje ──
             def fmt_pct(valor):
                 if valor is None:
                     return '0%'
                 return f"{round(valor)}%"
-            # ── 6. Construir dict del participante ──
+            
+            # ── Construir dict del participante ──
             datos.append({
                 'filial':             resultado.filial or usuario.filial or '',
                 'nivel':             resultado.nivel or usuario.nivel_usuario or '',
@@ -1665,7 +1653,7 @@ class ResultadoFinal(db.Model):
                 'valor_clasificacion': resultado.clasificacion or '',
                 'competencias':      competencias_lista,
                 'indicadores':       lista_indicadores,
-                'ficha':             usuario.ficha,  # útil para links/acciones
+                'ficha':             usuario.ficha,
                 'año_fiscal':        resultado.año_fiscal,  
                 'año_anterior':      año_anterior,
             })
