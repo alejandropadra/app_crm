@@ -568,7 +568,7 @@ def detalles_usuarios(ficha_get):
     indicadores_filtrados = []
     for indicador in indicadores:
         if indicador.año_fiscal == año_fiscal or \
-           (indicador.año_fiscal == "20252026" and año_fiscal == "AF26"):
+            (indicador.año_fiscal == "20252026" and año_fiscal == "AF26"):
             indicadores_filtrados.append(indicador)
 
     total_peso = sum(float(i.peso) for i in indicadores_filtrados if i.peso)
@@ -717,6 +717,10 @@ def detalles_usuarios(ficha_get):
                     Indicadores.actualizar_indicadores_usuario(ficha_get, lista_ids, nuevo_status="Cerrado")
                 else:
                     Indicadores.actualizar_indicadores_usuario(ficha_get, lista_ids, nuevo_status="Abierto")
+                
+                config = Configuracion.get_data()
+                actualizar_resultado_parcial(ficha_get, config.año_fiscal, columna='indicadores')
+
 
                 return jsonify({"status": "ok", "message": f"Indicadores actualizados con estado {aprobacion}"})
             else:
@@ -764,170 +768,279 @@ def detalles_usuarios(ficha_get):
         # Alias para que el HTML copiado de detalles_gestion_equipo funcione sin cambios
         usuario_dueño_evaluacion=usuario_dueño_indicador
     )
+    
+def validar_flujo_completo_usuario(ficha_participante, año_fiscal, nivel_usuario):
+    """
+    Valida si un usuario tiene el flujo GDD completo.
+    
+    El orden de validación respeta el flujo real del proceso:
+        1. Indicadores (mínimo 3 aprobados)
+        2. Evaluación de competencias (autoeval + supervisor; par/subordinado si nivel I)
+        3. Retroalimentación (ambos comentarios)
+    
+    
+    Usado por el endpoint api_sincronizar_tabla para refrescar resultados_finales
+    bajo demanda desde el botón 'Actualizar datos' en tabla_reporte.
+    """
+    formatos_año = [año_fiscal]
+    if año_fiscal.startswith("AF"):
+        año_num = int(año_fiscal[2:])
+        formatos_año.append(f"20{año_num-1}20{año_num:02d}")
+    else:
+        formatos_año.append(f"AF{año_fiscal[6:8]}")
+    
+    # ── PASO 1 del flujo: INDICADORES (mínimo 3 aprobados) ──
+    indicadores = Indicadores.query.filter(
+        Indicadores.ficha_usuario == ficha_participante,
+        Indicadores.año_fiscal.in_(formatos_año)
+    ).all()
+    indicadores_aprobados = [i for i in indicadores if i.status_aprobacion == 'A']
+    if len(indicadores) < 3 or len(indicadores_aprobados) < 3:
+        return {'completo': False, 'motivo': f'Indicadores incompletos ({len(indicadores_aprobados)}/{len(indicadores)} aprobados)'}
+    
+    # ── PASO 2 del flujo: EVALUACIÓN DE COMPETENCIAS ──
+    resultados_eval = Evaluacion.obtener_resultados(ficha_participante, año_fiscal)
+    if not resultados_eval or not isinstance(resultados_eval, list):
+        return {'completo': False, 'motivo': 'Sin evaluación de competencias'}
+    
+    autoeval_ok = all(c.get('autoeval') and c['autoeval'].strip() for c in resultados_eval)
+    superv_ok   = all(c.get('superv_eval') and c['superv_eval'].strip() for c in resultados_eval)
+    if not autoeval_ok:
+        return {'completo': False, 'motivo': 'Autoevaluación incompleta'}
+    if not superv_ok:
+        return {'completo': False, 'motivo': 'Evaluación del supervisor incompleta'}
+    
+    if nivel_usuario == 'I':
+        par_ok = all(c.get('par_eval') and c['par_eval'].strip() for c in resultados_eval)
+        sub_ok = all(c.get('subordinado_eval') and c['subordinado_eval'].strip() for c in resultados_eval)
+        if not par_ok:
+            return {'completo': False, 'motivo': 'Evaluación de par incompleta (nivel I)'}
+        if not sub_ok:
+            return {'completo': False, 'motivo': 'Evaluación de subordinado incompleta (nivel I)'}
+    
+    # ── PASO 3 del flujo: RETROALIMENTACIÓN (ambos comentarios) ──
+    retro = Retroalimentacion.obtener_por_ficha_y_año(ficha_participante, año_fiscal)
+    if not retro:
+        return {'completo': False, 'motivo': 'Sin retroalimentación creada'}
+    if not retro.comentarios_supervisor or not retro.comentarios_colaborador:
+        return {'completo': False, 'motivo': 'Falta comentario del supervisor o del colaborador'}
+    
+    # ── 4. CÁLCULO DE TOTALES (solo si pasó todos los pasos) ──
+    registro_eval = Evaluacion.obtener_evaluaciones_por_usuario(
+        ficha_usuario=ficha_participante,
+        año_fiscal=año_fiscal
+    )
+    raw_total = registro_eval.total if registro_eval else None
+    
+    try:
+        safe_desempeño = float(raw_total) if raw_total not in (None, '', '---', 0) else 0
+    except (ValueError, TypeError):
+        safe_desempeño = 0
+    
+    safe_cumplimiento = round(
+        sum(float(i.cumplimiento) for i in indicadores_aprobados if i.cumplimiento),
+        2
+    )
+    total_final = round(safe_desempeño + safe_cumplimiento, 1)
+    return {
+        'completo': True,
+        'motivo': 'OK',
+        'safe_desempeño': safe_desempeño,
+        'safe_cumplimiento': safe_cumplimiento,
+        'total_final': total_final
+    }
+
+def actualizar_resultado_parcial(ficha_participante, año_fiscal, columna):
+    """
+    Actualiza la tabla resultados_finales de forma incremental.
+    
+    Se llama cada vez que el usuario modifica algo en una de las tres etapas del flujo:
+        - 'indicadores'      → después de crear/editar/eliminar/aprobar indicadores
+        - 'competencias'     → después de guardar evaluación de competencias
+        - 'retroalimentacion' → después de guardar comentarios
+    
+    Lógica:
+        1. Recalcula y guarda SOLO la columna afectada.
+        2. Revalida todo el flujo.
+        3. Si cumple completo → marca enviado_sap=True (y el flujo normal ya envió a SAP en funcion_verificacion_enviar).
+        4. Si no cumple → mantiene enviado_sap=False.
+    """
+    try:
+
+        usuario = User.get_by_ficha(ficha_participante)
+        if not usuario:
+            print(f" Usuario {ficha_participante} no existe en DB")
+            return
+        
+        filial = usuario.filial or 'N/A'
+        
+        try:
+            rest = consultar_sap(ficha_participante)
+            nivel = rest[0].get('nivel') if rest else None
+        except Exception as e:
+            print(f" No se pudo obtener nivel de SAP para ficha {ficha_participante}: {e}")
+            nivel = None
+        
+        # Formatos de año fiscal equivalentes
+        formatos_año = [año_fiscal]
+        if año_fiscal.startswith("AF"):
+            año_num = int(año_fiscal[2:])
+            formatos_año.append(f"20{año_num-1}20{año_num:02d}")
+        
+
+        if columna == 'indicadores':
+            indicadores = Indicadores.query.filter(
+                Indicadores.ficha_usuario == ficha_participante,
+                Indicadores.año_fiscal.in_(formatos_año)
+            ).all()
+            total_ind = round(sum(float(i.cumplimiento) for i in indicadores if i.cumplimiento), 2)
+            ResultadoFinal.actualizar_columna(
+                ficha_usuario=ficha_participante,
+                año_fiscal=año_fiscal,
+                columna='total_indicadores',
+                valor=total_ind,
+                filial=filial,
+                nivel=nivel
+            )
+            print(f"Actualizado total_indicadores={total_ind} para ficha {ficha_participante}")
+        
+        elif columna == 'competencias':
+            registro_eval = Evaluacion.obtener_evaluaciones_por_usuario(
+                ficha_usuario=ficha_participante
+            )
+            raw_total = registro_eval.total if registro_eval else 0
+            safe_desempeño = 0 if (raw_total in (None, '', 0, '---')) else raw_total
+            ResultadoFinal.actualizar_columna(
+                ficha_usuario=ficha_participante,
+                año_fiscal=año_fiscal,
+                columna='total_competencias',
+                valor=safe_desempeño,
+                filial=filial,
+                nivel=nivel
+            )
+            print(f"Actualizado total_competencias={safe_desempeño} para ficha {ficha_participante}")
+        
+        elif columna == 'retroalimentacion':
+            # La retroalimentación no tiene columna propia en resultados_finales,
+            # pero afecta si el flujo está completo → ya se maneja abajo.
+            print(f"Retroalimentación registrada para ficha {ficha_participante}")
+        
+        else:
+            print(f"Columna no reconocida: {columna}")
+            return
+        
+        # ── Revalidar el flujo completo y actualizar enviado_sap ──
+        validacion = validar_flujo_completo_usuario(
+            ficha_participante=ficha_participante,
+            año_fiscal=año_fiscal,
+            nivel_usuario=nivel
+        )
+        
+        registro = ResultadoFinal.query.filter_by(
+            ficha_usuario=ficha_participante,
+            año_fiscal=año_fiscal
+        ).first()
+        
+        if registro:
+
+            if not validacion['completo']:
+                registro.enviado_sap = False
+                print(f" Ficha {ficha_participante}: no cumple flujo aún → enviado_sap=False ({validacion['motivo']})")
+    
+    except Exception as e:
+        print(f"Error en actualizar_resultado_parcial ({columna}) para ficha {ficha_participante}: {e}")
 
 def funcion_verificacion_enviar(usuario, año_fiscal):
-    enviar = False
+    """
+    SOLO envía a SAP si el flujo completo pasa validación.
+    
+    Disparada desde POST /Retroalimentacion cuando alguien guarda comentarios.
+    
+    Retorna True si envió a SAP, False si solo actualizó localmente.
+    """
     ficha_participante = usuario[0]['pernr'].lstrip('0')
-    indicadores = Indicadores.obtener_indicador_usuario(ficha_participante)
-    aprobados = sum(1 for ind in indicadores if ind.status_aprobacion == 'A')
-    
-    print(aprobados)
-    if len(indicadores) < 3:
-        data_status = "incompleto"
-    elif len(indicadores) == 3 and aprobados == 3:
-        data_status = "aprobado"
-    elif len(indicadores) == 3 and aprobados < 3:
-        data_status = "espera"
-        
-    resultados_evaluacion = Evaluacion.obtener_resultados(ficha_participante, año_fiscal)
-    
-    retroalimentacion_resultados = Retroalimentacion.obtener_por_ficha_y_año(
-        ficha_participante, año_fiscal
+    nivel_usuario      = usuario[0].get('nivel')
+    filial             = usuario[0].get('filial') or (
+        User.get_by_ficha(ficha_participante).filial if User.get_by_ficha(ficha_participante) else 'N/A'
     )
     
-    evaluaciones_pendientes = []
-    evaluacion_completada = True
-    supervisor_completado = False
-    subordinado_completado = False
-    par_completado = False
-    autoeval_completado = False
-    
-    # Contadores para cada tipo de evaluación
-    autoeval_count = 0
-    supervisor_count = 0
-    par_count = 0
-    subordinado_count = 0
-    
-    if resultados_evaluacion and isinstance(resultados_evaluacion, list):
-        for competencia in resultados_evaluacion:
-            if competencia.get('autoeval') and competencia['autoeval'].strip():
-                autoeval_completado = True
-                autoeval_count += 1
-            
-            if competencia.get('superv_eval') and competencia['superv_eval'].strip():
-                supervisor_completado = True
-                supervisor_count += 1
-            
-            if competencia.get('par_eval') and competencia['par_eval'].strip():
-                par_completado = True
-                par_count += 1
-                
-            if competencia.get('subordinado_eval') and competencia['subordinado_eval'].strip():
-                subordinado_completado = True
-                subordinado_count += 1
-        
-        # Determinar qué evaluaciones faltan
-        if not autoeval_completado:
-            evaluaciones_pendientes.append('Autoevaluación')
-            evaluacion_completada = False
-            
-        if not supervisor_completado:
-            evaluaciones_pendientes.append('Evaluación del Supervisor')
-            evaluacion_completada = False
-            
-        if usuario[0]['nivel'] == 'I':
-            if not subordinado_completado:
-                evaluaciones_pendientes.append('Evaluación del Subordinado')
-                evaluacion_completada = False
-                
-            if not par_completado:
-                evaluaciones_pendientes.append('Evaluación del Par')
-                evaluacion_completada = False
-        
-        # Calcular estadísticas adicionales
-        total_competencias = len(resultados_evaluacion)
-
-    
-        if evaluacion_completada and data_status == "aprobado":
-            if retroalimentacion_resultados:
-                if retroalimentacion_resultados.comentarios_supervisor and retroalimentacion_resultados.comentarios_colaborador:
-                    print('si cumple con todo')
-                    registro_evaluacion = Evaluacion.obtener_evaluaciones_por_usuario(
-                        ficha_usuario=ficha_participante
-                    )
-                    indicadores_filtrados = []
-
-                    # Validación segura para total_desempeño (equivalente a safe_desempeño)
-                    raw_total_desempeño = registro_evaluacion.total if registro_evaluacion else None
-                    safe_desempeño = 0 if (raw_total_desempeño is None or 
-                                            raw_total_desempeño == '---' or 
-                                            raw_total_desempeño == '' or 
-                                            raw_total_desempeño == 0) else raw_total_desempeño
-                    
-                    print(f"Total desempeño raw: {raw_total_desempeño}, safe: {safe_desempeño}")
-                    
-                    for indicador in indicadores:
-                        if indicador.año_fiscal == año_fiscal:
-                            indicador.año_fiscal_display = año_fiscal
-                        else:
-                            indicador.año_fiscal_display = indicador.año_fiscal
-                            
-                        if indicador.año_fiscal_display == año_fiscal or \
-                            (indicador.año_fiscal_display == "20252026" and año_fiscal == "AF26"):
-                                indicadores_filtrados.append(indicador)
-                    
-                    total_peso = sum(float(i.peso) for i in indicadores if i.peso)
-                    
-                    # Cálculo de total_cumplimiento
-                    raw_total_cumplimiento = round(
-                        sum(float(i.cumplimiento) for i in indicadores_filtrados if i.cumplimiento),
-                        2
-                    )
-                    
-
-                    safe_cumplimiento = 0 if (raw_total_cumplimiento is None or 
-                                                raw_total_cumplimiento == '---' or 
-                                                raw_total_cumplimiento == '' or 
-                                                raw_total_cumplimiento == 0) else raw_total_cumplimiento
-                    
-                    # Cálculo del total combinado (equivalente a totalDempeños)
-                    total_desempeño_final = round(safe_desempeño + safe_cumplimiento, 1)
-                    
-                    print(f"Safe desempeño: {safe_desempeño}")
-                    print(f"Safe cumplimiento: {safe_cumplimiento}")
-                    print(f"Total desempeño final: {total_desempeño_final}")
-                    
-                    if año_fiscal.startswith("AF"):
-                        año_convertido = "20" + año_fiscal[2:] #Esto es pq mi año_fiscal literalmente tiene las letras AF y necesito que sea 2026 osea el año como tal
-                    else:
-                        año_convertido = año_fiscal 
-                    
-                    # Enviar con los valores validados
-                    o = enviar_resultados(ficha_participante, año_convertido, str(int(safe_cumplimiento)), str(int(safe_desempeño)), str(int(total_desempeño_final)))
-                    print(o)
-
-                    sap_exitoso = o.get('success', False)  # True si SAP respondió 200
-
-                    ResultadoFinal.guardar(
-                        ficha_usuario=ficha_participante,
-                        año_fiscal=año_fiscal,             
-                        total_competencias=safe_desempeño,
-                        total_indicadores=safe_cumplimiento,
-                        total_final=total_desempeño_final,
-                        filial=usuario[0].get('filial') or User.get_by_ficha(ficha_participante).filial,
-                        nivel= usuario[0].get('nivel'),
-                        enviado_sap=sap_exitoso
-                    )
-
-                    enviar = True
-                else:
-                    print('Le falta algun comentario')
-            else:
-                print('No tiene ninguna retroalimentacion creada')
-        else:
-            print('No cumple con nada, por lo tanto no se puede enviar')
-        
+    # 1: Calcular valores actuales (aunque el flujo esté incompleto) 
+    formatos_año = [año_fiscal]
+    if año_fiscal.startswith("AF"):
+        año_num = int(año_fiscal[2:])
+        formatos_año.append(f"20{año_num-1}20{año_num:02d}")
     else:
-        evaluaciones_pendientes = ['No tiene evaluación creada']
-        evaluacion_completada = False
-        total_competencias = 0
-        autoeval_count = 0
-        supervisor_count = 0
-        par_count = 0
-        subordinado_count = 0
-
-    return enviar
-
+        formatos_año.append(f"AF{año_fiscal[6:8]}")
+    
+    # Cumplimiento: solo suma indicadores aprobados (bug fix aplicado)
+    indicadores = Indicadores.query.filter(
+        Indicadores.ficha_usuario == ficha_participante,
+        Indicadores.año_fiscal.in_(formatos_año)
+    ).all()
+    indicadores_aprobados = [i for i in indicadores if i.status_aprobacion == 'A']
+    safe_cumplimiento = round(
+        sum(float(i.cumplimiento) for i in indicadores_aprobados if i.cumplimiento),
+        2
+    )
+    
+    # Desempeño desde evaluación de competencias
+    registro_eval = Evaluacion.obtener_evaluaciones_por_usuario(
+        ficha_usuario=ficha_participante,
+        año_fiscal=año_fiscal
+    )
+    raw_total = registro_eval.total if registro_eval else None
+    try:
+        safe_desempeño = float(raw_total) if raw_total not in (None, '', '---', 0) else 0
+    except (ValueError, TypeError):
+        safe_desempeño = 0
+    
+    total_final = round(safe_desempeño + safe_cumplimiento, 1)
+    
+    print(f"Valores calculados → cumplimiento: {safe_cumplimiento}, desempeño: {safe_desempeño}, total: {total_final}")
+    
+    #  2: Validar si el flujo completo está OK 
+    validacion = validar_flujo_completo_usuario(
+        ficha_participante=ficha_participante,
+        año_fiscal=año_fiscal,
+        nivel_usuario=nivel_usuario
+    )
+    
+    #  3: Si cumple todo, enviar a SAP 
+    sap_exitoso = False
+    if validacion['completo']:
+        print('Flujo completo → enviando a SAP...')
+        
+        if año_fiscal.startswith("AF"):
+            año_convertido = "20" + año_fiscal[2:]
+        else:
+            año_convertido = año_fiscal
+        
+        resp = enviar_resultados(
+            ficha_participante,
+            año_convertido,
+            str(int(safe_cumplimiento)),
+            str(int(safe_desempeño)),
+            str(int(total_final))
+        )
+        print(f"Respuesta SAP: {resp}")
+        sap_exitoso = resp.get('success', False)
+    else:
+        print(f"Flujo incompleto: {validacion['motivo']} → solo guardando local")
+    
+    #  4: SIEMPRE guardar en resultados_finales 
+    # (así la tabla reporte siempre refleja los valores parciales actuales)
+    ResultadoFinal.guardar(
+        ficha_usuario      = ficha_participante,
+        año_fiscal         = año_fiscal,
+        total_competencias = safe_desempeño,
+        total_indicadores  = safe_cumplimiento,
+        total_final        = total_final,
+        filial             = filial,
+        nivel              = nivel_usuario,
+        enviado_sap        = sap_exitoso
+    )
+    
+    return sap_exitoso
 
 
 @page.route("/app_crm/gdd/menu", methods=['GET'] )
@@ -1339,6 +1452,9 @@ def gestion_equipo_detalles(ficha_get):
             })
 
         aprobacion_indicadores(user, nombre_dueño_indicador, apellido_dueño_indicador, lista_datos_correo, dueño_indicadores.email)
+        config = Configuracion.get_data()
+        actualizar_resultado_parcial(ficha_get, config.año_fiscal, columna='indicadores')
+
         flash("Datos recibidos", "success")
         return jsonify({'status': 'success'})
 
@@ -2026,6 +2142,7 @@ def insertar_indicador():
             
         )
         print('todo bien mi rey')
+        actualizar_resultado_parcial(ficha_usuario, año_fiscal, columna='indicadores')
         flash("Indicador registrado exitosamente, no olvides cargar tu hoja de vida", "success")
         return jsonify({"success": True, "message": "Indicador registrado exitosamente"}), 200
 
@@ -2094,6 +2211,8 @@ def evaluacion():
             año_fiscal=año,
             nuevo_total=total
         )
+        
+        actualizar_resultado_parcial(ficha_dueño, año, columna='competencias')
 
         if resultados:
             return jsonify({
@@ -2191,6 +2310,7 @@ def editar_indicador():
             año_fiscal= año_fiscal
         )
         print('todo bien mi rey')
+        actualizar_resultado_parcial(ficha_usuario, año_fiscal, columna='indicadores')
         flash("Indicador editado exitosamente", "success")
         return jsonify({"success": True, "message": "Indicador registrado exitosamente"}), 200
 
@@ -2283,12 +2403,22 @@ def eliminar_indicador():
         if isinstance(id, str):
             id = id.strip()
         print(id)
+        
+        indicador_obj = Indicadores.obtener_indicador(id)
+        ficha_dueño = indicador_obj.ficha_usuario if indicador_obj else None
+        año_fiscal_ind = indicador_obj.año_fiscal if indicador_obj else None
+        
 
         
         Indicadores.delete_element(
             id= id,
-
         )
+        
+        if ficha_dueño and año_fiscal_ind:
+            config = Configuracion.get_data()
+            año_fiscal_activo = config.año_fiscal if config else año_fiscal_ind
+            actualizar_resultado_parcial(ficha_dueño, año_fiscal_activo, columna='indicadores')
+        
         print('todo bien mi rey')
         flash("Indicador Eliminado", "success")
         return jsonify({"success": True, "message": "Indicador Eliminmado exitosamente"}), 200
@@ -2905,12 +3035,12 @@ def inicializar_resultados(year_fiscal):
 @login_required
 def sincronizar_resultados(year_fiscal):
     """
-    ESTA FUNCION ES POR SI ACASO YA HAY DATOS ENVIADOS EN SAP ENTONCES ES NECESARIO CALCULAR
-    LO QUE YA DEBERIA ESTAR EN SAP Y PASARLO A LA NUEVA TABLA.
-    Solo accesible para administradores.
-    Ejecutar: /app_crm/sincronizar-resultados/AF26
-
-    pd: es year_fiscal pq el python es gringo y da error con la ñ de año xdd
+    RUTA DEPRECADA
+    Esta ruta no valida retroalimentación ni indicadores aprobados, y causó registros
+    huérfanos con enviado_sap=True en resultados_finales.
+    
+    Usar en su lugar: POST /app_crm/gdd/api/sincronizar-tabla
+    (disparado desde el botón 'Actualizar datos' en tabla_reporte.html)
     """
 
     if current_user.nivel_usuario != 'admin' and current_user.nivel_usuario != "Administrador":
@@ -2980,9 +3110,9 @@ def sincronizar_resultados(year_fiscal):
 
         print(f"Ficha {ficha} | af_real={af_real} | indicadores encontrados={len(indicadores)}")
 
-        safe_cumplimiento = round(
-            sum(float(i.cumplimiento) for i in indicadores if i.cumplimiento), 2
-        )
+        # Opción A: sumar solo aprobados
+        indicadores_aprobados = [i for i in indicadores if i.status_aprobacion == 'A']
+        safe_cumplimiento = round(sum(float(i.cumplimiento) for i in indicadores_aprobados if i.cumplimiento), 2)
 
         raw_total      = evaluacion.total
         safe_desempeño = 0 if (raw_total is None or raw_total == '' or raw_total == 0) else raw_total
@@ -3047,6 +3177,135 @@ def sincronizar_resultados(year_fiscal):
         'detalle': detalle
     })
     
+    
+
+@page.route('/app_crm/gdd/api/sincronizar-tabla', methods=['POST'])
+@login_required
+def api_sincronizar_tabla():
+    """
+    Endpoint para refrescar la tabla resultados_finales bajo demanda.
+    Llamado desde el botón 'Actualizar datos' en tabla_reporte.html.
+    """
+    if current_user.nivel_usuario not in ('admin', 'Administrador'):
+        return jsonify({'success': False, 'error': 'No autorizado'}), 403
+    
+    config = Configuracion.get_data()
+    if not config:
+        return jsonify({'success': False, 'error': 'Sin configuración activa'}), 500
+    
+    año_fiscal = config.año_fiscal
+    
+    try:
+        participantes = participantes_gdd()
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Error consultando SAP: {str(e)}'}), 500
+    
+    niveles_por_ficha = {
+        int(p['pernr'].lstrip('0')): p.get('nivel')
+        for p in participantes if p.get('pernr')
+    }
+    
+    formatos_busqueda = [año_fiscal]
+    if año_fiscal.startswith("AF"):
+        año_num = int(año_fiscal[2:])
+        formatos_busqueda.append(f"20{año_num-1}20{año_num:02d}")
+    else:
+        formatos_busqueda.append(f"AF{año_fiscal[6:8]}")
+    
+    evaluaciones = Evaluacion.query.filter(
+        Evaluacion.año_fiscal.in_(formatos_busqueda)
+    ).all()
+    
+    if not evaluaciones:
+        return jsonify({'success': False, 'mensaje': f'No se encontraron evaluaciones para {año_fiscal}'}), 404
+    
+    culminados = 0  # cumplen flujo completo → enviado_sap=True
+    parciales  = 0  # no cumplen, pero tienen valores > 0
+    vacios     = 0  # no cumplen y valores en 0
+    errores    = 0
+    
+    for evaluacion in evaluaciones:
+        ficha   = evaluacion.ficha_usuario
+        af_real = evaluacion.año_fiscal
+        
+        if ficha in FICHAS_EXCLUIDAS:
+            continue
+        
+        nivel   = niveles_por_ficha.get(ficha)
+        usuario = User.get_by_ficha(ficha)
+        filial  = usuario.filial if usuario else 'N/A'
+        
+        try:
+
+            formatos_año_ind = [af_real]
+            if af_real.startswith("AF"):
+                an = int(af_real[2:])
+                formatos_año_ind.append(f"20{an-1}20{an:02d}")
+            else:
+                formatos_año_ind.append(f"AF{af_real[6:8]}")
+            
+            # Cumplimiento: solo indicadores aprobados
+            indicadores = Indicadores.query.filter(
+                Indicadores.ficha_usuario == ficha,
+                Indicadores.año_fiscal.in_(formatos_año_ind)
+            ).all()
+            indicadores_aprobados = [i for i in indicadores if i.status_aprobacion == 'A']
+            safe_cumplimiento = round(
+                sum(float(i.cumplimiento) for i in indicadores_aprobados if i.cumplimiento),
+                2
+            )
+            
+            # Desempeño desde la evaluación
+            raw_total = evaluacion.total
+            try:
+                safe_desempeño = float(raw_total) if raw_total not in (None, '', '---', 0) else 0
+            except (ValueError, TypeError):
+                safe_desempeño = 0
+            
+            total_final = round(safe_desempeño + safe_cumplimiento, 1)
+            
+            # ── Validar flujo completo ──
+            validacion = validar_flujo_completo_usuario(
+                ficha_participante=ficha,
+                año_fiscal=af_real,
+                nivel_usuario=nivel
+            )
+            
+            # ── Guardar SIEMPRE (con valores reales, no resetear a 0) ──
+            ResultadoFinal.guardar(
+                ficha_usuario=ficha,
+                año_fiscal=af_real,
+                total_competencias=safe_desempeño,
+                total_indicadores=safe_cumplimiento,
+                total_final=total_final,
+                filial=filial,
+                nivel=nivel,
+                enviado_sap=validacion['completo']
+            )
+            
+            # Clasificar para el reporte de respuesta
+            if validacion['completo']:
+                culminados += 1
+            elif total_final > 0:
+                parciales += 1
+            else:
+                vacios += 1
+        
+        except Exception as e:
+            print(f"Error sincronizando ficha {ficha}: {str(e)}")
+            errores += 1
+    
+    return jsonify({
+        'success': True,
+        'año_fiscal': año_fiscal,
+        'resumen': {
+            'total_procesados': len(evaluaciones),
+            'culminados': culminados,
+            'parciales': parciales,
+            'vacios':    vacios,
+            'errores':   errores
+        }
+    }), 200
 
 @page.route('/app_crm/corregir_supervisores/<year_fiscal>', methods=['GET'])
 @login_required

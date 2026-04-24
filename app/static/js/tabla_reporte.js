@@ -1,19 +1,29 @@
-
 let DATOS          = [];
 let datosFiltrados = [];
 let paginaActual   = 0;
 let porPagina      = 10;
 
+// ══════════════════════════════════════════
+// Mapa de abreviaciones de filial → nombre en DB
+// Se usa en filtros client-side. Si agregas una filial nueva,
+// actualiza también el listener .FilialComparar más abajo.
+// ══════════════════════════════════════════
+const FILIALES_MAP = {
+    'CRM': 'CORIMON C.A.',
+    'MGR': 'MONTANA GRÁFICA C.A.',
+    'CRP': 'CORIMON PINTURAS C.A.',
+    'CER': 'CERDEX C.A.',
+    'EEE': 'ENVACA C.A.',
+    'RES': 'RESIMON C.A.',
+    'PPV': 'PURAS PINTURAS VENEZOLANAS C.A.',
+    'TMO': 'TIENDAS MONTANA C.A.',
+};
 
-async function cargarDatos(filial = null, nivel = null) {
+
+async function cargarDatos() {
     try {
-        const params = new URLSearchParams();
-        console.log("Cargando datos con filtros:", { filial, nivel });
-        if (filial) params.set('filial', filial);
-        if (nivel)  params.set('nivel', nivel);
-
-        const url = `/app_crm/gdd/api/tabla-reporte${params.toString() ? '?' + params : ''}`;
-        const resp = await fetch(url);
+        console.log("Cargando dataset completo desde el backend");
+        const resp = await fetch('/app_crm/gdd/api/tabla-reporte');
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
         const json = await resp.json();
@@ -34,7 +44,8 @@ async function cargarDatos(filial = null, nivel = null) {
         });
 
         paginaActual = 0;
-        aplicarPaginacion(DATOS);
+        // Reaplicar filtros activos (si hay alguno) en vez de pintar todo directo
+        filtrar();
 
     } catch (err) {
         console.error('Error cargando datos de la tabla:', err);
@@ -46,11 +57,11 @@ async function cargarDatos(filial = null, nivel = null) {
 
 function badgeDesemp(d) {
     const colores = {
-        'UP':  '#fca5a5',   // red-300
-        'FP-': '#fcd34d',   // yellow-300
-        'FP':  '#cbd5e1',   // slate-300
-        'FP+': '#86efac',   // green-300
-        'O':   '#93c5fd',   // blue-300
+        'UP':  '#fca5a5',
+        'FP-': '#fcd34d',
+        'FP':  '#cbd5e1',
+        'FP+': '#86efac',
+        'O':   '#93c5fd',
     };
     const bg = colores[d] || '#e2e8f0';
     return `<span class="badge" style="background:${bg}; color:#333;">${d || 'NN'}</span>`;
@@ -115,10 +126,6 @@ function actualizarSummary(datos) {
     if (elPromedio) animarNumero(elPromedio, promedioTotal, '%');
 }
 
-
-/* ══════════════════════════════════════════
-Render tabla
-   ══════════════════════════════════════════ */
 
 function renderTabla(datos) {
     const tbody = document.getElementById('tbody');
@@ -200,23 +207,16 @@ function aplicarPaginacion(datos) {
 
     const totalPaginas = Math.ceil(datosFiltrados.length / porPagina);
 
-    // Ajustar si la página actual excede el total
     if (paginaActual >= totalPaginas) paginaActual = Math.max(0, totalPaginas - 1);
 
     const inicio = paginaActual * porPagina;
     const fin    = inicio + porPagina;
     const pagina = datosFiltrados.slice(inicio, fin);
 
-    // Renderizar solo la página actual
     renderTabla(pagina);
-
-    // Summary cards sobre TODOS los filtrados (no solo la página visible)
     actualizarSummary(datosFiltrados);
-
-    // Actualizar controles de paginación
     renderPaginacion();
 
-    // Empty state
     document.getElementById('empty-msg').style.display =
         datosFiltrados.length === 0 ? 'flex' : 'none';
 }
@@ -230,7 +230,6 @@ function renderPaginacion() {
     const inicio      = paginaActual * porPagina + 1;
     const fin         = Math.min((paginaActual + 1) * porPagina, total);
 
-    // ── Info texto ──
     const countEl = document.getElementById('result-count');
     if (countEl) {
         if (total === 0) {
@@ -240,7 +239,6 @@ function renderPaginacion() {
         }
     }
 
-    // Si solo hay 1 página o menos, ocultar paginación
     if (totalPag <= 1) {
         contenedor.innerHTML = '';
         return;
@@ -248,7 +246,6 @@ function renderPaginacion() {
 
     let html = '';
 
-    // ── Botón anterior ──
     html += `<button class="pag-btn pag-nav ${paginaActual === 0 ? 'disabled' : ''}"
                     onclick="cambiarPagina(${paginaActual - 1})"
                     ${paginaActual === 0 ? 'disabled' : ''}>
@@ -258,7 +255,6 @@ function renderPaginacion() {
                 </svg>
             </button>`;
 
-    // ── Páginas numéricas con ventana deslizante ──
     const maxVisible = 5;
     let rangoInicio = Math.max(0, paginaActual - Math.floor(maxVisible / 2));
     let rangoFin    = rangoInicio + maxVisible;
@@ -268,25 +264,21 @@ function renderPaginacion() {
         rangoInicio = Math.max(0, rangoFin - maxVisible);
     }
 
-    // Ellipsis al inicio
     if (rangoInicio > 0) {
         html += `<button class="pag-btn" onclick="cambiarPagina(0)">1</button>`;
         if (rangoInicio > 1) html += `<span class="pag-ellipsis">...</span>`;
     }
 
-    // Páginas del rango
     for (let i = rangoInicio; i < rangoFin; i++) {
         const activa = i === paginaActual ? 'pag-activa' : '';
         html += `<button class="pag-btn ${activa}" onclick="cambiarPagina(${i})">${i + 1}</button>`;
     }
 
-    // Ellipsis al final
     if (rangoFin < totalPag) {
         if (rangoFin < totalPag - 1) html += `<span class="pag-ellipsis">...</span>`;
         html += `<button class="pag-btn" onclick="cambiarPagina(${totalPag - 1})">${totalPag}</button>`;
     }
 
-    // ── Botón siguiente ──
     html += `<button class="pag-btn pag-nav ${paginaActual === totalPag - 1 ? 'disabled' : ''}"
                     onclick="cambiarPagina(${paginaActual + 1})"
                     ${paginaActual === totalPag - 1 ? 'disabled' : ''}>
@@ -307,7 +299,6 @@ function cambiarPagina(n) {
     paginaActual = n;
     aplicarPaginacion(datosFiltrados);
 
-    // Scroll suave al inicio de la tabla
     const tabla = document.getElementById('gdd-table');
     if (tabla) {
         tabla.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -322,27 +313,70 @@ function cambiarPorPagina(valor) {
 
 
 /* ══════════════════════════════════════════
-   Filtros
+    Filtros (TODOS client-side)
    ══════════════════════════════════════════ */
 
-const filtros = { filial: '', status: '' };
+const filtros = { filial: '', status: '', clasif: '' };
 
+const COLORES_CLASIF = {
+    'O':   '!bg-blue-300',
+    'FP+': '!bg-green-300',
+    'FP':  '!bg-slate-300',
+    'FP-': '!bg-yellow-300',
+    'UP':  '!bg-red-300',
+};
+
+const COLORES_STATUS = {
+    'CULMINADO':    '!bg-green-300',
+    'NO CULMINADO': '!bg-yellow-300',
+};
 function setFiltro(tipo, valor, label) {
     filtros[tipo] = valor;
-    const labelId = tipo === 'filial' ? 'labelFilial' : 'labelStatus';
-    document.getElementById(labelId).textContent = label;
-
-    const idDropdown = tipo === 'filial' ? 'dropdownFilial' : 'dropdownStatus';
-    document.getElementById(idDropdown).classList.add('hidden');
+    
+    const idsPorTipo = {
+        'filial': { label: 'labelFilial',  dropdown: 'dropdownFilial' },
+        'status': { label: 'labelStatus',  dropdown: 'dropdownStatus' },
+        'clasif': { label: 'labelClasif',  dropdown: 'dropdownClasif' },
+    };
+    
+    const coloresPorTipo = {
+        'clasif': COLORES_CLASIF,
+        'status': COLORES_STATUS,
+    };
+    
+    const ids = idsPorTipo[tipo];
+    if (ids) {
+        const el = document.getElementById(ids.label);
+        if (el) {
+            const mapaColores = coloresPorTipo[tipo];
+            
+            // Si este tipo usa badges Y hay un valor seleccionado → inyectar badge
+            if (mapaColores && valor) {
+                const colorClass = mapaColores[valor] || '!bg-gray-300';
+                el.innerHTML = `<span class="p-[4px_8px] rounded-xl font-bold text-[#333] ${colorClass}">${label}</span>`;
+            } else {
+                // Resto de casos (sin badge o valor vacío) → texto plano
+                el.textContent = label;
+            }
+        }
+        document.getElementById(ids.dropdown).classList.add('hidden');
+    }
+    
     filtrar();
 }
-
 function filtrar() {
     const fs = filtros.status;
+    const ff = filtros.filial;
+    const fc = filtros.clasif;
     const fq = document.getElementById('f-search').value.toLowerCase().trim();
 
+
+    const filialCompleta = ff ? FILIALES_MAP[ff] : null;
+
     const filtrados = DATOS.filter(p =>
+        (!filialCompleta || p.filial === filialCompleta) &&
         (!fs || p.status === fs) &&
+        (!fc || p.valor_clasificacion === fc) &&
         (!fq || p.nombre.toLowerCase().includes(fq))
     );
 
@@ -353,16 +387,20 @@ function filtrar() {
 function limpiarFiltros() {
     filtros.filial = '';
     filtros.status = '';
+    filtros.clasif = '';
     document.getElementById('dropdown-button-2').childNodes[0].textContent = 'Filtro por Filial';
     document.getElementById('labelStatus').textContent = 'Todos los estatus';
+    document.getElementById('labelClasif').textContent = 'Toda clasificación';
     document.getElementById('f-search').value = '';
     paginaActual = 0;
-    cargarDatos();  
+    filtrar();
 }
+
+
+
 function exportarExcel() {
     const datos = datosFiltrados.length > 0 ? datosFiltrados : DATOS;
 
-    // Aplanar: una fila por indicador
     const filas = [];
     datos.forEach(p => {
         if (p.indicadores.length === 0) {
@@ -415,6 +453,50 @@ function exportarExcel() {
     XLSX.writeFile(wb, 'Reporte_GDD.xlsx');
 }
 
+async function sincronizarResultados() {
+    const btn     = document.getElementById('btn-sincronizar');
+    const texto   = document.getElementById('text-sincronizar');
+    const textoOg = texto.textContent;
+    
+    btn.disabled = true;
+    btn.classList.add('loading');
+    texto.textContent = 'Actualizando...';
+    
+    try {
+        const resp = await fetch('/app_crm/gdd/api/sincronizar-tabla', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            }
+        });
+        const json = await resp.json();
+        
+        if (!resp.ok || !json.success) {
+            throw new Error(json.error || json.mensaje || 'Error desconocido');
+        }
+        
+        const r = json.resumen;
+
+        showAlertGrandes(`Sincronización completada
+            - Culminados: ${r.culminados}
+            - Parciales: ${r.parciales}
+            - Vacíos: ${r.vacios}
+            - Errores: ${r.errores}
+
+            Total procesados: ${r.total_procesados}`, 'success');
+        
+        // cargarDatos() ya reaplica filtros activos al final
+        await cargarDatos();
+    } catch (err) {
+        console.error('Error sincronizando:', err);
+        showAlertGrandes(`Error al sincronizar: ${err.message}`, 'error');  
+    } finally {
+        btn.disabled = false;
+        btn.classList.remove('loading');
+        texto.textContent = textoOg;
+    }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarDatos();
@@ -426,18 +508,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (filialCode === 'ALL') {
                 filtros.filial = '';
                 document.getElementById('dropdown-button-2').childNodes[0].textContent = 'Filtro por Filial';
-                cargarDatos();  // sin filtro
             } else {
                 filtros.filial = filialCode;
                 const nombre = btn.querySelector('P')?.textContent?.trim() || filialCode;
                 document.getElementById('dropdown-button-2').childNodes[0].textContent = nombre;
-                cargarDatos(filialCode);  // ← pide al backend solo esa filial
             }
 
-            // Cerrar el dropdown manualmente
             document.getElementById('dropdown-search-city').classList.add('hidden');
 
             paginaActual = 0;
+            filtrar();  // ⚡ instantáneo, client-side (antes llamaba cargarDatos con backend)
         });
     });
 
@@ -449,8 +529,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-
-
     // Drag-to-scroll horizontal
     const tableWrap = document.querySelector('.gdd-table-wrap');
     let isDown = false;
@@ -458,7 +536,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let scrollLeft;
 
     tableWrap.addEventListener('mousedown', (e) => {
-        // Ignorar si el click es en un elemento interactivo
         if (e.target.closest('button, a, input, select')) return;
         isDown = true;
         tableWrap.classList.add('grabbing');
@@ -480,7 +557,130 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isDown) return;
         e.preventDefault();
         const x = e.pageX - tableWrap.offsetLeft;
-        const walk = (x - startX) * 1.5; // multiplicador de velocidad
+        const walk = (x - startX) * 1.5;
         tableWrap.scrollLeft = scrollLeft - walk;
     });
+
+
 });
+
+
+
+function showAlertGrandes(message, category = 'success') {
+    const alertContainer = document.createElement('div');
+    alertContainer.className = 'fixed top-5 z-[100000] animate-fade-in-up left-[35%] transform -translate-x-1/2';
+    
+    const alertWrapper = document.createElement('div');
+    alertWrapper.className = 'flex flex-col gap-2 w-auto max-w-md sm:max-w-lg text-[10px] sm:text-xs';
+    
+    const alertBox = document.createElement('div');
+    alertBox.className = 'error-alert cursor-default flex items-start w-full min-h-12 sm:min-h-14 rounded-lg bg-azul-dark px-[10px] py-3';
+    
+    const contentWrapper = document.createElement('div');
+    contentWrapper.className = 'flex gap-3 items-start justify-between w-full';
+    
+    const iconContainer = document.createElement('div');
+    let iconColor = '';
+    
+    if (category === 'error') {
+        iconColor = 'text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg flex-shrink-0 mt-1';
+    } else if (category === 'atencion') {
+        iconColor = 'text-[#ffc107] bg-white/5 backdrop-blur-xl p-1 rounded-lg flex-shrink-0 mt-1';
+    } else {
+        iconColor = 'text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg flex-shrink-0 mt-1';
+    }
+    
+    iconContainer.className = iconColor;
+    
+    const iconSpan = document.createElement('span');
+    if (category === 'error') {
+        iconSpan.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert-icon lucide-circle-alert"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>`;
+    } else if (category === 'atencion') {
+        iconSpan.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert-icon lucide-triangle-alert"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>`;
+    } else {
+        iconSpan.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check"><path d="M20 6 9 17l-5-5"/></svg>`;
+    }
+    
+    const messageContainer = document.createElement('div');
+    messageContainer.className = 'flex flex-col flex-grow min-w-0';
+    
+    const titleDiv = document.createElement('div');
+    const titleText = document.createElement('h4');
+    titleText.className = 'text-white font-medium mb-2';
+    
+    if (category === 'error') {
+        titleText.textContent = 'Error:';
+    } else if (category === 'atencion') {
+        titleText.textContent = 'Atención:';
+    } else {
+        titleText.textContent = 'Proceso Exitoso:';
+    }
+    
+    const messageDiv = document.createElement('div');
+    const messageText = document.createElement('p');
+    messageText.className = 'text-white text-sm leading-relaxed whitespace-pre-line break-words';
+    messageText.textContent = message;
+    
+    const closeButton = document.createElement('button');
+    closeButton.className = 'flex close-btn flex-shrink-0';
+    
+    const closeIconContainer = document.createElement('div');
+    let closeIconColor = '';
+    
+    if (category === 'error') {
+        closeIconColor = 'text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg hover:bg-white/10 transition-colors';
+    } else if (category === 'atencion') {
+        closeIconColor = 'text-[#ffc107] bg-white/5 backdrop-blur-xl p-1 rounded-lg hover:bg-white/10 transition-colors';
+    } else {
+        closeIconColor = 'text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg hover:bg-white/10 transition-colors';
+    }
+    
+    closeIconContainer.className = closeIconColor;
+    
+    const closeIconSpan = document.createElement('span');
+    closeIconSpan.className = 'material-symbols-rounded';
+    closeIconSpan.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+    
+    iconContainer.appendChild(iconSpan);
+    titleDiv.appendChild(titleText);
+    messageDiv.appendChild(messageText);
+    messageContainer.appendChild(titleDiv);
+    messageContainer.appendChild(messageDiv);
+    closeIconContainer.appendChild(closeIconSpan);
+    closeButton.appendChild(closeIconContainer);
+    
+    contentWrapper.appendChild(iconContainer);
+    contentWrapper.appendChild(messageContainer);
+    contentWrapper.appendChild(closeButton);
+    
+    alertBox.appendChild(contentWrapper);
+    alertWrapper.appendChild(alertBox);
+    alertContainer.appendChild(alertWrapper);
+    
+    document.body.appendChild(alertContainer);
+    
+    setTimeout(() => {
+        alertContainer.style.opacity = '1';
+    }, 10);
+    
+    closeButton.addEventListener('click', () => {
+        alertContainer.style.opacity = '0';
+        alertContainer.classList.add("animate-fade-out-right");
+        setTimeout(() => {
+            if (document.body.contains(alertContainer)) {
+                document.body.removeChild(alertContainer);
+            }
+        }, 300);
+    });
+    
+    setTimeout(() => {
+        if (document.body.contains(alertContainer)) {
+            alertContainer.style.opacity = '0';
+            setTimeout(() => {
+                if (document.body.contains(alertContainer)) {
+                    document.body.removeChild(alertContainer);
+                }
+            }, 300);
+        }
+    }, 8000);
+}

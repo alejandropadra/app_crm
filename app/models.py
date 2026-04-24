@@ -1562,7 +1562,6 @@ class ResultadoFinal(db.Model):
 
     @classmethod
     def obtener_datos_tabla_reporte(cls, año_fiscal, filial=None, nivel=None):
-        print(f"Obteniendo datos para reporte - Año Fiscal: {año_fiscal}, Filial: {filial}, Nivel: {nivel}")
         ORDEN_COMPETENCIAS = [
             'Demostración Valores Corporativos',
             'Foco en Resultados',
@@ -1659,6 +1658,66 @@ class ResultadoFinal(db.Model):
             })
     
         return datos
+    
+    @classmethod
+    def actualizar_columna(cls, ficha_usuario, año_fiscal, columna, valor, filial=None, nivel=None):
+        """
+        Actualiza SOLO una columna específica del registro en resultados_finales.
+        
+        Si no existe el registro, lo crea con las demás columnas en 0.
+        
+        Args:
+            columna: 'total_indicadores' | 'total_competencias'
+            valor: valor numérico a guardar en esa columna
+        """
+        columnas_validas = ('total_indicadores', 'total_competencias')
+        if columna not in columnas_validas:
+            print(f" Columna no válida: {columna}")
+            return None
+        
+        try:
+            registro = cls.query.filter_by(
+                ficha_usuario=ficha_usuario,
+                año_fiscal=año_fiscal
+            ).first()
+            
+            if registro:
+                setattr(registro, columna, valor)
+                # Recalcular total_final con la suma de las dos columnas
+                comp = registro.total_competencias or 0
+                ind  = registro.total_indicadores or 0
+                registro.total_final = round(comp + ind, 1)
+                registro.clasificacion = cls._clasificar(registro.total_final)
+                if filial:
+                    registro.filial = filial
+                if nivel:
+                    registro.nivel = nivel
+            else:
+                # No existe → crearlo con esta columna y las demás en 0
+                nuevo_reg = {
+                    'ficha_usuario':      int(ficha_usuario),
+                    'año_fiscal':         año_fiscal,
+                    'filial':             filial,
+                    'nivel':              nivel,
+                    'total_competencias': 0,
+                    'total_indicadores':  0,
+                    'total_final':        0,
+                    'clasificacion':      cls._clasificar(0),
+                    'enviado_sap':        False,
+                }
+                nuevo_reg[columna] = valor
+                nuevo_reg['total_final'] = round(valor, 1)
+                nuevo_reg['clasificacion'] = cls._clasificar(valor)
+                registro = cls(**nuevo_reg)
+                db.session.add(registro)
+            
+            db.session.commit()
+            return registro
+        
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al actualizar columna {columna}: {e}")
+            return None
 
 
 

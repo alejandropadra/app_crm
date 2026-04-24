@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/tabla_reporte.css') }}">
 {% endblock %}
 
-
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <div class="bg-white p-5 rounded-[20px] shadow-light flex flex-col gap-5  max-h-screen overflow-hidden">
 
     <!-- ═══ Encabezado ═══ -->
@@ -126,10 +126,72 @@
         <div id="dropdownStatus" class="z-10 hidden dropdown-menu-gdd">
             <ul>
                 <li><button onclick="setFiltro('status','','Todos los estatus')">Todos los estatus</button></li>
-                <li><button onclick="setFiltro('status', 'CULMINADO', 'Culminado')">Culminado</button></li>
-                <li><button onclick="setFiltro('status', 'NO CULMINADO', 'No Culminado')">No Culminado</button></li>
+                <li class="py-2">
+                    <button class="!py-2" onclick="setFiltro('status', 'CULMINADO', 'Culminado')">
+                        <span class="p-[6px] rounded-xl h-full text-center font-bold text-[#333] !bg-green-300">Culminado</span>
+                    </button>
+                </li>
+                <li class="py-2">
+                    <button class="!py-2" onclick="setFiltro('status', 'NO CULMINADO', 'No Culminado')">
+                        <span class="p-[6px] rounded-xl h-full text-center font-bold text-[#333] !bg-yellow-300">No Culminado</span>
+                    </button>
+                </li>
             </ul>
         </div>
+
+
+        <button id="btnClasif"
+                data-dropdown-toggle="dropdownClasif"
+                type="button"
+                class="btn-filter">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <span id="labelClasif">Toda clasificación</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.4">
+                <path d="m6 9 6 6 6-6"/>
+            </svg>
+        </button>
+
+        <div id="dropdownClasif" class="z-10 hidden dropdown-menu-gdd">
+            <ul>
+                <li><button onclick="setFiltro('clasif','','Toda clasificación')">Toda clasificación</button></li>
+                <li class=" py-2" >
+                    <button class=" !py-2 " onclick="setFiltro('clasif','O','O ')">
+                        <span class=" p-[6px] rounded-xl  h-full text-center font-bold text-[#333] !bg-blue-300">O</span>
+                    </button>
+                </li>
+                <li class=" py-2" >
+                    <button class=" !py-2 " onclick="setFiltro('clasif','FP+','FP+')">
+                        <span class=" p-[6px] rounded-xl  h-full text-center font-bold text-[#333] !bg-green-300 ">FP+</span>
+                    </button>
+                </li>
+                <li class=" py-2" >
+                    <button class=" !py-2 " onclick="setFiltro('clasif','FP','FP ')">
+                        <span class=" p-[6px] rounded-xl  h-full text-center font-bold text-[#333] !bg-slate-300 ">FP</span>
+                    </button>
+                </li>
+                <li class=" py-2" >
+                    <button class=" !py-2 " onclick="setFiltro('clasif','FP-','FP- ')">
+                        <span class=" p-[6px] rounded-xl  h-full text-center font-bold text-[#333] !bg-yellow-300 ">FP-</span>
+                    </button>
+                </li>
+
+                <li class=" py-2" >
+                    <button class=" !py-2 " onclick="setFiltro('clasif','UP','UP')">
+                        <span class=" p-[6px] rounded-xl  h-full text-center font-bold text-[#333] !bg-red-300 ">UP</span>
+                    </button>
+                </li>
+
+            </ul>
+        </div>
+
+
+        
+
+
 
         <div class="dropdown-container flex items-center"><!--Filtro de la filial-->
             <div class="flex items-center justify-between w-full">
@@ -249,20 +311,20 @@
         <div class="search-wrap">
             <span class="icon-search">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
             </span>
             <input id="f-search"
-                   type="search"
-                   placeholder="Buscar participante..."
-                   autocomplete="off">
+                type="search"
+                placeholder="Buscar participante..."
+                autocomplete="off">
         </div>
 
         <!-- Limpiar -->
         <button type="button" onclick="limpiarFiltros()" class="btn-clear">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
             Limpiar
@@ -271,11 +333,23 @@
         <!-- Exportar -->
         <button type="button" onclick="exportarExcel()" class="btn-export">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
             Exportar
+        </button>
+        <button 
+            id="btn-sincronizar" 
+            onclick="sincronizarResultados()" 
+            class="btn-sincronizar">
+            <svg id="icon-sincronizar" width="16" height="16" viewBox="0 0 24 24" fill="none" 
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            <span id="text-sincronizar">Actualizar datos</span>
         </button>
 
         

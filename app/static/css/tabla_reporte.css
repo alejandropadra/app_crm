@@ -627,3 +627,26 @@
         justify-content: center;
     }
 }
+
+
+.btn-sincronizar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+.btn-sincronizar:hover:not(:disabled) { background: #2563eb; }
+.btn-sincronizar:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-sincronizar.loading svg { animation: rotar 1s linear infinite; }
+@keyframes rotar {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
