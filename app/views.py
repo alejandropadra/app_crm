@@ -30,6 +30,8 @@ import asyncio
 import threading
 from threading import Thread
 
+import app
+
 
 
 adj_imagenes = 'app/static/img/fotos_personal/'
@@ -3321,3 +3323,32 @@ def corregir_supervisores(year_fiscal):
     )
 
     return jsonify(resultado)
+
+@page.route('/app_crm/gdd/api/recalcular-nivel-i', methods=['POST'])
+@login_required
+def api_recalcular_nivel_i():
+    """
+    Recalcula evaluaciones Nivel I mal computadas por el bug del calcularCumplimiento.
+    
+    Body JSON:
+        { "año_fiscal": "AF26", "dry_run": true }   ← por defecto dry_run=True
+    
+    USO: primero llamar con dry_run=true para ver reporte,
+            después con dry_run=false para ejecutar.
+    """
+    if current_user.nivel_usuario != 'admin' and current_user.nivel_usuario != "Administrador":
+        return jsonify({'error': 'No autorizado'}), 403
+    
+    data = request.get_json() or {}
+    año_fiscal = data.get('año_fiscal')
+    dry_run = data.get('dry_run', True)  # seguro por defecto
+    
+    if not año_fiscal:
+        return jsonify({'success': False, 'error': 'Falta año_fiscal'}), 400
+    
+    resultado = Evaluacion.recalcular_nivel_i(año_fiscal=año_fiscal, dry_run=dry_run)
+    
+    if not resultado['success']:
+        return jsonify(resultado), 500
+    
+    return jsonify(resultado), 200

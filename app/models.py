@@ -1029,7 +1029,157 @@ class Evaluacion(db.Model):
             },
             'errores_detalle': errores
         }
+    
+    @classmethod
+    def eliminar_proceso_completo(cls, ficha_usuario, año_fiscal):
+        """
+        Elimina el proceso de EVALUACIÓN DE COMPETENCIAS de un usuario en un AF.
+        """
+        try:
+            resumen = {
+                'evaluaciones': 0,
+                'competencias': 0,
+                'retroalimentacion': 0,
+                'resultado_final': 0,
+            }
+            
+            # 1. Evaluación + competencias (cascade ORM)
+            evaluaciones = cls.query.filter_by(
+                ficha_usuario=ficha_usuario,
+                año_fiscal=año_fiscal
+            ).all()
+            for ev in evaluaciones:
+                resumen['competencias'] += len(ev.resultados)
+                db.session.delete(ev)
+                resumen['evaluaciones'] += 1
+            
+            # 2. Retroalimentación
+            retros = Retroalimentacion.query.filter_by(
+                ficha_usuario=ficha_usuario,
+                año_fiscal=año_fiscal
+            ).all()
+            for r in retros:
+                db.session.delete(r)
+                resumen['retroalimentacion'] += 1
+            
+            # 3. Resultado Final
+            resultados = ResultadoFinal.query.filter_by(
+                ficha_usuario=ficha_usuario,
+                año_fiscal=año_fiscal
+            ).all()
+            for rf in resultados:
+                db.session.delete(rf)
+                resumen['resultado_final'] += 1
+            
+            db.session.commit()
+            return {'success': True, 'resumen': resumen}
         
+        except Exception as e:
+            db.session.rollback()
+            return {'success': False, 'error': str(e)}    
+        
+    @classmethod
+    def recalcular_nivel_i(cls, año_fiscal, dry_run=True):
+        """
+        Recalcula cumplimiento_eval, desempeno_eval y el total de la evaluación
+        SOLO para evaluaciones Nivel I (las que tienen par_evaluador Y subordinado_evaluador).
+        
+        Corrige el bug donde calcularCumplimiento del frontend usaba umbrales
+        incorrectos (2, 5, 7, 9) en vez de los del Excel (3, 6, 9, 12).
+        
+        Returns:
+            dict: Reporte detallado con cambios por evaluación y totales.
+        """
+        # Tabla de puntajes
+        PUNTOS = {"UP": 0, "FP-": 1, "FP": 2, "FP+": 3, "O": 4}
+        SIGLAS = ["UP", "FP-", "FP", "FP+", "O"]
+        
+        def calcular(sup, par, sub):
+            """Replica la lógica VLOOKUP del Excel con umbrales correctos."""
+            vals = [v for v in (sup, par, sub) if v and v.strip()]
+            S = sum(PUNTOS.get(v, 0) for v in vals)
+            if S < 3:   idx = 0
+            elif S < 6: idx = 1
+            elif S < 9: idx = 2
+            elif S < 12: idx = 3
+            else:       idx = 4
+            return idx, SIGLAS[idx]
+        
+        try:
+            # Filtrar SOLO Nivel I: con par Y subordinado asignados
+            evaluaciones_nivel_i = cls.query.filter(
+                cls.año_fiscal == año_fiscal,
+                cls.par_evaluador.isnot(None),
+                cls.par_evaluador != '',
+                cls.subordinado_evaluador.isnot(None),
+                cls.subordinado_evaluador != ''
+            ).all()
+            
+            reporte = {
+                'año_fiscal': año_fiscal,
+                'dry_run': dry_run,
+                'evaluaciones_procesadas': 0,
+                'evaluaciones_modificadas': 0,
+                'competencias_modificadas': 0,
+                'total_recalculado': 0,
+                'detalles': []
+            }
+            
+            for ev in evaluaciones_nivel_i:
+                reporte['evaluaciones_procesadas'] += 1
+                cambios_eval = []
+                nuevo_total = 0
+                hubo_cambios = False
+                
+                for comp in ev.resultados:
+                    superv = (comp.superv_eval or '').strip()
+                    par    = (comp.par_eval or '').strip()
+                    sub    = (comp.subordinado_eval or '').strip()
+                    
+                    nuevo_cumpl, nuevo_desemp = calcular(superv, par, sub)
+                    nuevo_total += nuevo_cumpl
+                    
+                    if (comp.cumplimiento_eval != nuevo_cumpl 
+                        or comp.desempeno_eval != nuevo_desemp):
+                        hubo_cambios = True
+                        reporte['competencias_modificadas'] += 1
+                        cambios_eval.append({
+                            'competencia': comp.nombre_competencia,
+                            'sup': superv, 'par': par, 'sub': sub,
+                            'antes': {'cumpl': comp.cumplimiento_eval, 'desemp': comp.desempeno_eval},
+                            'despues': {'cumpl': nuevo_cumpl, 'desemp': nuevo_desemp}
+                        })
+                        
+                        if not dry_run:
+                            comp.cumplimiento_eval = nuevo_cumpl
+                            comp.desempeno_eval = nuevo_desemp
+                
+                # Recalcular total de la evaluación si cambió algo
+                if hubo_cambios:
+                    reporte['evaluaciones_modificadas'] += 1
+                    total_anterior = ev.total
+                    
+                    if not dry_run:
+                        ev.total = nuevo_total
+                    
+                    reporte['detalles'].append({
+                        'evaluacion_id': ev.id,
+                        'ficha_usuario': ev.ficha_usuario,
+                        'total_antes': total_anterior,
+                        'total_despues': nuevo_total,
+                        'competencias_cambiadas': cambios_eval
+                    })
+            
+            if not dry_run:
+                db.session.commit()
+                reporte['total_recalculado'] = reporte['competencias_modificadas']
+            
+            return {'success': True, 'reporte': reporte}
+        
+        except Exception as e:
+            if not dry_run:
+                db.session.rollback()
+            return {'success': False, 'error': str(e)}
 
 
 # Tabla del resultado de las evaluaciones

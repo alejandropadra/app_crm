@@ -278,12 +278,11 @@ function recolectarDatosEvaluacion() {
         "O": 4
     };
     function calcularCumplimiento(puntajeBruto) {
-        if (puntajeBruto <= 0) return 0;
-        if (puntajeBruto >= 2 && puntajeBruto <= 4) return 1;
-        if (puntajeBruto >= 5 && puntajeBruto <= 6) return 2;
-        if (puntajeBruto >= 7 && puntajeBruto <= 8) return 3;
-        if (puntajeBruto >= 9) return 4;
-        return 0; 
+        if (puntajeBruto < 3)  return 0;   // UP  [0, 3)
+        if (puntajeBruto < 6)  return 1;   // FP- [3, 6)
+        if (puntajeBruto < 9)  return 2;   // FP  [6, 9)
+        if (puntajeBruto < 12) return 3;   // FP+ [9, 12)
+        return 4;                          // O   = 12
     }
     function obtenerSigla(cumplimientoFinal) {
         return Object.keys(valoresPorSigla).find(sigla => 
