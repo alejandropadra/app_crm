@@ -3,11 +3,7 @@ let datosFiltrados = [];
 let paginaActual   = 0;
 let porPagina      = 10;
 
-// ══════════════════════════════════════════
-// Mapa de abreviaciones de filial → nombre en DB
-// Se usa en filtros client-side. Si agregas una filial nueva,
-// actualiza también el listener .FilialComparar más abajo.
-// ══════════════════════════════════════════
+
 const FILIALES_MAP = {
     'CRM': 'CORIMON C.A.',
     'MGR': 'MONTANA GRÁFICA C.A.',
@@ -401,56 +397,194 @@ function limpiarFiltros() {
 function exportarExcel() {
     const datos = datosFiltrados.length > 0 ? datosFiltrados : DATOS;
 
-    const filas = [];
+    const getComps = (p) => ({
+        'Demostración Valores':      p.competencias?.[0] || '',
+        'Foco en Resultados':        p.competencias?.[1] || '',
+        'Influencia Organizacional': p.competencias?.[2] || '',
+        'Liderazgo':                 p.competencias?.[3] || '',
+        'Desarrollo Equipo':         p.competencias?.[4] || '',
+    });
+
+    const compsVacias = {
+        'Demostración Valores':      '',
+        'Foco en Resultados':        '',
+        'Influencia Organizacional': '',
+        'Liderazgo':                 '',
+        'Desarrollo Equipo':         '',
+    };
+
+    // Años dinámicos (igual que en el HTML, leídos del primer registro)
+    const añoAnterior = DATOS[0]?.año_anterior || '';
+    const añoActual   = DATOS[0]?.año_fiscal   || '';
+
+    const filas  = [];
+    const merges = [];
+
+    // El header ahora ocupa 2 filas, así que la data empieza en la fila 2 (0-indexed)
+    let rowIndex = 2;
+
     datos.forEach(p => {
+        const n        = p.indicadores.length || 1;
+        const startRow = rowIndex;
+        const endRow   = rowIndex + n - 1;
+
         if (p.indicadores.length === 0) {
             filas.push({
-                'Filial': p.filial,
-                'Nivel': p.nivel,
-                'Participante': p.nombre,
-                'Indicador': '',
-                'Tendencia': '',
-                'Peso': '',
-                'Real AF Ant.': '',
-                'Obj AF Act.': '',
-                'Real AF Act.': '',
-                'Cumplimiento': '',
-                'Desempeño': '',
+                'Filial': p.filial, 'Nivel': p.nivel, 'Participante': p.nombre,
+                'Indicador': '', 'Tendencia': '', 'Peso': '',
+                'Real_anterior': '', 'Ppto_actual': '', 'Real_actual': '',
+                'Cumplimiento': '', 'Desempeño': '',
                 'Valor Indic.': p.valor_indicadores,
+                ...getComps(p),
                 'Valor Eval.': p.valor_evaluacion,
                 'Valor Total': p.valor_total,
                 'Clasificación': p.valor_clasificacion || '',
                 'Status': p.status,
             });
-            return;
+        } else {
+            p.indicadores.forEach((ind, i) => {
+                filas.push({
+                    'Filial':        i === 0 ? p.filial : '',
+                    'Nivel':         i === 0 ? p.nivel : '',
+                    'Participante':  i === 0 ? p.nombre : '',
+                    'Indicador':     ind.nombre,
+                    'Tendencia':     ind.tendencia,
+                    'Peso':          ind.peso + '%',
+                    'Real_anterior': fmtValor(ind.real_af_antes),
+                    'Ppto_actual':   fmtValor(ind.obj_af_actual),
+                    'Real_actual':   fmtValor(ind.real_af_actual),
+                    'Cumplimiento':  ind.cumplimiento + '%',
+                    'Desempeño':     ind.desempeno,
+                    'Valor Indic.':  i === 0 ? p.valor_indicadores : '',
+                    ...(i === 0 ? getComps(p) : compsVacias),
+                    'Valor Eval.':   i === 0 ? p.valor_evaluacion : '',
+                    'Valor Total':   i === 0 ? p.valor_total : '',
+                    'Clasificación': i === 0 ? (p.valor_clasificacion || '') : '',
+                    'Status':        i === 0 ? p.status : '',
+                });
+            });
         }
 
-        p.indicadores.forEach((ind, i) => {
-            filas.push({
-                'Filial':        i === 0 ? p.filial : '',
-                'Nivel':         i === 0 ? p.nivel : '',
-                'Participante':  i === 0 ? p.nombre : '',
-                'Indicador':     ind.nombre,
-                'Tendencia':     ind.tendencia,
-                'Peso':          ind.peso + '%',
-                'Real AF Ant.':  fmtValor(ind.real_af_antes),
-                'Obj AF Act.':   fmtValor(ind.obj_af_actual),
-                'Real AF Act.':  fmtValor(ind.real_af_actual),
-                'Cumplimiento':  ind.cumplimiento + '%',
-                'Desempeño':     ind.desempeno,
-                'Valor Indic.':  i === 0 ? p.valor_indicadores : '',
-                'Valor Eval.':   i === 0 ? p.valor_evaluacion : '',
-                'Valor Total':   i === 0 ? p.valor_total : '',
-                'Clasificación': i === 0 ? (p.valor_clasificacion || '') : '',
-                'Status':        i === 0 ? p.status : '',
+        if (n > 1) {
+            const colsGrupo = [0, 1, 2, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+            colsGrupo.forEach(col => {
+                merges.push({ s: { r: startRow, c: col }, e: { r: endRow, c: col } });
             });
-        });
+        }
+
+        rowIndex += n;
     });
 
-    const ws = XLSX.utils.json_to_sheet(filas);
+    // ═══════ HEADER PERSONALIZADO (2 filas) ═══════
+    const headerRow1 = [
+        'FILIAL', 'NIVEL', 'PARTICIPANTE',
+        'INDICADORES', '', '', '', '', '', '', '',  // INDICADORES spans cols 3-10
+        'VALOR\nINDIC.',
+        'DEMOSTRACIÓN\nVALORES', 'FOCO EN\nRESULTADOS', 'INFLUENCIA\nORGANIZACIONAL', 'LIDERAZGO', 'DESARROLLO\nEQUIPO',
+        'VALOR\nEVAL.', 'VALOR\nTOTAL', 'CLASIF.', 'STATUS'
+    ];
+
+    const headerRow2 = [
+        '', '', '',
+        'INDICADOR', 'TENDENCIA', 'PESO',
+        `REAL ${añoAnterior}`, `PPTO/OBJ ${añoActual}`, `REAL ${añoActual}`,
+        'CUMPLIMIENTO', 'DESEMPEÑO',
+        '', '', '', '', '', '', '', '', '', ''
+    ];
+
+    // Convertir array de objetos a array de arrays preservando el orden de keys
+    const dataRows = filas.map(row => Object.values(row));
+
+    const aoa = [headerRow1, headerRow2, ...dataRows];
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+    // ═══════ MERGES DEL HEADER ═══════
+    // INDICADORES: merge horizontal en row 0, cols 3-10
+    merges.push({ s: { r: 0, c: 3 }, e: { r: 0, c: 10 } });
+    // Headers verticales (rowspan 2): todas las columnas excepto 3-10
+    [0, 1, 2, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].forEach(col => {
+        merges.push({ s: { r: 0, c: col }, e: { r: 1, c: col } });
+    });
+
+    ws['!merges'] = merges;
+
+
+    const COLOR_OSCURO = '183452';  // th-oscuro
+    const COLOR_MEDIO  = '62a0cf';  // th-medio
+    const COLOR_CLARO  = '62a0cf';  // th-claro
+
+    const styleHeader = (color) => ({
+        font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 10 },
+        fill: { fgColor: { rgb: color } },
+        alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+        border: {
+            top:    { style: 'thin', color: { rgb: 'FFFFFF' } },
+            bottom: { style: 'thin', color: { rgb: 'FFFFFF' } },
+            left:   { style: 'thin', color: { rgb: 'FFFFFF' } },
+            right:  { style: 'thin', color: { rgb: 'FFFFFF' } },
+        },
+    });
+
+    const styleData = {
+        alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+        border: {
+            top:    { style: 'thin', color: { rgb: 'D1D5DB' } },
+            bottom: { style: 'thin', color: { rgb: 'D1D5DB' } },
+            left:   { style: 'thin', color: { rgb: 'D1D5DB' } },
+            right:  { style: 'thin', color: { rgb: 'D1D5DB' } },
+        },
+    };
+
+    // Color por columna del header top (row 0)
+    const colorPorColumna = {
+        0: COLOR_OSCURO, 1: COLOR_OSCURO, 2: COLOR_OSCURO,                  // Filial/Nivel/Participante
+        3: COLOR_OSCURO, 4: COLOR_OSCURO, 5: COLOR_OSCURO, 6: COLOR_OSCURO, // INDICADORES (merged)
+        7: COLOR_OSCURO, 8: COLOR_OSCURO, 9: COLOR_OSCURO, 10: COLOR_OSCURO,
+        11: COLOR_OSCURO,                                                     // Valor Indic.
+        12: COLOR_MEDIO, 13: COLOR_MEDIO, 14: COLOR_MEDIO,                  // 5 competencias
+        15: COLOR_MEDIO, 16: COLOR_MEDIO,
+        17: COLOR_OSCURO, 18: COLOR_OSCURO, 19: COLOR_OSCURO, 20: COLOR_OSCURO, // Eval/Total/Clasif/Status
+    };
+
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let R = range.s.r; R <= range.e.r; R++) {
+        for (let C = range.s.c; C <= range.e.c; C++) {
+            const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+            if (!ws[cellRef]) ws[cellRef] = { t: 's', v: '' };
+
+            if (R === 0) {
+                ws[cellRef].s = styleHeader(colorPorColumna[C] || COLOR_OSCURO);
+            } else if (R === 1) {
+                // Sub-header: cols 3-10 = claro; resto hereda el color de su top (oculto por merge)
+                ws[cellRef].s = (C >= 3 && C <= 10)
+                    ? styleHeader(COLOR_CLARO)
+                    : styleHeader(colorPorColumna[C] || COLOR_OSCURO);
+            } else {
+                ws[cellRef].s = styleData;
+            }
+        }
+    }
+
+    ws['!cols'] = [
+        { wch: 14 }, { wch: 8 },  { wch: 24 },
+        { wch: 28 }, { wch: 10 }, { wch: 8 },
+        { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 12 },
+        { wch: 12 },
+        { wch: 16 }, { wch: 16 }, { wch: 18 }, { wch: 12 }, { wch: 16 },
+        { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 16 },
+    ];
+
+    ws['!rows'] = [
+        { hpt: 32 },  // header row 1
+        { hpt: 30 },  // header row 2
+    ];
+
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Reporte GDD');
-    XLSX.writeFile(wb, 'Reporte_GDD.xlsx');
+
+    const hoy = new Date();
+    const fecha = `${String(hoy.getDate()).padStart(2, '0')}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${hoy.getFullYear()}`;
+    XLSX.writeFile(wb, `Reporte_GDD_${fecha}.xlsx`);
 }
 
 async function sincronizarResultados() {

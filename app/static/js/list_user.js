@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const spanCantidadRetroalimentacionIncopmpleta = document.querySelector('.spanCantidadRetroalimentacionIncopmpleta');
 
 
-    const retroalimentacionFilterButtons = document.querySelectorAll('.evaluacion-filter-button');
+    const retroalimentacionFilterButtons = document.querySelectorAll('.retroalimentacion-filter-button');
     const botonDropDownRetroalimentacion = document.getElementById('dropdown-status-button-retroalimentacion');
     
     
@@ -321,7 +321,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Event listeners para filtro de retroalimentación
     retroalimentacionFilterButtons.forEach(button => {
         button.addEventListener('click', function () {
-            valorRetroalimentacionSeleccionada = this.getAttribute('data-status-evaluacion-button');
+            valorRetroalimentacionSeleccionada = this.getAttribute('data-status-retroalimentacion-button');
             if (botonDropDownRetroalimentacion) {
                 botonDropDownRetroalimentacion.innerHTML = `${this.textContent.trim()} <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>`;
             }
