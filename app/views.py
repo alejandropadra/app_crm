@@ -2969,59 +2969,87 @@ def consultar_nivel():
 FICHAS_EXCLUIDAS = [3141, 2937, 3104]
 
 
-
-@page.route('/app_crm/reenviar_sap', methods= ['GET'])
+@page.route('/app_crm/reenviar_sap', methods=['GET'])
+@login_required
 def reenviar_sap():
-    """ESTA ES UNA FUNCION AUXILIAR POR SI EL ENVIO A SAP NO FUNCIONA, ESTE ENVIA LOS DATOS QUE ESTAN EN RESULTADOS_FINALESSS 
-    OSEA QUE NO CALCULA NADA SOLO ENVIA A SAP SIN IMPORTAR QUE EN LA COLUMNA ENVIADO_SAP ESTE EN TRUE O FALSE,
-    SOLO ENVIA LOS DATOS QUE ESTAN EN RESULTADOS FINALES"""
-    succes= False
-    usuario = User.get_all()
-    omitidos = 0
-    exitosos=0
-    usuaios_omitidos = []
-    
-    sap_exitoso = False
+    """
+    Reenvía a SAP los datos ya calculados en resultados_finales.
+    No recalcula nada, solo toma lo que está en la tabla y lo envía.
+    Ignora la columna enviado_sap (fuerza reenvío).
+    Requiere nivel admin.
+    """
+    if current_user.nivel_usuario not in ('admin', 'Administrador'):
+        return jsonify({'error': 'No autorizado'}), 403
+
     config = Configuracion.get_data()
     año_fiscal = config.año_fiscal
-    for user in usuario:
-        if user.ficha in FICHAS_EXCLUIDAS:
+
+    # Manejar formato dual AF26 / 20252026
+    formatos_busqueda = [año_fiscal]
+    if año_fiscal.startswith("AF"):
+        año_num = int(año_fiscal[2:])
+        formatos_busqueda.append(f"20{año_num-1}20{año_num:02d}")
+    else:
+        formatos_busqueda.append(f"AF{año_fiscal[6:8]}")
+
+    if año_fiscal.startswith("AF"):
+        año_convertido = "20" + año_fiscal[2:]
+    else:
+        año_convertido = año_fiscal
+
+    # Consultar directamente desde resultados_finales en lugar de iterar todos los User
+    todos_resultados = ResultadoFinal.query.filter(
+        ResultadoFinal.año_fiscal.in_(formatos_busqueda)
+    ).all()
+
+    omitidos = 0
+    exitosos = 0
+    fallidos = 0
+    usuarios_omitidos = []
+    detalle_fallidos = []
+
+    for resultado in todos_resultados:
+        ficha = resultado.ficha_usuario
+
+        if ficha in FICHAS_EXCLUIDAS:
             omitidos += 1
-            usuaios_omitidos.append(user.ficha)
+            usuarios_omitidos.append(ficha)
             continue
 
-        ficha_participante = user.ficha
-        ficha_participante = str(user.ficha)
-        resultados = ResultadoFinal.get_by_ficha_year_fiscal(ficha_usuario=ficha_participante, año_fiscal=año_fiscal)
-        if not resultados:
-            continue
-        if año_fiscal.startswith("AF"):
-            año_convertido = "20" + año_fiscal[2:]
-        else:
-            año_convertido = año_fiscal
-        #valor_ind, valor_eval, valor_total):
+        ficha_str = str(ficha)
+
         resp = enviar_resultados(
-            ficha_participante,
+            ficha_str,
             año_convertido,
-            str(int(resultados.total_indicadores)),
-            str(int(resultados.total_competencias)),
-            str(int(resultados.total_final))
+            str(int(resultado.total_indicadores)),
+            str(int(resultado.total_competencias)),
+            str(int(resultado.total_final))
         )
-        print(f"Respuesta SAP: {resp}")
-        sap_exitoso = resp.get('success', False)
-        if sap_exitoso:
+
+        if resp.get('success', False):
             exitosos += 1
-        print(f"Envío a SAP : {sap_exitoso}")
+        else:
+            fallidos += 1
+            detalle_fallidos.append({
+                'ficha': ficha,
+                'error': resp.get('error', 'desconocido')
+            })
+
+        print(f"Ficha {ficha_str} → {'OK' if resp.get('success') else 'FAIL'} | ind={resultado.total_indicadores} comp={resultado.total_competencias} total={resultado.total_final}")
 
     return jsonify({
-        "success": succes, 
-        "message": "ta funcionando compai",
-        "omitidos": omitidos,
-        "usuarios_omitidos": usuaios_omitidos,
-        "sap_exitoso": sap_exitoso,
-        "exitosos": exitosos
-
-        }), 200
+        "success": fallidos == 0,
+        "año_fiscal": año_fiscal,
+        "año_convertido_sap": año_convertido,
+        "resumen": {
+            "total_procesados": len(todos_resultados),
+            "exitosos": exitosos,
+            "fallidos": fallidos,
+            "omitidos": omitidos
+        },
+        "usuarios_omitidos": usuarios_omitidos,
+        "detalle_fallidos": detalle_fallidos
+    }), 200
 
 @page.route('/app_crm/inicializar_resultados/<year_fiscal>', methods=['GET'])
 @login_required
