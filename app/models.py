@@ -1558,6 +1558,13 @@ class ResultadoFinal(db.Model):
             return 'FP+'
         else:
             return 'O'
+        
+    @classmethod
+    def get_by_ficha_year_fiscal(cls, ficha_usuario, año_fiscal):
+        """
+        Busca los resultados por su ficha y año fiscal.
+        """
+        return cls.query.filter_by(ficha_usuario=ficha_usuario, año_fiscal=año_fiscal).first()
 
     @classmethod
     def guardar(cls, ficha_usuario, año_fiscal, total_competencias, total_indicadores, total_final, filial=None, nivel=None, enviado_sap=False):

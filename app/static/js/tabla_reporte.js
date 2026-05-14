@@ -405,23 +405,12 @@ function exportarExcel() {
         'Desarrollo Equipo':         p.competencias?.[4] || '',
     });
 
-    const compsVacias = {
-        'Demostración Valores':      '',
-        'Foco en Resultados':        '',
-        'Influencia Organizacional': '',
-        'Liderazgo':                 '',
-        'Desarrollo Equipo':         '',
-    };
-
-    // Años dinámicos (igual que en el HTML, leídos del primer registro)
     const añoAnterior = DATOS[0]?.año_anterior || '';
     const añoActual   = DATOS[0]?.año_fiscal   || '';
 
     const filas  = [];
     const merges = [];
-
-    // El header ahora ocupa 2 filas, así que la data empieza en la fila 2 (0-indexed)
-    let rowIndex = 2;
+    let rowIndex = 2; // header ocupa filas 0 y 1
 
     datos.forEach(p => {
         const n        = p.indicadores.length || 1;
@@ -444,9 +433,9 @@ function exportarExcel() {
         } else {
             p.indicadores.forEach((ind, i) => {
                 filas.push({
-                    'Filial':        i === 0 ? p.filial : '',
-                    'Nivel':         i === 0 ? p.nivel : '',
-                    'Participante':  i === 0 ? p.nombre : '',
+                    'Filial':        p.filial,
+                    'Nivel':         p.nivel,
+                    'Participante':  p.nombre,
                     'Indicador':     ind.nombre,
                     'Tendencia':     ind.tendencia,
                     'Peso':          ind.peso + '%',
@@ -455,12 +444,12 @@ function exportarExcel() {
                     'Real_actual':   fmtValor(ind.real_af_actual),
                     'Cumplimiento':  ind.cumplimiento + '%',
                     'Desempeño':     ind.desempeno,
-                    'Valor Indic.':  i === 0 ? p.valor_indicadores : '',
-                    ...(i === 0 ? getComps(p) : compsVacias),
-                    'Valor Eval.':   i === 0 ? p.valor_evaluacion : '',
-                    'Valor Total':   i === 0 ? p.valor_total : '',
-                    'Clasificación': i === 0 ? (p.valor_clasificacion || '') : '',
-                    'Status':        i === 0 ? p.status : '',
+                    'Valor Indic.':  p.valor_indicadores,
+                    ...getComps(p),
+                    'Valor Eval.':   p.valor_evaluacion,
+                    'Valor Total':   p.valor_total,
+                    'Clasificación': p.valor_clasificacion || '',
+                    'Status':        p.status,
                 });
             });
         }
@@ -478,7 +467,7 @@ function exportarExcel() {
     // ═══════ HEADER PERSONALIZADO (2 filas) ═══════
     const headerRow1 = [
         'FILIAL', 'NIVEL', 'PARTICIPANTE',
-        'INDICADORES', '', '', '', '', '', '', '',  // INDICADORES spans cols 3-10
+        'INDICADORES', '', '', '', '', '', '', '',
         'VALOR\nINDIC.',
         'DEMOSTRACIÓN\nVALORES', 'FOCO EN\nRESULTADOS', 'INFLUENCIA\nORGANIZACIONAL', 'LIDERAZGO', 'DESARROLLO\nEQUIPO',
         'VALOR\nEVAL.', 'VALOR\nTOTAL', 'CLASIF.', 'STATUS'
@@ -492,26 +481,22 @@ function exportarExcel() {
         '', '', '', '', '', '', '', '', '', ''
     ];
 
-    // Convertir array de objetos a array de arrays preservando el orden de keys
     const dataRows = filas.map(row => Object.values(row));
-
     const aoa = [headerRow1, headerRow2, ...dataRows];
     const ws = XLSX.utils.aoa_to_sheet(aoa);
 
     // ═══════ MERGES DEL HEADER ═══════
-    // INDICADORES: merge horizontal en row 0, cols 3-10
     merges.push({ s: { r: 0, c: 3 }, e: { r: 0, c: 10 } });
-    // Headers verticales (rowspan 2): todas las columnas excepto 3-10
     [0, 1, 2, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].forEach(col => {
         merges.push({ s: { r: 0, c: col }, e: { r: 1, c: col } });
     });
 
     ws['!merges'] = merges;
 
-
-    const COLOR_OSCURO = '183452';  // th-oscuro
-    const COLOR_MEDIO  = '62a0cf';  // th-medio
-    const COLOR_CLARO  = '62a0cf';  // th-claro
+    // ═══════ ESTILOS ═══════
+    const COLOR_OSCURO = '1E2A5C';
+    const COLOR_MEDIO  = '2E4A8C';
+    const COLOR_CLARO  = '4A6CB0';
 
     const styleHeader = (color) => ({
         font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 10 },
@@ -535,15 +520,14 @@ function exportarExcel() {
         },
     };
 
-    // Color por columna del header top (row 0)
     const colorPorColumna = {
-        0: COLOR_OSCURO, 1: COLOR_OSCURO, 2: COLOR_OSCURO,                  // Filial/Nivel/Participante
-        3: COLOR_OSCURO, 4: COLOR_OSCURO, 5: COLOR_OSCURO, 6: COLOR_OSCURO, // INDICADORES (merged)
+        0: COLOR_OSCURO, 1: COLOR_OSCURO, 2: COLOR_OSCURO,
+        3: COLOR_OSCURO, 4: COLOR_OSCURO, 5: COLOR_OSCURO, 6: COLOR_OSCURO,
         7: COLOR_OSCURO, 8: COLOR_OSCURO, 9: COLOR_OSCURO, 10: COLOR_OSCURO,
-        11: COLOR_OSCURO,                                                     // Valor Indic.
-        12: COLOR_MEDIO, 13: COLOR_MEDIO, 14: COLOR_MEDIO,                  // 5 competencias
+        11: COLOR_OSCURO,
+        12: COLOR_MEDIO, 13: COLOR_MEDIO, 14: COLOR_MEDIO,
         15: COLOR_MEDIO, 16: COLOR_MEDIO,
-        17: COLOR_OSCURO, 18: COLOR_OSCURO, 19: COLOR_OSCURO, 20: COLOR_OSCURO, // Eval/Total/Clasif/Status
+        17: COLOR_OSCURO, 18: COLOR_OSCURO, 19: COLOR_OSCURO, 20: COLOR_OSCURO,
     };
 
     const range = XLSX.utils.decode_range(ws['!ref']);
@@ -555,7 +539,6 @@ function exportarExcel() {
             if (R === 0) {
                 ws[cellRef].s = styleHeader(colorPorColumna[C] || COLOR_OSCURO);
             } else if (R === 1) {
-                // Sub-header: cols 3-10 = claro; resto hereda el color de su top (oculto por merge)
                 ws[cellRef].s = (C >= 3 && C <= 10)
                     ? styleHeader(COLOR_CLARO)
                     : styleHeader(colorPorColumna[C] || COLOR_OSCURO);
@@ -564,6 +547,11 @@ function exportarExcel() {
             }
         }
     }
+
+    // ═══════ AUTOFILTER en la fila 2 (sub-header con nombres operativos) ═══════
+    const totalRows = filas.length + 2; // +2 por las 2 filas de header
+    const ultimaCol = XLSX.utils.encode_col(20); // columna U (índice 20)
+    ws['!autofilter'] = { ref: `A2:${ultimaCol}${totalRows}` };
 
     ws['!cols'] = [
         { wch: 14 }, { wch: 8 },  { wch: 24 },
@@ -575,8 +563,8 @@ function exportarExcel() {
     ];
 
     ws['!rows'] = [
-        { hpt: 32 },  // header row 1
-        { hpt: 30 },  // header row 2
+        { hpt: 32 },
+        { hpt: 30 },
     ];
 
     const wb = XLSX.utils.book_new();

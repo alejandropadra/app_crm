@@ -956,8 +956,6 @@ def funcion_verificacion_enviar(usuario, año_fiscal):
     """
     SOLO envía a SAP si el flujo completo pasa validación.
     
-    Disparada desde POST /Retroalimentacion cuando alguien guarda comentarios.
-    
     Retorna True si envió a SAP, False si solo actualizó localmente.
     """
     ficha_participante = usuario[0]['pernr'].lstrip('0')
@@ -966,7 +964,6 @@ def funcion_verificacion_enviar(usuario, año_fiscal):
         User.get_by_ficha(ficha_participante).filial if User.get_by_ficha(ficha_participante) else 'N/A'
     )
     
-    # 1: Calcular valores actuales (aunque el flujo esté incompleto) 
     formatos_año = [año_fiscal]
     if año_fiscal.startswith("AF"):
         año_num = int(año_fiscal[2:])
@@ -1007,7 +1004,8 @@ def funcion_verificacion_enviar(usuario, año_fiscal):
         nivel_usuario=nivel_usuario
     )
     
-    #  3: Si cumple todo, enviar a SAP 
+    
+    #  Si cumple todo, enviar a SAP 
     sap_exitoso = False
     if validacion['completo']:
         print('Flujo completo → enviando a SAP...')
@@ -1016,7 +1014,7 @@ def funcion_verificacion_enviar(usuario, año_fiscal):
             año_convertido = "20" + año_fiscal[2:]
         else:
             año_convertido = año_fiscal
-        
+
         resp = enviar_resultados(
             ficha_participante,
             año_convertido,
@@ -1029,8 +1027,6 @@ def funcion_verificacion_enviar(usuario, año_fiscal):
     else:
         print(f"Flujo incompleto: {validacion['motivo']} → solo guardando local")
     
-    #  4: SIEMPRE guardar en resultados_finales 
-    # (así la tabla reporte siempre refleja los valores parciales actuales)
     ResultadoFinal.guardar(
         ficha_usuario      = ficha_participante,
         año_fiscal         = año_fiscal,
@@ -1042,7 +1038,12 @@ def funcion_verificacion_enviar(usuario, año_fiscal):
         enviado_sap        = sap_exitoso
     )
     
-    return sap_exitoso
+    return jsonify({
+        'sap_exitoso': sap_exitoso,
+        'safe_cumplimiento': safe_cumplimiento,
+        'safe_desempeño': safe_desempeño,
+        'total_final': total_final,
+    })
 
 
 @page.route("/app_crm/gdd/menu", methods=['GET'] )
@@ -1057,9 +1058,7 @@ def menu():
     etapa_general = variables_configuracion_global.etapa_actual
     etapa_general = int(etapa_general)
     año_fiscal = variables_configuracion_global.año_fiscal
-    """enviar_datos = funcion_verificacion_enviar(rest, año_fiscal)
-    if enviar_datos:
-        print('se puede enviar datos')"""
+
         
         
     
@@ -1298,7 +1297,7 @@ def enviar_resultados(ficha_usuario, año_fiscal, valor_ind, valor_eval, valor_t
     if not año_fiscal or len(año_fiscal) != 4:
         return {"success": False, "error": "Año fiscal debe tener 4 dígitos"}
     
-    sap_url = f"http://10.207.4.68:8000/sap/bc/zhr_rest/zhrgest_recibir?sap-client=510&FICHA=0000{ficha_usuario}"
+    sap_url = f"http://10.207.4.66:8000/sap/bc/zhr_rest/zhrgest_recibir?sap-client=510&FICHA=0000{ficha_usuario}"
     
     payload = [{
         "pernr": f"0000{ficha_usuario}", 
@@ -2963,7 +2962,66 @@ def archivo(nombre_archivo):
 def consultar_nivel():
     rest= participantes_gdd()
     return jsonify(rest)
+
+
+
+
 FICHAS_EXCLUIDAS = [3141, 2937, 3104]
+
+
+
+@page.route('/app_crm/reenviar_sap', methods= ['GET'])
+def reenviar_sap():
+    """ESTA ES UNA FUNCION AUXILIAR POR SI EL ENVIO A SAP NO FUNCIONA, ESTE ENVIA LOS DATOS QUE ESTAN EN RESULTADOS_FINALESSS 
+    OSEA QUE NO CALCULA NADA SOLO ENVIA A SAP SIN IMPORTAR QUE EN LA COLUMNA ENVIADO_SAP ESTE EN TRUE O FALSE,
+    SOLO ENVIA LOS DATOS QUE ESTAN EN RESULTADOS FINALES"""
+    succes= False
+    usuario = User.get_all()
+    omitidos = 0
+    exitosos=0
+    usuaios_omitidos = []
+    
+    sap_exitoso = False
+    config = Configuracion.get_data()
+    año_fiscal = config.año_fiscal
+    for user in usuario:
+        if user.ficha in FICHAS_EXCLUIDAS:
+            omitidos += 1
+            usuaios_omitidos.append(user.ficha)
+            continue
+
+        ficha_participante = user.ficha
+        ficha_participante = str(user.ficha)
+        resultados = ResultadoFinal.get_by_ficha_year_fiscal(ficha_usuario=ficha_participante, año_fiscal=año_fiscal)
+        if not resultados:
+            continue
+        if año_fiscal.startswith("AF"):
+            año_convertido = "20" + año_fiscal[2:]
+        else:
+            año_convertido = año_fiscal
+        #valor_ind, valor_eval, valor_total):
+        resp = enviar_resultados(
+            ficha_participante,
+            año_convertido,
+            str(int(resultados.total_indicadores)),
+            str(int(resultados.total_competencias)),
+            str(int(resultados.total_final))
+        )
+        print(f"Respuesta SAP: {resp}")
+        sap_exitoso = resp.get('success', False)
+        if sap_exitoso:
+            exitosos += 1
+        print(f"Envío a SAP : {sap_exitoso}")
+
+    return jsonify({
+        "success": succes, 
+        "message": "ta funcionando compai",
+        "omitidos": omitidos,
+        "usuarios_omitidos": usuaios_omitidos,
+        "sap_exitoso": sap_exitoso,
+        "exitosos": exitosos
+
+        }), 200
 
 @page.route('/app_crm/inicializar_resultados/<year_fiscal>', methods=['GET'])
 @login_required
