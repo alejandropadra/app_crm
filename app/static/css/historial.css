@@ -1,0 +1,77 @@
+.hgdd-card {
+    border-radius: 22px;
+    padding: 28px 30px;
+    min-height: 200px;
+    position: relative;
+    overflow: hidden;
+    display: block;
+    transition: transform .2s ease, box-shadow .2s ease;
+    box-shadow: 0 1px 2px rgba(16,24,40,.04), 0 8px 24px -8px rgba(16,24,40,.08);
+    border: solid 1px var(--border-light);
+}
+
+.hgdd-card::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 5px;
+    background: var(--card-accent);
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
+}
+
+.hgdd-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 2px 4px rgba(16,24,40,.05), 0 18px 34px -14px rgba(16,24,40,.20);
+}
+
+.hgdd-card:hover .hgdd-ir { transform: translateX(4px); }
+
+.hgdd-ir { transition: transform .2s ease; }
+
+.hgdd-eyebrow {
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #6B7280;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.page-header .icon-wrap {
+    background: var(--azul-dark);
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+
+.card-theme-0 { background: #FAF7EC; --card-accent: #4FB477; --card-num: #0B3D20; }
+.card-theme-1 { background: #D8E7F5; --card-accent: #5B8FCF; --card-num: #1B3556; }
+.card-theme-2 { background: #E5DDF2; --card-accent: #8E78C8; --card-num: #3D2E63; }
+.card-theme-3 { background: #E2F3DD; --card-accent: #388A57; --card-num: #143E22; }
+
+
+.hgdd-card .card-num { color: var(--card-num); }
+.hgdd-card .hgdd-ir  { color: var(--card-num); }
+
+/* ── Badges por clasificación ── */
+.badge { padding: 2px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; }
+
+.badge-fp-plus { background: #C8F0D6; color: #1A6B35; }   
+.badge-fp      { background: #E5E7EB; color: #4B5563; }   
+.badge-fp-minus{ background: #FEF3C7; color: #92400E; }   
+.badge-o       { background: #DBEAFE; color: #1E40AF; }   
+.badge-up      { background: #FEE2E2; color: #991B1B; }   
+.badge-default { background: #E5E7EB; color: #6B7280; }

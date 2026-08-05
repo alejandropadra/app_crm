@@ -1,0 +1,105 @@
+{% extends 'layout.html' %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename = 'css/historial.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<div class="page-header opado">
+    <button onclick="window.history.back()" class=" bg-slate-600 flex justify-center  w-10 h-10 rounded-[50%] items-center text-white hover:bg-slate-400 p-4  outline-none focus:outline-none ease-linear transition-all duration-150" type="button">
+        <span class="">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        </span>
+    </button>
+    <div class="icon-wrap">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>
+    </div>
+    
+    <div>
+        <h2 style="font-size:20px; margin:0;">Mi Historial GDD</h2>
+        <p class="small">Consulta tus resultados por año fiscal</p>
+    </div>
+</div>
+
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6 opado">
+    {% if historial %}
+
+        {% for r in historial %}
+
+            {% set tema_idx = loop.index0 % 4 %}
+
+            {# ── Clase de badge según clasificación ── #}
+            {% if r.clasificacion == 'O'%}
+                {% set badge_class = 'badge-o'%}
+            {% elif r.clasificacion == 'FP+'%}
+                {% set badge_class = 'badge-fp-plus'%}
+            {% elif r.clasificacion == 'FP'%}
+                {% set badge_class = 'badge-fp'%}
+            {% elif r.clasificacion in ['FP-', 'FP–'] %}
+                {% set badge_class = 'badge-fp-minus' %}
+            {% elif r.clasificacion == 'UP'%}
+                {% set badge_class = 'badge-up'%}
+            {% else %}
+                {% set badge_class = 'badge-default'%}
+            {% endif %}
+
+            {# ── Tarjeta ─────────────────────────────────────────────── #}
+            <a href="{{ url_for('.historial_detalle', ficha_get=current_user.ficha, year_fiscal_ver=r.año_fiscal) }}" class=" opado hgdd-card card-theme-{{ tema_idx }}">
+                <p class="hgdd-eyebrow">
+                    Año Fiscal{% if loop.first %} · Actual{% endif %}
+                </p>
+
+                <h3 class="text-[28px] font-extrabold leading-none tracking-tight mt-1">
+                    {{ r.año_fiscal }}
+                </h3>
+
+                <div class="mt-5">
+                    <div class="card-num text-[44px] font-extrabold leading-none">
+                        {{ r.total_final | int }}%
+                    </div>
+                    <p class="text-[12px] mt-1" style="color: #6B7280;">
+                        Resultado final
+                    </p>
+                </div>
+
+                <div class="mt-3 flex items-center gap-2 flex-wrap">
+                    <span class="badge {{ badge_class }}">
+                        {{ r.clasificacion }}
+                    </span>
+                    {% if r.enviado_sap %}
+                        <span class="text-[11px] font-medium" style="color: #6B7280;">
+                        SAP ✓
+                        </span>
+                    {% endif %}
+                </div>
+
+                <span class="hgdd-ir absolute bottom-5 right-6">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14"/>
+                        <path d="m12 5 7 7-7 7"/>
+                    </svg>
+                </span>
+            </a>
+        {% endfor %}
+    {% else %}
+        {# Empty state cuando no hay registros #}
+        <div class="col-span-full flex flex-col items-center justify-center
+                    py-16 rounded-2xl border border-dashed border-gray-200">
+            <svg class="mb-3 opacity-30" width="40" height="40" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                <line x1="7" y1="7" x2="7.01" y2="7"/>
+            </svg>
+            <p class="text-[14px] text-gray-400">
+                Aún no tienes evaluaciones registradas.
+            </p>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

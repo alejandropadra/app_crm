@@ -150,6 +150,32 @@
                 </form>
             </div>
 
+            <!-- Filtro por Año Fiscal -->
+            <div class="col-span-1 relative flex items-center">
+                <div class="flex items-center justify-between w-full">
+                    <button id="dropdown-button-af" data-dropdown-toggle="dropdown-search-af" 
+                        class="rounded-xl w-full shrink-0 z-10 inline-flex items-center justify-between py-2.5 px-4 text-sm font-medium text-center text-gray-500 border border-gray-300 bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
+                        {{ año_fiscal_seleccionado or 'Año Fiscal' }}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                </div>
+
+                <div id="dropdown-search-af" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700">
+                    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
+                        {% for af in años_disponibles %}
+                        <li>
+                            <button type="button" 
+                                data-af="{{ af }}"
+                                class="af-filter-btn inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 
+                                    {% if af == año_fiscal_seleccionado %}bg-blue-50 font-semibold{% endif %}">
+                                {{ af }}
+                            </button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
         </div>
 
     </div>
@@ -161,8 +187,7 @@
                 {%set resultado_autocompletar = consultar_cargo(participante['pernr'].lstrip('0'))%}
             {%endif%}
                 {% set indicadores = obtener_indicador_usuario(participante['pernr'].lstrip('0'))%}
-                <a href="{{ url_for('.gestion_equipo_detalles', ficha_get=(participante['pernr'].lstrip('0'))) }}" class="flex flex-col col-span-3 2xl:col-span-2  p-2 bg-white shadow-custom rounded-2xl hover:bg-slate-200 relative  cursor-pointer " >
-
+                <a href="{{ url_for('.gestion_equipo_detalles', ficha_get=(participante['pernr'].lstrip('0')), year_fiscal=año_fiscal_seleccionado) }}" class="opado flex flex-col col-span-3 2xl:col-span-2 p-2 bg-white shadow-custom rounded-2xl hover:bg-slate-200 relative cursor-pointer">
 
                     <div class=" p-3 gap-3 flex">
                         <div class="w-[27%] aspect-square flex justify-center items-center">

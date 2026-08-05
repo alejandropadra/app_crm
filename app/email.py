@@ -163,12 +163,12 @@ def cambio_clave(usuario, nueva_clave):
 
 # EN ESTAS FUNCIONES SON LOS CORREOS MASIVOS
 ##↓EN ESTA FUNCION ACUERDATE DE PASAR LITERALMENTE LA VARIABLE TEXTO AL JINJA↓
-async def inicio_gdd(users, texto):
+async def inicio_gdd(users, texto, año_fiscal):
     """Notificación masiva de inicio de periodo"""
     if isinstance(users, list):
-        return await enviar_correo_masivo_async(users, "Inicio de periodo de carga de indicadores funcionales", "email/inicio_gdd.html", tipo_correo='Inicio_GDD', texto=texto)
+        return await enviar_correo_masivo_async(users, "Inicio de periodo de carga de indicadores funcionales", "email/inicio_gdd.html", tipo_correo='Inicio_GDD', texto=texto, año_fiscal=año_fiscal)
     else:
-        return await enviar_correo_masivo_async([users], "Inicio de periodo de carga de indicadores funcionales", "email/inicio_gdd.html", tipo_correo='Inicio_GDD', texto=texto)
+        return await enviar_correo_masivo_async([users], "Inicio de periodo de carga de indicadores funcionales", "email/inicio_gdd.html", tipo_correo='Inicio_GDD', texto=texto, año_fiscal=año_fiscal)
 
 async def cierre_gdd(users, texto):
     """Notificación masiva de cierre de periodo"""

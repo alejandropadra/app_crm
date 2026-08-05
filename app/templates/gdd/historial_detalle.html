@@ -1,0 +1,359 @@
+{% extends 'layout.html' %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename = 'css/historial.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<div class="page-header opado">
+    <button onclick="window.history.back()" class=" bg-slate-600 flex justify-center  w-10 h-10 rounded-[50%] items-center text-white hover:bg-slate-400 p-4  outline-none focus:outline-none ease-linear transition-all duration-150" type="button">
+        <span class="">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        </span>
+    </button>
+    <div class="icon-wrap">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-clock-icon lucide-folder-clock"><path d="M16 14v2.2l1.6 1"/><path d="M7 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2"/><circle cx="16" cy="16" r="6"/></svg>
+    </div>
+    
+    <div>
+        <h2 style="font-size:20px; margin:0;">Mi Historial GDD -> {{ año_fiscal_ver }}</h2>
+        <p class="small">Consulta tus resultados por año fiscal</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 mb-5">
+    {% include "components/tarjeta_perfil.html" %}
+</div>
+
+
+<div class="bg-white opado p-5 rounded-[20px] shadow-custom " id="tarjetaprincipalgdi" >
+
+    <div class="rounded-t mb-0 px-4 py-3 border-0 flex flex-col sm:flex-row justify-between items-center gap-3">
+        <!-- Contenedor del título con flex-grow para ocupar el espacio a la izquierda -->
+        <div class="relative px-0 md:px-4 flex-grow flex gap-5">
+            <h3 class="text-left opado">  Resultado de Indicadores Funcionales del año fiscal {{ año_fiscal_ver }} </h3>
+
+        </div>
+    </div>
+    
+    <div class="opado relative overflow-x-auto border border-gray-200 dark:border-gray-700 md:rounded-xl" id="contenedor-table">
+        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 divide-y divide-gray-200" id="indicadorTable">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3 min-w-[300px] max-w-[280px] break-words whitespace-normal " id="indicadorAyuda">
+                        Indicadores
+                    </th>
+                    <th scope="col" class="px-6 py-3 min-w-[70px] max-w-[280px] text-center" id="tendenciaIndicador">
+                        Tendencia
+                    </th>
+                    <th scope="col" class="px-6 py-3 min-w-[100px] max-w-[280px] text-center" id="pesoIndicador">
+                        Peso
+                    </th>
+                    <th scope="col" class="px-6 py-3  min-w-[120px] max-w-[280px] text-center" id="realafIndicador">
+                        Real AF25
+                    </th>
+                    <th scope="col" class="px-6 py-3 min-w-[160px] max-w-[280px] text-center" id="objetivoAFIndicador">
+                        PPTO U OBJETIVO AF26
+                    </th>
+                    <th scope="col" class="px-6 py-3 min-w-[160px] max-w-[280px] text-center" id="REAlAFAyuda">
+                        REAL AF26
+                    </th>
+                    <th scope="col" class="px-6 py-3 min-w-[100px] max-w-[280px] text-center" id="cumplimientoIndicador">
+                        Cumplimiento
+                    </th>
+                    <th scope="col" class="px-6 py-3 min-w-[100px] max-w-[280px] text-center" id="desempeñoIndicador">
+                        Desempeño
+                    </th>
+                    <th scope="col" class="px-6 py-3 min-w-[120px] max-w-[280px] text-center" id="estatusIndicador">
+                        Estatus
+                    </th>
+                    <th scope="col" class="px-6 py-3 min-w-[120px] max-w-[280px] text-center" id="archivosAyuda">
+                        Archivos
+                    </th>
+
+                    <th class="hidden"></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for indicador in indicadores %}
+                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+    
+                    <td class="px-4 py-3 text-sm text-gray-700  text-left break-words whitespace-normal align-center">
+                        {{indicador.nombre_indicador}}
+                    </td>
+    
+                    <td class="px-6 py-4 text-sm text-gray-700 text-center">
+                        {{indicador.tendencia}}
+                    </td>
+    
+                    <td class="px-6 py-4 text-sm text-gray-700 text-center font-bold">
+                        {{indicador.peso|int}}%
+                    </td>
+    
+                    <td class="px-6 py-4 text-sm text-gray-700 text-center">
+                        {% if indicador.real_af_antes%} {{indicador.real_af_antes}} {%else%} N/A {%endif%}
+                    </td>
+    
+                    <td class="px-6 py-4 text-sm text-gray-700 text-center">
+                        {% if indicador.objetivo_af_actual%} {{indicador.objetivo_af_actual}} {%else%} N/A {%endif%}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-700 text-center">
+                        {% if indicador.real_af_actual%} {{indicador.real_af_actual}} {%elif indicador.real_af_actual == 0%} 0{%else%} N/A {%endif%}
+                    </td>
+                    <td class="px-6 py-4 text-gray-700 font-extrabold text-center">
+    
+                        {% if indicador.cumplimiento%} {{indicador.cumplimiento}}% {%else%} 0% {%endif%}
+                    </td>
+    
+                    <td class=" px-6 py-4  text-center font-bold text-[#333]">
+                        <span class="{% if indicador.desempeno == 'O'%} bg-blue-300  
+                                        {% elif indicador.desempeno == 'UP'%} bg-red-300 
+                                        {% elif indicador.desempeno == 'FP-'%} bg-yellow-300 
+                                        {% elif indicador.desempeno == 'FP'%} bg-green-300 
+                                        {% elif indicador.desempeno == 'FP+'%} bg-green-300 
+                                        {% else %} bg-slate-300 text-slate-600 {%endif%}
+                                        font-bold
+                                        p-3 rounded-2xl">{% if indicador.desempeno%} {{indicador.desempeno}} {%else%} NN {%endif%}</span>
+                    </td>
+    
+            
+
+                    <td class=" px-6 py-4  text-center relative">
+
+                        {% if indicador.status_aprobacion%}
+
+                            <span class=" p-3 rounded-xl text-center {% if indicador.status_aprobacion == 'A'%} bg-green-300  
+                                        {% elif indicador.status_aprobacion == 'R'%} bg-red-300 
+                                        {% elif indicador.status_aprobacion == 'C'%} bg-blue-300 
+                                        {%endif%} font-bold  text-[#333]" >{{indicador.status_aprobacion}}</span> 
+            
+                        {%else%}
+                            <span class=" p-3 rounded-2xl  h-full text-center font-bold text-[#333] bg-gray-400">---</span>
+                        {%endif%}
+
+
+
+                    </td>
+    
+                    <td class="p-2">
+                        <div class="flex flex-col gap-5">
+                            <div class="w-full">
+                                <!-- Botón con tooltip -->
+                                <a data-tooltip-target="tooltip-default{{loop.index0}}" href="{{ url_for('.hoja_vida', indicador=indicador.id) }}" class="p-2 w-full bg-azul-dark text-white rounded-xl" id="hojavida" aria-disabled="true">
+                                    Hoja de Vida
+                                </a>
+
+                                <div id="tooltip-default{{loop.index0}}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700" >
+                                    Ver hoja de Vida
+                                    <div class="tooltip-arrow" data-popper-arrow></div>
+                                </div>
+                                
+                            </div>
+    
+                            <div class="w-full">
+                                <!-- Botón con tooltip -->
+                                <a data-tooltip-target="tooltip-default-cr{{loop.index0}}" href="{{ url_for('.cronograma', indicador=indicador.id) }}" class="p-2 w-full bg-azul-dark text-white rounded-xl" id="cronograma">
+                                    Cronograma
+                                </a>
+                                
+                                <div id="tooltip-default-cr{{loop.index0}}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700">
+                                    Ver Cronograma
+                                    <div class="tooltip-arrow" data-popper-arrow></div>
+                                </div>
+                                
+                            </div>
+                            
+                        </div>
+                    </td>
+    
+                    <td class=" hidden">"
+                        {{indicador.id}}
+                    </td>
+    
+                </tr>
+
+                {%endfor%}
+                
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th scope="row"></th>
+                    <td></td>
+                    <td></td>
+                    <td class="pr-4 align-middle border text-xs whitespace-nowrap p-4 text-center font-bold bg-blue-200 text-[#333]" id="footerPeso">  {{ total_peso }}%</td>
+                    <td></td>
+                    <td></td>
+
+                    <td class="pr-4 align-middle border text-xs whitespace-nowrap p-4 text-center font-extrabold text-gray-700
+                    
+                            {% if total_cumplimiento < 50%}
+                                bg-blue-200 
+                            {% elif total_cumplimiento >= 50%}
+                                bg-green-300 
+                        {%endif%}" id="footerCumplimiento">{{total_cumplimiento}}%
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+
+
+<div class="tarjeta-base bg-white overflow-x-auto sombra w-full shadow-custom z-0 mt-8 flex flex-col gap-4 p-3">
+    <h3 class="opado p-3">Resultados Evaluación de Competencias — {{ año_fiscal_ver }}</h3>
+    <table class="table-auto w-full border-collapse opado">
+        <thead>
+            <tr>
+                <td class="w-1/4 px-3 bg-blueGray-50 align-middle border border-solid border-blueGray-100 py-3 text-base font-semibold text-left"></td>
+                <td class="w-1/12 px-2 align-middle border border-solid border-blueGray-100 py-3 text-base font-semibold text-left">Peso %</td>
+                <td class="w-1/6 px-2 align-middle border border-solid border-blueGray-100 py-3 text-base font-semibold text-left">Auto Evaluación</td>
+                <td class="w-1/6 px-2 align-middle border border-solid border-blueGray-100 py-3 text-base font-semibold text-left">Supervisor</td>
+                {% if usuario_dueño_evaluacion[0].nivel == 'I' %}
+                <td class="w-1/6 px-2 align-middle border border-solid border-blueGray-100 py-3 text-base font-semibold text-left">Par</td>
+                <td class="w-1/6 px-2 align-middle border border-solid border-blueGray-100 py-3 text-base font-semibold text-left">Colaborador</td>
+                {% endif %}
+                <td class="w-1/6 px-2 align-middle border border-solid border-blueGray-100 py-3 text-base font-semibold text-left">Cumplimiento</td>
+                <td class="w-1/6 px-2 align-middle border border-solid border-blueGray-100 py-3 text-base font-semibold text-left">Desempeño</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% set competencias_nombres = [
+                'Demostración Valores Corporativos',
+                'Foco en Resultados',
+                'Influencia Organizacional',
+                'Liderazgo',
+                'Desarrollo del Equipo de Trabajo'
+            ] %}
+            {% set auto_vals = [autoevaluaciones.numero_1, autoevaluaciones.numero_2, autoevaluaciones.numero_3, autoevaluaciones.numero_4, autoevaluaciones.numero_5] %}
+            {% set superv_vals = [supervisor_evaluaciones.numero_1, supervisor_evaluaciones.numero_2, supervisor_evaluaciones.numero_3, supervisor_evaluaciones.numero_4, supervisor_evaluaciones.numero_5] %}
+            {% set par_vals = [par_evaluaciones.numero_1, par_evaluaciones.numero_2, par_evaluaciones.numero_3, par_evaluaciones.numero_4, par_evaluaciones.numero_5] %}
+            {% set sub_vals = [subordinado_eval.numero_1, subordinado_eval.numero_2, subordinado_eval.numero_3, subordinado_eval.numero_4, subordinado_eval.numero_5] %}
+            {% set cumpl_vals = [cumplimientos.numero_1, cumplimientos.numero_2, cumplimientos.numero_3, cumplimientos.numero_4, cumplimientos.numero_5] %}
+            {% set desemp_vals = [desempeños.numero_1, desempeños.numero_2, desempeños.numero_3, desempeños.numero_4, desempeños.numero_5] %}
+
+            {% macro badge(val) %}
+                {% if val and val != '' %}
+                    <span class="p-3 rounded-2xl font-bold text-[#333]
+                        {% if val == 'UP' %} bg-red-300
+                        {% elif val == 'FP-' %} bg-yellow-300
+                        {% elif val == 'FP' %} bg-slate-300
+                        {% elif val == 'FP+' %} bg-green-300
+                        {% elif val == 'O' %} bg-blue-300
+                        {% endif %}">{{ val }}</span>
+                {% else %}
+                    <span class="p-3 rounded-2xl font-bold text-[#333] bg-gray-400">---</span>
+                {% endif %}
+            {% endmacro %}
+
+            {% for i in range(5) %}
+            <tr class="!h-[90px]">
+                <td class="border border-solid h-full p-0">
+                    <div class="p-4"><h4 class="font-normal text-[#000000]">{{ competencias_nombres[i] }}</h4></div>
+                </td>
+                <td class="border border-solid h-full p-0">
+                    <input type="text" class="w-full h-full p-2 border-none" value="4%" readonly>
+                </td>
+                <td class="border border-solid h-full p-0 text-center">{{ badge(auto_vals[i]) }}</td>
+                <td class="border border-solid h-full p-0 text-center">{{ badge(superv_vals[i]) }}</td>
+                {% if usuario_dueño_evaluacion[0].nivel == 'I' %}
+                <td class="border border-solid h-full p-0 text-center">{{ badge(par_vals[i]) }}</td>
+                <td class="border border-solid h-full p-0 text-center">{{ badge(sub_vals[i]) }}</td>
+                {% endif %}
+                <td class="border border-solid h-full p-0 text-center">{{ badge(cumpl_vals[i]) }}</td>
+                <td class="border border-solid h-full p-0 text-center">{{ badge(desemp_vals[i]) }}</td>
+            </tr>
+            {% endfor %}
+
+            <!-- Fila total desempeño -->
+            <tr>
+                <td></td><td></td><td></td><td></td>
+                {% if usuario_dueño_evaluacion[0].nivel == 'I' %}<td></td><td></td>{% endif %}
+                <td class="border border-solid p-0 text-center">
+                    <span class="p-3 rounded-2xl font-bold text-[#333]">{{ total_desempeño }}%</span>
+                </td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+{% set safe_desempeño = 0 if (total_desempeño is none or total_desempeño == '---' or total_desempeño == '') else total_desempeño %}
+{% set safe_cumplimiento = 0 if (total_cumplimiento is none or total_cumplimiento == '---' or total_cumplimiento == '') else total_cumplimiento %}
+{% set totalFinal = (safe_desempeño + safe_cumplimiento) | round(1) %}
+<div class="w-full flex items-center justify-end opado mt-5 p-3 gap-4">
+    <div class="bg-white shadow-custom w-auto flex items-center p-4 rounded-xl gap-3">
+        <h3>Resultado Final:</h3>
+        <div class="text-lg font-semibold
+            {% if totalFinal < 30 %} text-yellow-400
+            {% elif totalFinal < 60 %} text-green-600
+            {% else %} text-blue-600 {% endif %}">{{ totalFinal }}%</div>
+    </div>
+    <div class="bg-white shadow-custom w-auto flex items-center p-4 rounded-xl gap-3">
+        <h3>Resultado Cualitativo:</h3>
+        <div class="text-lg font-semibold text-blue-600">
+            {% if totalFinal <= 80 %}UP
+            {% elif totalFinal <= 99 %}FP-
+            {% elif totalFinal <= 109 %}FP
+            {% elif totalFinal <= 119 %}FP+
+            {% else %}O{% endif %}
+        </div>
+    </div>
+</div>
+
+
+
+<div class="tarjeta-base bg-white !shadow-custom mt-5 opado">
+    <div class="p-4">
+        <h3 class="mb-4">Retroalimentación</h3>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+            <!-- Feedback recibido -->
+            <div class="form-group-resultados col-span-2 rounded-2xl p-5 flex flex-col blanco">
+                <label class="text-sm font-bold mb-2">¿Recibió feedback de su supervisor?</label>
+                <span class="inline-flex items-center gap-2 mt-1">
+                    <span class="px-4 py-2 rounded-full font-semibold text-sm
+                        {% if retroalimentacion_resultados.feedback == 'Sí' %} bg-green-200 text-green-800
+                        {% elif retroalimentacion_resultados.feedback == 'No' %} bg-red-200 text-red-800
+                        {% else %} bg-gray-200 text-gray-600 {% endif %}">
+                        {{ retroalimentacion_resultados.feedback or '---' }}
+                    </span>
+                </span>
+            </div>
+
+            <!-- Comentario colaborador -->
+            <div class="w-full p-5 bg-blue-100 rounded-xl">
+                <div class="flex items-center mb-2 gap-2 text-[#333]">
+                    <label class="block text-sm font-bold">Observaciones del colaborador</label>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 21a8 8 0 0 1 10.821-7.487"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="8" r="5"/></svg>
+                </div>
+                <div class="bg-white w-full rounded-xl p-3 text-sm text-gray-700 min-h-[80px]">
+                    {{ retroalimentacion_resultados.comentarios_colaborador or 'Sin comentarios.' }}
+                </div>
+            </div>
+
+            <!-- Comentario supervisor -->
+            <div class="w-full p-5 bg-blue-100 rounded-xl">
+                <div class="flex items-center mb-2 gap-2 text-[#333]">
+                    <label class="block text-sm font-bold">Observaciones del Supervisor</label>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M14 15a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/><path d="M2.5 13 5 7c.7-1.3 1.4-2 3-2"/><path d="M21.5 13 19 7c-.7-1.3-1.5-2-3-2"/></svg>
+                </div>
+                <div class="bg-white w-full rounded-xl p-3 text-sm text-gray-700 min-h-[80px]">
+                    {{ retroalimentacion_resultados.comentarios_supervisor or 'Sin comentarios.' }}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+{%endblock%}

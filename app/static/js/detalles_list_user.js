@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const rutaDestino = `/app_crm/detalles_usuarios/${ficha_get}`;
 
 
+    
 
     boton_bloquear.addEventListener('click', function (event) {
         event.preventDefault();
@@ -807,7 +808,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
+function initDropdownAF() {
+    const botonDropdown = document.getElementById('boton-dropdown-af');
+    const dropdown = document.getElementById('dropdown-search-af');
+    const botonesAF = document.querySelectorAll('.af-filter-btn');
+    const fichaGet = document.getElementById('ficha_get').value;
 
+    if (!botonDropdown || !dropdown) return;
+
+    botonDropdown.addEventListener('click', function (e) {
+        e.stopPropagation();
+        dropdown.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!dropdown.contains(e.target) && !botonDropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+
+    botonesAF.forEach(boton => {
+        boton.addEventListener('click', function () {
+            const af = boton.getAttribute('data-af');
+            window.location.href = `/app_crm/detalles_usuarios/${fichaGet}/${af}`;
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    initDropdownAF();
+});
 
 
 

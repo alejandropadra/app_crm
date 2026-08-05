@@ -18,6 +18,7 @@
     --verde-succes: #04e40048;
     --azul-dark: #03162c;
     --gris-dark: #dddddd;
+    --border-light: #e8eaef;
 }
 
 .colorverde{
@@ -1297,3 +1298,7 @@ border-radius: 6px;
     transition: height 0.1s ease;
     line-height: 1.5;
 }
+
+
+#contenedor-table          { cursor: grab; }
+#contenedor-table.grabbing { cursor: grabbing; user-select: none; }

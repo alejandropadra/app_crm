@@ -1751,7 +1751,12 @@ class ResultadoFinal(db.Model):
     
         for resultado, usuario, cargo in registros:
             # ── 2. Indicadores del usuario para este año fiscal ──
-            años_equivalentes = ['AF26', '20252026'] if año_fiscal in ('AF26', '20252026') else [año_fiscal]
+            años_equivalentes = [año_fiscal]
+            if año_fiscal.startswith("AF"):
+                año_num = int(año_fiscal[2:])
+                años_equivalentes.append(f"20{año_num-1}20{año_num:02d}")
+            else:
+                años_equivalentes.append(f"AF{año_fiscal[6:8]}")
             indicadores_db = Indicadores.query.filter(
                 Indicadores.ficha_usuario == usuario.ficha,
                 Indicadores.año_fiscal.in_(años_equivalentes)

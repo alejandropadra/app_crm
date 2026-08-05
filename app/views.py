@@ -62,6 +62,12 @@ def prueba():
 
     return 'Prueba rey'
 
+
+@page.context_processor
+def inject_config():
+    config = Configuracion.get_data()
+    return dict(config_global=config)
+
 #======================================== MANEJO DE ERRORES====================================================================>
 @page.errorhandler(CSRFError)
 def handle_csrf_error(e):
@@ -541,17 +547,32 @@ def participantes():
     return render_template('/auth/list_users.html', etapa_general= etapa_general, participantes_procesados= participantes_procesados, ruta_foto_personal= ruta_foto_personal, año_fiscal= año_fiscal,  resultados_evaluacion = Evaluacion.obtener_resultados,  obtener_indicador_usuario = Indicadores.obtener_indicador_usuario,  consultar_cargo= consultar_cargo, ficha = ficha,  titulo= "participantes", participantes = participantes,usuario=usuario,rest=rest)
 
 
-@page.route("/app_crm/detalles_usuarios/<int:ficha_get>", methods=['GET','POST'])
+@page.route("/app_crm/detalles_usuarios/<int:ficha_get>", methods=['GET', 'POST'])
+@page.route("/app_crm/detalles_usuarios/<int:ficha_get>/<string:af_seleccionado>", methods=['GET', 'POST'])
 @login_required
-def detalles_usuarios(ficha_get):
+def detalles_usuarios(ficha_get, af_seleccionado=None):
     variables_configuracion_global = Configuracion.get_data()
     sin_equipo = False
     etapa_general = variables_configuracion_global.etapa_actual
     etapa_general = int(etapa_general)
-    año_fiscal = variables_configuracion_global.año_fiscal
+    año_fiscal_actual = variables_configuracion_global.año_fiscal
+    
+    año_fiscal = af_seleccionado if af_seleccionado else año_fiscal_actual
+    viendo_af_historico = af_seleccionado is not None and af_seleccionado != año_fiscal_actual
+
+    
     usuario = current_user
     if usuario.nivel_usuario == "Medio":
         return redirect(url_for('.menu'))
+    
+    resultados_usuario = ResultadoFinal.query.filter_by(ficha_usuario=ficha_get).all()
+    años_disponibles = sorted(
+        {r.año_fiscal for r in resultados_usuario if r.año_fiscal},
+        reverse=True
+    )
+    
+    if año_fiscal_actual not in años_disponibles:
+        años_disponibles.insert(0, año_fiscal_actual)
 
     usuario_dueño_indicador = consultar_sap(ficha_get)
     ficha = current_user.ficha
@@ -634,7 +655,7 @@ def detalles_usuarios(ficha_get):
     retroalimentacion_resultados = ""
     evaluacion_completada = True
 
-    if etapa_general == 2:
+    if etapa_general == 2 or viendo_af_historico:
         resultados = Evaluacion.obtener_resultados(
             ficha_usuario=ficha_get,
             año_fiscal=año_fiscal
@@ -768,7 +789,10 @@ def detalles_usuarios(ficha_get):
         retroalimentacion_resultados=retroalimentacion_resultados,
         evaluacion_completada=evaluacion_completada,
         # Alias para que el HTML copiado de detalles_gestion_equipo funcione sin cambios
-        usuario_dueño_evaluacion=usuario_dueño_indicador
+        usuario_dueño_evaluacion=usuario_dueño_indicador,
+        años_disponibles=años_disponibles,
+        año_fiscal_seleccionado=año_fiscal,
+        viendo_af_historico=viendo_af_historico,
     )
     
 def validar_flujo_completo_usuario(ficha_participante, año_fiscal, nivel_usuario):
@@ -1058,6 +1082,8 @@ def menu():
     etapa_general = variables_configuracion_global.etapa_actual
     etapa_general = int(etapa_general)
     año_fiscal = variables_configuracion_global.año_fiscal
+    const= participantes_gdd()
+    print(const)
 
         
         
@@ -1401,40 +1427,62 @@ def Seleccionar_evaluar():
 
 
 
-
-
-
-
-
-
-@page.route("/app_crm/gdd/gestion_equipo", methods=['GET'] )
+@page.route("/app_crm/gdd/gestion_equipo", methods=['GET'])
+@page.route("/app_crm/gdd/gestion_equipo/<year_fiscal>", methods=['GET'])
 @login_required
-def gestion_equipo():
+def gestion_equipo(year_fiscal=None):
     variables_configuracion_global = Configuracion.get_data()
-    etapa_general = variables_configuracion_global.etapa_actual
-    etapa_general = int(etapa_general)
+    etapa_general = int(variables_configuracion_global.etapa_actual)
+    
+    if year_fiscal is None:
+        year_fiscal = variables_configuracion_global.año_fiscal  
+
     usuario = current_user
     ficha = current_user.ficha
     rest = consultar_sap(ficha)
     participantes = participantes_gdd()
-    #print(participantes)
+
     try:
-        lista_equipo = obtener_lista_equipo(participantes,ficha)
-    except:
-        lista_equipo=[]
+        equipo = obtener_lista_equipo_por_af(participantes, ficha, year_fiscal)
+    except Exception as e:
+        print(f"Error obteniendo equipo: {e}")
+        equipo = []
 
-    equipo = obtener_lista_equipo(participantes,ficha)
-    print(equipo)
+    # Lista de AF disponibles para el dropdown (normalizados al formato AFxx)
+    def normalizar_af(af):
+        if af and not af.startswith("AF"):
+            return f"AF{af[6:8]}"
+        return af
 
-    #print(ruta_foto_personal(2824))
+    años_disponibles_raw = Evaluacion.query.with_entities(
+        Evaluacion.año_fiscal
+    ).distinct().all()
 
-    return render_template('/gdd/gestion_equipo.html', etapa_general=etapa_general, consultar_cargo= consultar_cargo,  titulo= "Gestión de Equipo",usuario=usuario,rest=rest, participantes= equipo , ruta_foto_personal=ruta_foto_personal, obtener_indicador_usuario = Indicadores.obtener_indicador_usuario, ficha= ficha)
+    años_disponibles = sorted(
+        {normalizar_af(a[0]) for a in años_disponibles_raw if a[0]},
+        reverse=True
+    )
+
+    return render_template(
+        '/gdd/gestion_equipo.html',
+        etapa_general=etapa_general,
+        consultar_cargo=consultar_cargo,
+        titulo="Gestión de Equipo",
+        usuario=usuario,
+        rest=rest,
+        participantes=equipo,
+        ruta_foto_personal=ruta_foto_personal,
+        obtener_indicador_usuario=Indicadores.obtener_indicador_usuario,
+        ficha=ficha,
+        año_fiscal_seleccionado=year_fiscal,
+        años_disponibles=años_disponibles,
+    )
 
 
-
-@page.route("/app_crm/gdd/gestion_equipo/<int:ficha_get>", methods=['GET', 'POST'])
+@page.route("/app_crm/gdd/gestion_equipo_detalles/<int:ficha_get>", methods=['GET'])
+@page.route("/app_crm/gdd/gestion_equipo_detalles/<int:ficha_get>/<year_fiscal>", methods=['GET'])
 @login_required
-def gestion_equipo_detalles(ficha_get):
+def gestion_equipo_detalles(ficha_get, year_fiscal=None):
     if request.method == 'POST':
         user = current_user
         dueño_indicadores = User.get_by_ficha(ficha_get)
@@ -1462,7 +1510,9 @@ def gestion_equipo_detalles(ficha_get):
 
     variables_configuracion_global = Configuracion.get_data()
     etapa_general = int(variables_configuracion_global.etapa_actual)
-    año_fiscal = variables_configuracion_global.año_fiscal
+    if year_fiscal is None:
+        year_fiscal = variables_configuracion_global.etapa_actual
+    año_fiscal = year_fiscal
     usuario = current_user
     ficha = current_user.ficha
     rest = consultar_sap(ficha)
@@ -1902,6 +1952,193 @@ def evaluacion_competencias(ficha_get):
 
     return render_template('/gdd/evaluacion.html', etapa_general=etapa_general, ruta_foto_personal= ruta_foto_personal, json_supervisor_evaluaciones= json_supervisor_evaluaciones,  json_autoevaluaciones = json_autoevaluaciones,  usuario_dueño_indicador= usuario_dueño_indicador,  par_evaluaciones= par_evaluaciones, subordinado_eval= subordinado_eval,  total_desempeño = total_desempeño, desempeños= desempeños,  cumplimientos= cumplimientos, supervisor_evaluaciones= supervisor_evaluaciones,  usuario_dueño_evaluacion= usuario_dueño_evaluacion,  ficha_evaluador_supervisor=ficha_evaluador_supervisor, ficha_get= ficha_get, autoevaluaciones=autoevaluaciones, estado_evaluacion = estado_evaluacion, habilitacion_supervisor= habilitacion_supervisor, consultar_cargo= consultar_cargo, titulo ="Evaluación", usuario = usuario, rest=rest, ficha=ficha)
 
+
+
+@page.route("/app_crm/gdd/historial", methods=['GET'])
+@login_required
+def historial():
+    usuario = current_user
+    ficha = current_user.ficha
+    rest = consultar_sap(ficha)
+    variables_configuracion_global = Configuracion.get_data()
+    etapa_general = int(variables_configuracion_global.etapa_actual)
+
+    registros = ResultadoFinal.query.filter_by(
+        ficha_usuario=ficha
+    ).order_by(ResultadoFinal.año_fiscal.desc()).all()
+
+    # Armar lista de cards con solo lo necesario
+    historial = []
+    for r in registros:
+        historial.append({
+            'año_fiscal':      r.año_fiscal,
+            'total_final':     r.total_final or 0,
+            'clasificacion':   r.clasificacion or '---',
+            'enviado_sap':     r.enviado_sap,
+        })
+
+    return render_template(
+        '/gdd/historial.html',
+        etapa_general=etapa_general,
+        usuario=usuario,
+        rest=rest,
+        ficha=ficha,
+        historial=historial,
+        ruta_foto_personal=ruta_foto_personal,
+        consultar_cargo=consultar_cargo,
+        titulo="Mi Historial GDD"
+    )
+
+
+@page.route("/app_crm/gdd/historial/<ficha_get>/<year_fiscal_ver>", methods=['GET'])
+@login_required
+def historial_detalle(ficha_get, year_fiscal_ver):
+    año_fiscal_ver = year_fiscal_ver
+    usuario = current_user
+    ficha = ficha_get
+    rest = consultar_sap(ficha)
+    variables_configuracion_global = Configuracion.get_data()
+    etapa_general = int(variables_configuracion_global.etapa_actual)
+
+    # Verificar que el registro pertenece al usuario logueado
+    registro_resultado = ResultadoFinal.query.filter_by(
+        ficha_usuario=ficha,
+        año_fiscal=año_fiscal_ver
+    ).first()
+
+    if not registro_resultado:
+        flash("No tienes un GDD registrado para ese año fiscal.", "error")
+        return redirect(url_for('.historial'))
+
+
+    formatos_año = [año_fiscal_ver]
+    if año_fiscal_ver.startswith("AF"):
+        año_num = int(año_fiscal_ver[2:])
+        formatos_año.append(f"20{año_num-1}20{año_num:02d}")
+    else:
+        formatos_año.append(f"AF{año_fiscal_ver[6:8]}")
+
+    indicadores = Indicadores.query.filter(
+        Indicadores.ficha_usuario == ficha,
+        Indicadores.año_fiscal.in_(formatos_año)
+    ).all()
+
+    total_peso = sum(float(i.peso) for i in indicadores if i.peso)
+    total_cumplimiento = round(
+        sum(float(i.cumplimiento) for i in indicadores if i.cumplimiento), 2
+    )
+
+    autoevaluaciones      = {f'numero_{i}': None for i in range(1, 6)}
+    supervisor_evaluaciones = {f'numero_{i}': None for i in range(1, 6)}
+    par_evaluaciones      = {f'numero_{i}': None for i in range(1, 6)}
+    subordinado_eval      = {f'numero_{i}': None for i in range(1, 6)}
+    cumplimientos         = {f'numero_{i}': None for i in range(1, 6)}
+    desempeños            = {f'numero_{i}': None for i in range(1, 6)}
+    total_desempeño       = ""
+    retroalimentacion_resultados = None
+
+    resultados = Evaluacion.obtener_resultados(
+        ficha_usuario=ficha,
+        año_fiscal=año_fiscal_ver
+    )
+    
+    actualizar_diccionario_evaluaciones(autoevaluaciones,       resultados, 'autoeval')
+    actualizar_diccionario_evaluaciones(supervisor_evaluaciones, resultados, 'superv_eval')
+    actualizar_diccionario_evaluaciones(par_evaluaciones,        resultados, 'par_eval')
+    actualizar_diccionario_evaluaciones(subordinado_eval,        resultados, 'subordinado_eval')
+    actualizar_diccionario_evaluaciones(cumplimientos,           resultados, 'cumplimiento_eval')
+    actualizar_diccionario_evaluaciones(desempeños,              resultados, 'desempeno_eval')
+
+
+    registro_eval = Evaluacion.obtener_evaluaciones_por_usuario(
+        ficha_usuario=ficha,
+        año_fiscal=año_fiscal_ver
+    )
+    if registro_eval:
+        total_desempeño = registro_eval.total
+    
+    print(registro_eval)
+
+    retroalimentacion_resultados = Retroalimentacion.obtener_por_ficha_y_año(
+        ficha_usuario=ficha,
+        año_fiscal=año_fiscal_ver
+    )
+
+
+    usuario_dueño_indicador = rest
+
+    return render_template(
+        '/gdd/historial_detalle.html',
+
+        modo_lectura=True,
+        año_fiscal_ver=año_fiscal_ver,
+        registro_resultado=registro_resultado,
+        etapa_general=etapa_general,
+        usuario=usuario,
+        rest=rest,
+        ficha=ficha,
+        ficha_get=ficha,
+        indicadores=indicadores,
+        total_peso=total_peso,
+        total_cumplimiento=total_cumplimiento,
+        autoevaluaciones=autoevaluaciones,
+        supervisor_evaluaciones=supervisor_evaluaciones,
+        par_evaluaciones=par_evaluaciones,
+        subordinado_eval=subordinado_eval,
+        cumplimientos=cumplimientos,
+        desempeños=desempeños,
+        total_desempeño=total_desempeño,
+        retroalimentacion_resultados=retroalimentacion_resultados,
+        usuario_dueño_indicador=usuario_dueño_indicador,
+        usuario_dueño_evaluacion=usuario_dueño_indicador,
+        evaluacion_completada=True,
+        ruta_foto_personal=ruta_foto_personal,
+        consultar_cargo=consultar_cargo,
+        titulo=f"Mi GDD {año_fiscal_ver}"
+    )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #---------------------------------------ENDPOINTS PARA JS-------------------------------------
 """
     Función para consulta de SAP inicial
@@ -2033,7 +2270,11 @@ def participantes_gdd():
     
     user_fuente = U_FUENTE
     contra_fuente = C_FUENTE
-    
+
+    print(user_fuente)
+    print(contra_fuente)
+
+    print(sap_url)
     response = requests.get(sap_url, auth=HTTPBasicAuth(user_fuente, contra_fuente), params=args, verify=True)
 
     if response.status_code == 200:
@@ -2167,14 +2408,15 @@ def evaluacion():
         
         variables_configuracion_global = Configuracion.get_data()
         
-        año= "AF26"
+        variables_configuracion_global = Configuracion.get_data()
+        año = variables_configuracion_global.año_fiscal
         resultados = []
         total = 0
         rest = consultar_sap(ficha_dueño)
         ficha_supervisor = procesar_ficha(rest[0]['fichaSuperv'])     
         Evaluacion.asignar_supervisor(
             ficha_usuario=ficha_dueño,
-            año_fiscal='AF26',
+            año_fiscal=año,
             ficha_supervisor=ficha_supervisor
         )
         for evaluacion_individual in lista_evaluaciones:
@@ -2556,6 +2798,60 @@ def encontrar_subordinados_recursivo(participantes, ficha_superior, equipo=None)
     
     return equipo
 
+
+def obtener_lista_equipo_por_af(participantes, ficha_superior, año_fiscal):
+    """
+    Devuelve el equipo de un supervisor para un año fiscal dado.
+    - AF actual: usa SAP recursivamente (igual que antes).
+    - AF pasados: usa la tabla Evaluacion como fuente de verdad histórica.
+    """
+    # Año fiscal actual desde Configuracion
+    af_actual = Configuracion.get_data()
+    af_actual = af_actual.año_fiscal 
+    if año_fiscal == af_actual:
+        return obtener_lista_equipo(participantes, ficha_superior)
+
+    # AF histórico: reconstruir desde Evaluacion
+    return obtener_equipo_historico(ficha_superior, año_fiscal, participantes)
+
+def obtener_equipo_historico(ficha_superior, año_fiscal, participantes):
+    # Normalizar formato AF para comparar
+    formatos_af = [año_fiscal]
+    if año_fiscal.startswith("AF"):
+        año_num = int(año_fiscal[2:])
+        formatos_af.append(f"20{año_num-1}20{año_num:02d}")
+    else:
+        formatos_af.append(f"AF{año_fiscal[6:8]}")
+
+    mapa_sap = {}
+    for p in participantes:
+        pernr = p.get('pernr')
+        if pernr:
+            mapa_sap[str(int(pernr))] = p
+
+    equipo = []
+    visitados = set()
+
+    def recursivo(ficha_sup):
+        if ficha_sup in visitados:
+            return
+        visitados.add(ficha_sup)
+        evaluaciones = Evaluacion.obtener_evaluaciones_como_evaluador(ficha_sup)
+
+        for ev in evaluaciones:
+            if ev['año_fiscal'] not in formatos_af:
+                continue
+            if 'supervisor' not in ev['rol_evaluador']:
+                continue
+
+            ficha_emp = str(int(ev['ficha_evaluado']))
+            datos = mapa_sap.get(ficha_emp, {'pernr': ficha_emp, 'fichaSuperv': ficha_sup}).copy()
+            equipo.append(datos)
+            recursivo(ficha_emp)
+
+    recursivo(str(int(ficha_superior)))
+    return equipo
+
 def obtener_lista_equipo(participantes, ficha_superior):
     # Aseguramos que la ficha llegue como string (por si viene como número)
     ficha_superior_str = str(ficha_superior) if ficha_superior is not None else None
@@ -2696,7 +2992,11 @@ def consultarCargo():
 def CorreoMasivo():
     datos = request.get_json()
     try:
+        variables_configuracion_global = Configuracion.get_data()
+        etapa_general = variables_configuracion_global.etapa_actual
+        año_fiscal = variables_configuracion_global.año_fiscal
         texto = datos.get('texto')
+        
         tipo = datos.get('tipo')
         mensaje = ""
         print(texto)
@@ -2707,27 +3007,15 @@ def CorreoMasivo():
                     'venicia_pena@corimon.com', 'alejandropadra@protonmail.com', 
                     'eliezerincrp@gmail.com','digitalingpadra@gmail.com', 
                     'venicia3006@gmail.com', 'dguedez2002@gmail.com',
-                    'guedez20023@gmail.com', 'claudiogptpa@gmail.com', 
-                    'd1l4nj0su3g@gmail.com', '220010862@uam.edu.ve', 
-                    'preparadorrandol@gmail.com', 'randol.jgm@gmail.com', 
-                    'thewathershow@gmail.com', 'escalona_65@hotmail.com', 
-                    'escalona.jose.65.94@gmail.com', 'escalonabusiness15@gmail.com',
-                    'venicia_3006@hotmail.com', 'ssaioros1993@hotmail.com',
-                    'veni_pe@hotmail.com', 'dilanjosueguedez2002@hotmail.com',
-                    'dilanjosueguedez2002@gmail.com', 'graterolalexis59@gmail.com',
-                    'alegraterol123023@gmail.com', 'gojiracomputer@gmail.com',
-                    'ch.vidaunitec@gmail.com', 'genegabych@gmail.com ',
-                    'gloriangellugo2710@gmail.com','alvix.arreaza@gmail.com',
-                    'nacky.aldana@gmail.com', 'aldanaconsultores@gmail.com ',
-                    'jonathan_francisco@gmail.com', 'pao123vere@gmail.com ', 'eliezerchirin0@hotmail.com']
+                    ]"""
 
-        class SimpleUser:
+        """class SimpleUser:
             def __init__(self, email):
                 self.email = email
         
         lista_users = [SimpleUser(email) for email in lista]"""
         lista_users= User.get_by_usuarios()
-        
+        #lista_users= lista
         
         app = current_app._get_current_object()
         def enviar_en_background():
@@ -2737,7 +3025,7 @@ def CorreoMasivo():
                     if tipo == 'cierre':
                         asyncio.run(cierre_gdd(lista_users, texto))
                     elif tipo == "inicio":
-                        asyncio.run(inicio_gdd(lista_users, texto))
+                        asyncio.run(inicio_gdd(lista_users, texto, año_fiscal))
                     elif tipo == 'avance':
                         asyncio.run(inicio_avance(lista_users, texto))
                     elif tipo == 'InicioEtapaDos':
@@ -2809,7 +3097,9 @@ def mover_etapa():
         
         if currentActive == 3:
             Configuracion.actualizar_solo_etapa(1)
-        mensaje = "No se encontraron usuarios nivel I para notificar."
+            User.actualizar_status_global("Abierto")
+            Indicadores.actualizar_status_global("Cerrado")
+        mensaje = "Etapa actualizada correctamente."
         return jsonify({
             "success": True,
             "message": mensaje

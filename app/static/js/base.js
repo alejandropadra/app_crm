@@ -70,6 +70,30 @@ closebtn.addEventListener('click', () => {
 
 
 
+const tabla = document.getElementById('contenedor-table');
+
+let isDown = false, startX, scrollLeft;
+
+if (tabla) {
+    tabla.addEventListener('mousedown', e => {
+        isDown = true;
+        tabla.classList.add('grabbing');
+        startX    = e.pageX - tabla.offsetLeft;
+        scrollLeft = tabla.scrollLeft;
+    });
+
+    tabla.addEventListener('mouseleave', () => { isDown = false; tabla.classList.remove('grabbing'); });
+    tabla.addEventListener('mouseup',    () => { isDown = false; tabla.classList.remove('grabbing'); });
+
+    tabla.addEventListener('mousemove', e => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x    = e.pageX - tabla.offsetLeft;
+        const walk = (x - startX) * 1.2;   
+        tabla.scrollLeft = scrollLeft - walk;
+    });
+}
+
 /*
 ESTO ES PARA EL MENÚ DE NAVEGACIÓN
 GESTIONA EL ABRIR Y CERRARLO
@@ -325,6 +349,9 @@ function showAlert(message, category = 'success') {
         }, 300);
         }, 5000);
     }
+
+
+
 
 
 

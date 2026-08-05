@@ -5,13 +5,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const tarjetas = document.querySelectorAll('.flex.flex-col.col-span-3');
 
 
+    const botonesAF = document.querySelectorAll('.af-filter-btn');
 
-
-
-
-
-
-
+    botonesAF.forEach(boton => {
+        boton.addEventListener('click', function () {
+            const af = boton.getAttribute('data-af');
+            window.location.href = `/app_crm/gdd/gestion_equipo/${af}`;
+        });
+    });
 
 
 

@@ -165,42 +165,51 @@
                                         <span class="descipcionesSubmenu">Gestión de Indicadores</span>
                                     </a>
                                 </li>
-                                    <li class=" ml-5 mb-3 pl-1  bg-transparent rounded-md relative after:absolute after:top-0 after:left-5 after:h-full after:w-[2px] after:bg-red-600">
-                                        <a 
-                                            class="relative text-white gap-1  hover:text-rojo-crm pl-6 my-2 flex items-center">
-                                        
-                                            <span>
-                                                <svg svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-candlestick-icon lucide-chart-candlestick"><path d="M9 5v4"/><rect width="4" height="6" x="7" y="9" rx="1"/><path d="M9 15v2"/><path d="M17 3v2"/><rect width="4" height="8" x="15" y="5" rx="1"/><path d="M17 13v3"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/></svg>
-                                            </span>
-                                            
-                                            Autoevaluacion
-                                        </a>
-
-                                        <a 
-                                            class="relative text-white gap-1  hover:text-rojo-crm pl-6 my-2 flex items-center">
-                                            <span>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-notebook-pen-icon lucide-notebook-pen"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/></svg>
-                                            </span>
-                                        Evaluacion a Terceros
-                                        </a>
-
-
-                                    </li>
-                                    {% if current_user.nivel_usuario == 'Administrador' %}
-                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white  ">
-                                    <a href="{{ url_for('.tablaReporte') }}" class=" flex items-center gap-2  ">
-                                        <span class="">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-clock-icon lucide-file-clock"><path d="M16 22h2a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><circle cx="8" cy="16" r="6"/><path d="M9.5 17.5 8 16.25V14"/></svg>
+                                <li class=" ml-5 mb-3 pl-1  bg-transparent rounded-md relative after:absolute after:top-0 after:left-5 after:h-full after:w-[2px] after:bg-red-600">
+                                    <a href="{{ url_for('.evaluacion_competencias', ficha_get=current_user.ficha) }}"
+                                        class="relative text-white gap-1  hover:text-rojo-crm pl-6 my-2 flex items-center">
+                                    
+                                        <span>
+                                            <svg svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-candlestick-icon lucide-chart-candlestick"><path d="M9 5v4"/><rect width="4" height="6" x="7" y="9" rx="1"/><path d="M9 15v2"/><path d="M17 3v2"/><rect width="4" height="8" x="15" y="5" rx="1"/><path d="M17 13v3"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/></svg>
                                         </span>
-                                        <span class="descipcionesSubmenu">Reportes</span>
+                                        
+                                        Autoevaluacion
                                     </a>
+
+                                    <a href="{{ url_for('.Seleccionar_evaluar')}}"
+                                        class="relative text-white gap-1  hover:text-rojo-crm pl-6 my-2 flex items-center">
+                                        <span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-notebook-pen-icon lucide-notebook-pen"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/></svg>
+                                        </span>
+                                    Evaluacion a Terceros
+                                    </a>
+
+
                                 </li>
+                                {% if current_user.nivel_usuario == 'Administrador' %}
+                                    <li class=" pl-8 py-2 hover:text-rojo-crm text-white  ">
+                                        <a href="{{ url_for('.tablaReporte') }}" class=" flex items-center gap-2  ">
+                                            <span class="">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-clock-icon lucide-file-clock"><path d="M16 22h2a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><circle cx="8" cy="16" r="6"/><path d="M9.5 17.5 8 16.25V14"/></svg>
+                                            </span>
+                                            <span class="descipcionesSubmenu">Reportes</span>
+                                        </a>
+                                    </li>
                                 {% endif %}
 
                                 <li class=" pl-8 py-2 hover:text-rojo-crm text-white ">
-                                    <a {%if etapa_general <2 %} onclick="showAlertGrandes('Esta sección no está disponible', 'atencion')" {%else%}  href="{{ url_for('.gestion_equipo_detalles', ficha_get=current_user.ficha) }}" {%endif%} class=" flex items-center gap-2  ">
+                                    <a {%if etapa_general <2 %} onclick="showAlertGrandes('Esta sección no está disponible', 'atencion')" {%else%}  href="{{ url_for('.gestion_equipo_detalles', ficha_get=current_user.ficha, year_fiscal=config_global.año_fiscal) }}" {%endif%} class=" flex items-center gap-2  ">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calculator-icon lucide-calculator"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
                                         <span class="descipcionesSubmenu">Resultados</span>
+                                    </a>
+                                </li>
+
+                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white " >
+                                    <a href="{{ url_for('.historial')}}" class=" flex items-center gap-2  ">
+                                        <span class="">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-clock-icon lucide-folder-clock"><path d="M16 14v2.2l1.6 1"/><path d="M7 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2"/><circle cx="16" cy="16" r="6"/></svg>
+                                        </span>
+                                        <span class="descipcionesSubmenu">Historico</span>
                                     </a>
                                 </li>
 
@@ -324,15 +333,15 @@
                                         </li>
                                     </li>
                                     {% if current_user.nivel_usuario == 'Administrador' %}
-                                <li class=" pl-8 py-2 hover:text-rojo-crm text-white  ">
-                                    <a href="{{ url_for('.tablaReporte') }}" class=" flex items-center gap-2  ">
-                                        <span class="">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-clock-icon lucide-file-clock"><path d="M16 22h2a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><circle cx="8" cy="16" r="6"/><path d="M9.5 17.5 8 16.25V14"/></svg>
-                                        </span>
-                                        <span class="descipcionesSubmenu">Reportes</span>
-                                    </a>
-                                </li>
-                                {% endif %}
+                                    <li class=" pl-8 py-2 hover:text-rojo-crm text-white  ">
+                                        <a href="{{ url_for('.tablaReporte') }}" class=" flex items-center gap-2  ">
+                                            <span class="">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-clock-icon lucide-file-clock"><path d="M16 22h2a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><circle cx="8" cy="16" r="6"/><path d="M9.5 17.5 8 16.25V14"/></svg>
+                                            </span>
+                                            <span class="descipcionesSubmenu">Reportes</span>
+                                        </a>
+                                    </li>
+                                    {% endif %}
 
                                     <li class=" pl-8 py-2 hover:text-rojo-crm text-white">
                                         <a href="{{ url_for('.gestion_equipo')}}" class=" flex items-center gap-2  ">
@@ -342,11 +351,21 @@
                                     </li>
 
                                     <li class=" pl-8 py-2 hover:text-rojo-crm text-white">
-                                        <a {%if etapa_general <2 %} onclick="showAlertGrandes('Esta sección no está disponible', 'atencion')" {%else%}  href="{{ url_for('.gestion_equipo_detalles', ficha_get=current_user.ficha) }}" {%endif%}  class=" flex items-center gap-2  ">
+                                        <a {%if etapa_general <2 %} onclick="showAlertGrandes('Esta sección no está disponible', 'atencion')" {%else%}  href="{{ url_for('.gestion_equipo_detalles', ficha_get=current_user.ficha, year_fiscal=config_global.año_fiscal) }}" {%endif%}  class=" flex items-center gap-2  ">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calculator-icon lucide-calculator"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
                                             <span class="descipcionesSubmenu">Resultados</span>
                                         </a>
                                     </li>
+
+                                    <li class=" pl-8 py-2 hover:text-rojo-crm text-white " >
+                                        <a href="{{ url_for('.historial')}}" class=" flex items-center gap-2  ">
+                                            <span class="">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-clock-icon lucide-folder-clock"><path d="M16 14v2.2l1.6 1"/><path d="M7 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2"/><circle cx="16" cy="16" r="6"/></svg>
+                                            </span>
+                                            <span class="descipcionesSubmenu">Historico</span>
+                                        </a>
+                                    </li>
+
                                     
                                     <li class=" pl-8 py-2 hover:text-rojo-crm text-white">
                                         <a  href="{{ url_for('.Documentacion')}}" class=" flex items-center gap-2  ">

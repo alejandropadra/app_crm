@@ -796,6 +796,14 @@ document.addEventListener("DOMContentLoaded", async function () {
             const nuevaEtapa = circles.length;
             
             await enviarAlBackendEtapaAño('actualizarAF', Afconfig);
+
+            // Inicializar resultados del nuevo AF
+            const respInit = await fetch(`/app_crm/inicializar_resultados/AF${Afconfig}`, {
+                method: 'GET',
+                headers: { "X-CSRFToken": csrfToken }
+            });
+            if (!respInit.ok) console.warn('Advertencia: inicializar_resultados falló, continúa de todas formas');
+
             await enviarAlBackendEtapaAño('MoverEtapa', nuevaEtapa);
             
             modalLoading.removeAttribute("aria-hidden");
