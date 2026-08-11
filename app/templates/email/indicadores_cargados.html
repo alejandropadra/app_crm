@@ -111,7 +111,7 @@
                 
                 <p style="color:#333;font-size:14px;line-height:1.5;">
                 
-                    Le informamos que el colaborador/a <strong>{{user.nombre | title}} {{user.apellido | title}}</strong>, ha cargado sus indicadores funcionales en la plataforma GDD. 
+                    Le informamos que el colaborador/a <strong>{{user.nombre | title}} {{user.apellido | title}}</strong>, ha cargado sus indicadores funcionales del año fiscal <strong>{{ año_fiscal }}</strong> en la plataforma GDD. 
 
                     <br><br>
 
@@ -127,9 +127,9 @@
                                 <table cellpadding="0" cellspacing="0" border="0">
                                     <tr>
                                         <td align="center" style="background-color:#496fb6;border-radius:5px;">
-                                            <a href="http://10.10.0.33/app_crm/gdd/gestion_equipo/{{user.ficha}}" 
-                                            style="display:inline-block;background-color:#496fb6;color:#ffffff;text-decoration:none;padding:12px 25px;border-radius:5px;font-weight:bold;font-family:Arial,sans-serif;font-size:14px;">
-                                            Ingresa Aquí
+                                            <a href="{{ url }}" 
+                                                style="display:inline-block;background-color:#496fb6;color:#ffffff;text-decoration:none;padding:12px 25px;border-radius:5px;font-weight:bold;font-family:Arial,sans-serif;font-size:14px;">
+                                                Ingresa Aquí
                                             </a>
                                         </td>
                                     </tr>

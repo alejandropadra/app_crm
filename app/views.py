@@ -386,42 +386,50 @@ def add_user_admin():
 
     return render_template("auth/register_user_admin.html", etapa_general=etapa_general, consultar_cargo= consultar_cargo,  titulo="Perfil Usuario", form=form, ruta_foto_personal = ruta_foto_personal)
 
-
-@page.route("/app_crm/usuarios", methods=['GET'] )
+@page.route("/app_crm/usuarios", methods=['GET'])
 @login_required
 def participantes():
     usuario = current_user
     ficha = current_user.ficha
     variables_configuracion_global = Configuracion.get_data()
-    etapa_general = variables_configuracion_global.etapa_actual
+    etapa_general = int(variables_configuracion_global.etapa_actual)
     año_fiscal = variables_configuracion_global.año_fiscal
-    
-    etapa_general = int(etapa_general)
+
     if usuario.nivel_usuario == "Medio":
-        return redirect(url_for('.menu'))  
+        return redirect(url_for('.menu'))
 
     rest = consultar_sap(ficha)
-
     participantes = participantes_gdd()
-    print(participantes)
-    participantes_procesados = []
-    
-    
 
+    # Formatos equivalentes del AF: "AF26" <-> "20252026"
+    años_equivalentes = [año_fiscal]
+    if año_fiscal.startswith("AF"):
+        año_num = int(año_fiscal[2:])
+        años_equivalentes.append(f"20{año_num - 1}20{año_num:02d}")
+    else:
+        años_equivalentes.append(f"AF{año_fiscal[6:8]}")
+
+    participantes_procesados = []
 
     for participante in participantes:
         ficha_participante = participante['pernr'].lstrip('0')
-        indicadores = Indicadores.obtener_indicador_usuario(ficha_participante)
+
+        # Solo indicadores del AF vigente
+        indicadores = Indicadores.query.filter(
+            Indicadores.ficha_usuario == ficha_participante,
+            Indicadores.año_fiscal.in_(años_equivalentes)
+        ).all()
+
         aprobados = sum(1 for ind in indicadores if ind.status_aprobacion == 'A')
-        
-        # Calcular status de indicadores: ESTO ES PARA VER SI TIENE TODOS SUS INDICADORES APROBADOS O NEL
-        if len(indicadores) < 3:
+        total_indicadores = len(indicadores)
+
+        # Status de aprobación de indicadores
+        if total_indicadores < 3:
             data_status = "incompleto"
-        elif len(indicadores) == 3 and aprobados == 3:
+        elif aprobados == 3:
             data_status = "aprobado"
-        elif len(indicadores) == 3 and aprobados < 3:
+        else:
             data_status = "espera"
-        
 
         check = None
         comentarios_colaborador = None
@@ -432,79 +440,68 @@ def participantes():
             comentarios_colaborador = retroalimentacion_equipos.comentarios_colaborador
             comentarios_supervisor = retroalimentacion_equipos.comentarios_supervisor
 
-        
         resultados_evaluacion = Evaluacion.obtener_resultados(ficha_participante, año_fiscal)
-        
+
         evaluaciones_pendientes = []
         evaluacion_completada = True
         supervisor_completado = False
         subordinado_completado = False
         par_completado = False
         autoeval_completado = False
-        
-        # Contadores para cada tipo de evaluación
+
         autoeval_count = 0
         supervisor_count = 0
         par_count = 0
         subordinado_count = 0
-        
+
         if resultados_evaluacion and isinstance(resultados_evaluacion, list):
             for competencia in resultados_evaluacion:
                 if competencia.get('autoeval') and competencia['autoeval'].strip():
                     autoeval_completado = True
                     autoeval_count += 1
-                
+
                 if competencia.get('superv_eval') and competencia['superv_eval'].strip():
                     supervisor_completado = True
                     supervisor_count += 1
-                
+
                 if competencia.get('par_eval') and competencia['par_eval'].strip():
                     par_completado = True
                     par_count += 1
-                    
+
                 if competencia.get('subordinado_eval') and competencia['subordinado_eval'].strip():
                     subordinado_completado = True
                     subordinado_count += 1
-            
+
             # Determinar qué evaluaciones faltan
             if not autoeval_completado:
                 evaluaciones_pendientes.append('Autoevaluación')
                 evaluacion_completada = False
-                
+
             if not supervisor_completado:
                 evaluaciones_pendientes.append('Evaluación del Supervisor')
                 evaluacion_completada = False
-                
+
             if participante['nivel'] == 'I':
                 if not subordinado_completado:
                     evaluaciones_pendientes.append('Evaluación del Subordinado')
                     evaluacion_completada = False
-                    
+
                 if not par_completado:
                     evaluaciones_pendientes.append('Evaluación del Par')
                     evaluacion_completada = False
-            
-            # Calcular estadísticas adicionales
+
             total_competencias = len(resultados_evaluacion)
-            
-            print(f"para la ficha {ficha_participante} : {evaluaciones_pendientes}")
-            
-            # Extraer información de desempeño
+
             desempeno_valores = [c.get('desempeno_eval', '') for c in resultados_evaluacion if c.get('desempeno_eval')]
             cumplimiento_valores = [c.get('cumplimiento_eval', '') for c in resultados_evaluacion if c.get('cumplimiento_eval')]
-            
+
         else:
             evaluaciones_pendientes = ['No tiene evaluación creada']
             evaluacion_completada = False
             total_competencias = 0
             desempeno_valores = []
             cumplimiento_valores = []
-            autoeval_count = 0
-            supervisor_count = 0
-            par_count = 0
-            subordinado_count = 0
-        
-            # Crear diccionario con el resumen de evaluaciones
+
         resumen_evaluacion = {
             'tiene_evaluacion': bool(resultados_evaluacion),
             'autoeval_completado': autoeval_completado,
@@ -520,32 +517,26 @@ def participantes():
             'cumplimiento_valores': cumplimiento_valores,
             'evaluacion_id': resultados_evaluacion[0].get('evaluacion_id') if resultados_evaluacion else None
         }
-        
+
         participante_procesado = {
-            **participante,  
+            **participante,
             'ficha_participante': ficha_participante,
-            'indicadores_count': len(indicadores),
+            'indicadores_count': total_indicadores,
             'aprobados_count': aprobados,
             'data_status': data_status,
             'comentarios_supervisor': comentarios_supervisor,
             'check': check,
             'comentarios_colaborador': comentarios_colaborador,
-            #  DATOS DE EVALUACIÓN PROCESADOS
-            'resultados_evaluacion_raw': resultados_evaluacion,  
-            'resumen_evaluacion': resumen_evaluacion,  
+            'resultados_evaluacion_raw': resultados_evaluacion,
+            'resumen_evaluacion': resumen_evaluacion,
             'evaluaciones_pendientes': evaluaciones_pendientes,
             'evaluacion_completada': evaluacion_completada,
             'total_evaluaciones_pendientes': len(evaluaciones_pendientes)
         }
-        
-        participantes_procesados.append(participante_procesado)
-        
-        
-        
-    
-    #print(participantes)
-    return render_template('/auth/list_users.html', etapa_general= etapa_general, participantes_procesados= participantes_procesados, ruta_foto_personal= ruta_foto_personal, año_fiscal= año_fiscal,  resultados_evaluacion = Evaluacion.obtener_resultados,  obtener_indicador_usuario = Indicadores.obtener_indicador_usuario,  consultar_cargo= consultar_cargo, ficha = ficha,  titulo= "participantes", participantes = participantes,usuario=usuario,rest=rest)
 
+        participantes_procesados.append(participante_procesado)
+
+    return render_template('/auth/list_users.html', etapa_general= etapa_general, participantes_procesados= participantes_procesados, ruta_foto_personal= ruta_foto_personal, año_fiscal= año_fiscal,  resultados_evaluacion = Evaluacion.obtener_resultados,  obtener_indicador_usuario = Indicadores.obtener_indicador_usuario,  consultar_cargo= consultar_cargo, ficha = ficha,  titulo= "participantes", participantes = participantes,usuario=usuario,rest=rest)
 
 @page.route("/app_crm/detalles_usuarios/<int:ficha_get>", methods=['GET', 'POST'])
 @page.route("/app_crm/detalles_usuarios/<int:ficha_get>/<string:af_seleccionado>", methods=['GET', 'POST'])
