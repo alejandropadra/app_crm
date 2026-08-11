@@ -1644,46 +1644,43 @@ def gestion_equipo_detalles(ficha_get, year_fiscal=None):
         usuario_dueño_evaluacion=usuario_dueño_indicador,
         ruta_foto_personal=ruta_foto_personal
     )
-@page.route("/app_crm/gdd/indicadores", methods=['GET', 'POST'] )
-@login_required 
+@page.route("/app_crm/gdd/indicadores", methods=['GET', 'POST'])
+@login_required
 def gdi():
     variables_configuracion_global = Configuracion.get_data()
-    etapa_general = variables_configuracion_global.etapa_actual
-    etapa_general = int(etapa_general)
+    etapa_general = int(variables_configuracion_global.etapa_actual)
     año_fiscal = variables_configuracion_global.año_fiscal
+
     usuario = current_user
     ficha = current_user.ficha
     rest = consultar_sap(ficha)
 
-    año_fiscal = variables_configuracion_global.año_fiscal
-    vista= "gdd"
+    vista = "gdd"
     estatus_proceso = "Abriendo"
     form = formgdi()
-    indicadores = Indicadores.obtener_indicador_usuario(usuario.ficha)
-    indicadores_filtrados = []
-    # Crear un atributo temporal para mostrar en el frontend
-    for indicador in indicadores:
-        if indicador.año_fiscal == año_fiscal:
-            indicador.año_fiscal_display = año_fiscal
-            
-        else:
-            indicador.año_fiscal_display = indicador.año_fiscal
-        print(indicador.año_fiscal_display)
-        if indicador.año_fiscal_display == año_fiscal or \
-        (indicador.año_fiscal_display == "20252026" and año_fiscal == "AF26"):
-            indicadores_filtrados.append(indicador)
-    
-    print(indicadores_filtrados)
-            
-            
-    total_peso = sum(float(i.peso) for i in indicadores if i.peso)
+
+    # Formatos equivalentes del AF: "AF26" <-> "20252026"
+    años_equivalentes = [año_fiscal]
+    if año_fiscal.startswith("AF"):
+        año_num = int(año_fiscal[2:])
+        años_equivalentes.append(f"20{año_num - 1}20{año_num:02d}")
+    else:
+        años_equivalentes.append(f"AF{año_fiscal[6:8]}")
+
+    # Solo los indicadores del AF vigente
+    indicadores_filtrados = Indicadores.query.filter(
+        Indicadores.ficha_usuario == usuario.ficha,
+        Indicadores.año_fiscal.in_(años_equivalentes)
+    ).all()
+
+    # Totales calculados SOBRE EL MISMO conjunto que se renderiza
+    total_peso = sum(float(i.peso) for i in indicadores_filtrados if i.peso)
     total_cumplimiento = round(
-        sum(float(i.cumplimiento) for i in indicadores if i.cumplimiento),
+        sum(float(i.cumplimiento) for i in indicadores_filtrados if i.cumplimiento),
         2
     )
 
     return render_template('/gdd/indicadores.html', etapa_general= etapa_general, ruta_foto_personal= ruta_foto_personal, consultar_cargo= consultar_cargo,  titulo="Indicadores", indicadores = indicadores_filtrados, total_peso= total_peso, total_cumplimiento= total_cumplimiento,   año_fiscal=año_fiscal, usuario = usuario, rest = rest, vista = vista, estatus_proceso = estatus_proceso, form = form, ficha= ficha)
-
 @page.route("/app_crm/configuracionGDD", methods=['GET', 'POST'] )
 @login_required 
 def configuracionGDD():
