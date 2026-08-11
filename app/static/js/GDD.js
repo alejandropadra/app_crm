@@ -1,18 +1,11 @@
-/* ============================================================
-   GDD.js — Carga de Indicadores Funcionales
-   ============================================================ */
-
-/* ---------- Constantes de negocio ---------- */
-const MAX_INDICADORES = 3;   // máximo de indicadores por usuario
-const PESO_TOTAL      = 80;  // peso total que deben sumar
-const PESO_MIN        = 20;  // peso mínimo por indicador
-const PESO_MAX        = 40;  // peso máximo por indicador
+const MAX_INDICADORES = 3;   
+const PESO_TOTAL = 80;  
+const PESO_MIN = 20;  
+const PESO_MAX = 40;  
 
 let numero_enviado = false;
 
 /* ---------- Helpers ---------- */
-
-// Cuenta SOLO las filas del tbody (rows.length incluye thead y tfoot)
 function contarIndicadores() {
     const tbody = document.querySelector('#indicadorTable tbody');
     return tbody ? tbody.rows.length : 0;
@@ -29,93 +22,6 @@ function getCsrfToken() {
     return meta ? meta.getAttribute("content") : "";
 }
 
-/* ---------- Alertas ---------- */
-function showAlert(message, category = 'success') {
-
-    const alertContainer = document.createElement('div');
-    alertContainer.className = 'fixed top-5 z-[100000] animate-fade-in-up left-[40%]';
-
-    const alertWrapper = document.createElement('div');
-    alertWrapper.className = 'flex flex-col gap-2 w-[300px] text-[10px] sm:text-xs';
-
-    const alertBox = document.createElement('div');
-    alertBox.className = 'error-alert cursor-default flex items-center w-full h-12 sm:h-14 rounded-lg bg-azul-dark px-[10px]';
-
-    const contentWrapper = document.createElement('div');
-    contentWrapper.className = 'flex gap-2 items-center justify-around w-full';
-
-    const iconContainer = document.createElement('div');
-    iconContainer.className = category === 'error'
-        ? 'text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg'
-        : 'text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg';
-
-    const iconSpan = document.createElement('span');
-    if (category === 'error') {
-        iconSpan.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>`;
-    } else {
-        iconSpan.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg>`;
-    }
-
-    const messageContainer = document.createElement('div');
-    messageContainer.className = 'flex flex-col';
-
-    const titleDiv = document.createElement('div');
-    const titleText = document.createElement('h4');
-    titleText.className = 'text-white';
-    titleText.textContent = category === 'error' ? 'Error:' : 'Proceso Exitoso:';
-
-    const messageDiv = document.createElement('div');
-    const messageText = document.createElement('p');
-    messageText.className = 'text-white';
-    messageText.textContent = message;
-
-    const closeButton = document.createElement('button');
-    closeButton.className = 'flex close-btn';
-
-    const closeIconContainer = document.createElement('div');
-    closeIconContainer.className = category === 'error'
-        ? 'text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg'
-        : 'text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg';
-
-    const closeIconSpan = document.createElement('span');
-    closeIconSpan.className = 'material-symbols-rounded';
-    closeIconSpan.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
-
-    iconContainer.appendChild(iconSpan);
-    titleDiv.appendChild(titleText);
-    messageDiv.appendChild(messageText);
-    messageContainer.appendChild(titleDiv);
-    messageContainer.appendChild(messageDiv);
-    closeIconContainer.appendChild(closeIconSpan);
-    closeButton.appendChild(closeIconContainer);
-
-    contentWrapper.appendChild(iconContainer);
-    contentWrapper.appendChild(messageContainer);
-    contentWrapper.appendChild(closeButton);
-
-    alertBox.appendChild(contentWrapper);
-    alertWrapper.appendChild(alertBox);
-    alertContainer.appendChild(alertWrapper);
-
-    document.body.appendChild(alertContainer);
-
-    setTimeout(() => {
-        alertContainer.style.opacity = '1';
-    }, 10);
-
-    const quitar = () => {
-        alertContainer.style.opacity = '0';
-        alertContainer.classList.add("animate-fade-out-right");
-        setTimeout(() => {
-            if (document.body.contains(alertContainer)) {
-                document.body.removeChild(alertContainer);
-            }
-        }, 300);
-    };
-
-    closeButton.addEventListener('click', quitar);
-    setTimeout(quitar, 5000);
-}
 
 /* ---------- Foco visual en un input ---------- */
 function enfocarInput(id) {
@@ -152,7 +58,6 @@ function abrirModal() {
     try {
         const n = contarIndicadores();
 
-        // 1) Validar ANTES de deshabilitar el botón
         if (n >= MAX_INDICADORES) {
             showAlert(`No puedes agregar más de ${MAX_INDICADORES} indicadores`, 'error');
             return;
@@ -164,7 +69,6 @@ function abrirModal() {
         const indicatorForm = document.getElementById("indicatorForm");
         if (indicatorForm) indicatorForm.reset();
 
-        // 2) Limpiar readOnly/disabled que pudo haber dejado editRow()
         ["Indicador", "Tendencia", "peso", "AFANTERIOR", "AFPPTO", "AFACTUAL"]
             .forEach(id => {
                 const el = document.getElementById(id);
@@ -173,17 +77,14 @@ function abrirModal() {
                 el.disabled = false;
             });
 
-        // En alta, REAL AF actual no se captura
         document.getElementById("AFACTUAL").disabled = true;
 
-        // 3) Restaurar el botón a modo "Guardar"
         const submitButton = document.getElementById('botonModal');
         if (submitButton) {
             submitButton.textContent = "Guardar";
             assignBotonAction(submitButton, AddRow);
         }
 
-        // 4) Si es el ÚLTIMO indicador, el peso queda forzado
         if (n === MAX_INDICADORES - 1) {
             const peso = document.getElementById("peso");
             peso.value = PESO_TOTAL - getFooterPeso();
@@ -201,17 +102,17 @@ function abrirModal() {
     }
 }
 
-/* ---------- Alta de indicador ---------- */
+
 function AddRow(event) {
     event.preventDefault();
 
     const ficha_usuario = document.getElementById('ficha_usuario').value.trim();
-    const indicador     = document.getElementById("Indicador").value.trim();
-    const peso          = document.getElementById("peso").value.trim();
-    const tendencia     = document.getElementById("Tendencia").value.trim();
-    const AFANTERIOR    = document.getElementById("AFANTERIOR").value.trim();
-    const AFPPTO        = document.getElementById("AFPPTO").value.trim();
-    const año_fiscal    = document.getElementById('año_fiscal').value.trim();
+    const indicador = document.getElementById("Indicador").value.trim();
+    const peso = document.getElementById("peso").value.trim();
+    const tendencia = document.getElementById("Tendencia").value.trim();
+    const AFANTERIOR = document.getElementById("AFANTERIOR").value.trim();
+    const AFPPTO = document.getElementById("AFPPTO").value.trim();
+    const año_fiscal = document.getElementById('año_fiscal').value.trim();
 
     if (!indicador || !peso || !tendencia || !AFPPTO) {
         showAlert('Todos los campos deben estar completos', 'error');
@@ -219,9 +120,9 @@ function AddRow(event) {
         return;
     }
 
-    const n            = contarIndicadores();
-    const pesoInt      = parseInt(peso, 10);
-    const footerPeso   = getFooterPeso();
+    const n = contarIndicadores();
+    const pesoInt = parseInt(peso, 10);
+    const footerPeso = getFooterPeso();
 
     // Rango individual
     if (isNaN(pesoInt) || pesoInt < PESO_MIN || pesoInt > PESO_MAX) {
@@ -231,8 +132,8 @@ function AddRow(event) {
     }
 
     // Reserva para los indicadores que aún faltan por cargar
-    const restantes      = MAX_INDICADORES - (n + 1);
-    const reservaMinima  = restantes * PESO_MIN;
+    const restantes = MAX_INDICADORES - (n + 1);
+    const reservaMinima = restantes * PESO_MIN;
 
     if (footerPeso + pesoInt + reservaMinima > PESO_TOTAL) {
         const maximoPermitido = PESO_TOTAL - footerPeso - reservaMinima;
@@ -287,53 +188,52 @@ function editRow(button) {
     try {
         const row = button.closest('tr');
 
-        const indicador     = row.cells[1].textContent.trim();
-        const tendencia     = row.cells[2].textContent.trim();
-        const peso          = row.cells[3].textContent.trim().replace('%', '');
-        const realAnterior  = row.cells[4].textContent.trim() === 'N/A' ? '' : row.cells[4].textContent.trim();
-        const pptoAFactual  = row.cells[5].textContent.trim() === 'N/A' ? '' : row.cells[5].textContent.trim();
-        const realAactual   = row.cells[6].textContent.trim() === 'N/A' ? '' : row.cells[6].textContent.trim();
+        const indicador = row.cells[1].textContent.trim();
+        const tendencia = row.cells[2].textContent.trim();
+        const peso = row.cells[3].textContent.trim().replace('%', '');
+        const realAnterior = row.cells[4].textContent.trim() === 'N/A' ? '' : row.cells[4].textContent.trim();
+        const pptoAFactual = row.cells[5].textContent.trim() === 'N/A' ? '' : row.cells[5].textContent.trim();
+        const realAactual  = row.cells[6].textContent.trim() === 'N/A' ? '' : row.cells[6].textContent.trim();
 
         const id = row.cells[12].textContent.replace(/\D/g, "");
 
         const estatusVariable = document.getElementById('estatusProceso').value.trim();
 
-        // AFACTIVO = periodo de cierre: solo se edita REAL AF actual
-        const esCierre  = estatusVariable === 'AFACTIVO';
-        const edicion   = esCierre;    // bloquea los campos de apertura
-        const afedicion = !esCierre;   // bloquea REAL AF actual
+        const esCierre = estatusVariable === 'AFACTIVO';
+        const edicion = esCierre;    
+        const afedicion = !esCierre;   
 
         const modal = document.getElementById("modal-container");
         modal.style.display = "block";
         modal.classList.add("one");
 
         const nombreIndicadorField = document.getElementById("Indicador");
-        nombreIndicadorField.value    = indicador;
+        nombreIndicadorField.value = indicador;
         nombreIndicadorField.readOnly = edicion;
 
         const tendenciaField = document.getElementById("Tendencia");
-        tendenciaField.value    = tendencia;
+        tendenciaField.value = tendencia;
         tendenciaField.disabled = edicion;
 
         const pesoField = document.getElementById("peso");
-        pesoField.value    = peso;
-        pesoField.readOnly = true;   // el peso nunca se edita
+        pesoField.value = peso;
+        pesoField.readOnly = true;   
         pesoField.disabled = false;
 
         const AfAnterior = document.getElementById('AFANTERIOR');
-        AfAnterior.value    = realAnterior;
+        AfAnterior.value = realAnterior;
         AfAnterior.readOnly = edicion;
         AfAnterior.disabled = false;
 
         const Afppto = document.getElementById('AFPPTO');
-        Afppto.value    = pptoAFactual;
+        Afppto.value = pptoAFactual;
         Afppto.readOnly = edicion;
         Afppto.disabled = false;
 
         const AfActual = document.getElementById('AFACTUAL');
-        AfActual.value       = realAactual;
-        AfActual.readOnly    = afedicion;
-        AfActual.disabled    = false;
+        AfActual.value = realAactual;
+        AfActual.readOnly = afedicion;
+        AfActual.disabled = false;
         AfActual.placeholder = "ejemplo: 50";
 
         const submitButton = document.getElementById('botonModal');
@@ -347,19 +247,18 @@ function editRow(button) {
     }
 }
 
-/* ---------- Actualización de indicador ---------- */
 function updateRow(event, id) {
     event.preventDefault();
 
-    const ficha_usuario   = document.getElementById('ficha_usuario').value.trim();
-    const indicador       = document.getElementById("Indicador").value.trim();
+    const ficha_usuario  = document.getElementById('ficha_usuario').value.trim();
+    const indicador = document.getElementById("Indicador").value.trim();
     const estatusVariable = document.getElementById('estatusProceso').value.trim();
-    const peso            = document.getElementById("peso").value.trim();
-    const tendencia       = document.getElementById("Tendencia").value.trim();
-    const AFANTERIOR      = document.getElementById("AFANTERIOR").value.trim();
-    const AFPPTO          = document.getElementById("AFPPTO").value.trim();
-    const AFACTUAL        = document.getElementById("AFACTUAL")?.value.trim() || '';
-    const año_fiscal      = document.getElementById('año_fiscal').value.trim();
+    const peso = document.getElementById("peso").value.trim();
+    const tendencia  = document.getElementById("Tendencia").value.trim();
+    const AFANTERIOR = document.getElementById("AFANTERIOR").value.trim();
+    const AFPPTO = document.getElementById("AFPPTO").value.trim();
+    const AFACTUAL  = document.getElementById("AFACTUAL")?.value.trim() || '';
+    const año_fiscal = document.getElementById('año_fiscal').value.trim();
 
     if (estatusVariable === "AFACTIVO" && !AFACTUAL) {
         showAlert('Debes completar el REAL del AF actual', 'error');
@@ -447,7 +346,7 @@ function deleteSelectedRows() {
 
     const csrfToken = getCsrfToken();
 
-    // Un solo reload al final, no uno por cada fila
+
     const peticiones = Array.from(selectedCheckboxes).map(checkbox => {
         const row = checkbox.closest('tr');
         const id  = row.cells[12].textContent.replace(/\D/g, "");
@@ -481,6 +380,99 @@ function deleteSelectedRows() {
         });
 }
 
+
+
+
+
+
+function showAlert(message, category = 'success') {
+
+    const alertContainer = document.createElement('div');
+    alertContainer.className = 'fixed top-5 z-[100000] animate-fade-in-up left-[40%]';
+
+    const alertWrapper = document.createElement('div');
+    alertWrapper.className = 'flex flex-col gap-2 w-[300px] text-[10px] sm:text-xs';
+
+    const alertBox = document.createElement('div');
+    alertBox.className = 'error-alert cursor-default flex items-center w-full h-12 sm:h-14 rounded-lg bg-azul-dark px-[10px]';
+
+    const contentWrapper = document.createElement('div');
+    contentWrapper.className = 'flex gap-2 items-center justify-around w-full';
+
+    const iconContainer = document.createElement('div');
+    iconContainer.className = category === 'error'
+        ? 'text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg'
+        : 'text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg';
+
+    const iconSpan = document.createElement('span');
+    if (category === 'error') {
+        iconSpan.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>`;
+    } else {
+        iconSpan.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg>`;
+    }
+
+    const messageContainer = document.createElement('div');
+    messageContainer.className = 'flex flex-col';
+
+    const titleDiv = document.createElement('div');
+    const titleText = document.createElement('h4');
+    titleText.className = 'text-white';
+    titleText.textContent = category === 'error' ? 'Error:' : 'Proceso Exitoso:';
+
+    const messageDiv = document.createElement('div');
+    const messageText = document.createElement('p');
+    messageText.className = 'text-white';
+    messageText.textContent = message;
+
+    const closeButton = document.createElement('button');
+    closeButton.className = 'flex close-btn';
+
+    const closeIconContainer = document.createElement('div');
+    closeIconContainer.className = category === 'error'
+        ? 'text-[#d65563] bg-white/5 backdrop-blur-xl p-1 rounded-lg'
+        : 'text-[#4caf50] bg-white/5 backdrop-blur-xl p-1 rounded-lg';
+
+    const closeIconSpan = document.createElement('span');
+    closeIconSpan.className = 'material-symbols-rounded';
+    closeIconSpan.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+
+    iconContainer.appendChild(iconSpan);
+    titleDiv.appendChild(titleText);
+    messageDiv.appendChild(messageText);
+    messageContainer.appendChild(titleDiv);
+    messageContainer.appendChild(messageDiv);
+    closeIconContainer.appendChild(closeIconSpan);
+    closeButton.appendChild(closeIconContainer);
+
+    contentWrapper.appendChild(iconContainer);
+    contentWrapper.appendChild(messageContainer);
+    contentWrapper.appendChild(closeButton);
+
+    alertBox.appendChild(contentWrapper);
+    alertWrapper.appendChild(alertBox);
+    alertContainer.appendChild(alertWrapper);
+
+    document.body.appendChild(alertContainer);
+
+    setTimeout(() => {
+        alertContainer.style.opacity = '1';
+    }, 10);
+
+    const quitar = () => {
+        alertContainer.style.opacity = '0';
+        alertContainer.classList.add("animate-fade-out-right");
+        setTimeout(() => {
+            if (document.body.contains(alertContainer)) {
+                document.body.removeChild(alertContainer);
+            }
+        }, 300);
+    };
+
+    closeButton.addEventListener('click', quitar);
+    setTimeout(quitar, 5000);
+}
+
+
 /* ---------- Inicialización ---------- */
 document.addEventListener("DOMContentLoaded", () => {
     const openModal = document.getElementById("openModal");
@@ -498,3 +490,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
+
+
+
+

@@ -2355,20 +2355,7 @@ def insertar_indicador():
         cumplimiento = data.get('cumplimiento')
         desempeno = data.get('desempeno')   
         Indicadores_full = data.get('numero_enviado')
-        if Indicadores_full:
-            user = current_user
-            ficha = current_user.ficha
-            rest = consultar_sap(ficha)
-            
-            ficha_superv = rest[0]['fichaSuperv']
-            ficha_superv_corta =0
-            if len(ficha_superv) >= 5 and ficha_superv[4] != '0':
-                ficha_superv_corta = ficha_superv[4:]
-            else:
-                ficha_superv_corta = ficha_superv[-4:]
-            supervisor= User.get_by_ficha(ficha_superv_corta)
-            indicadores_cargados(user, supervisor)
-            print(f"el numero de indicadores esta full? {data.get('numero_enviado')}")   
+        
         
         Indicadores.create_indicador(
             nombre_indicador=nombre_indicador,
@@ -2383,6 +2370,38 @@ def insertar_indicador():
         print('todo bien mi rey')
         actualizar_resultado_parcial(ficha_usuario, año_fiscal, columna='indicadores')
         flash("Indicador registrado exitosamente, no olvides cargar tu hoja de vida", "success")
+
+
+
+        if Indicadores_full:
+            user = current_user
+            ficha = current_user.ficha
+            rest = consultar_sap(ficha)
+            
+            ficha_superv = rest[0]['fichaSuperv']
+            ficha_superv_corta =0
+            if len(ficha_superv) >= 5 and ficha_superv[4] != '0':
+                ficha_superv_corta = ficha_superv[4:]
+            else:
+                ficha_superv_corta = ficha_superv[-4:]
+            supervisor= User.get_by_ficha(ficha_superv_corta)
+
+            if supervisor and supervisor.email:
+                url = url_for('.gestion_equipo_detalles',
+                            ficha_get=user.ficha,
+                            year_fiscal=año_fiscal,
+                            _external=True)
+                indicadores_cargados(user, supervisor, url, año_fiscal)
+            else:
+                print(f"Supervisor {ficha_superv_corta} no encontrado o sin email — correo omitido")
+
+
+            indicadores_cargados(user, supervisor, url, año_fiscal)
+            print(f"el numero de indicadores esta full? {data.get('numero_enviado')}")   
+
+
+
+
         return jsonify({"success": True, "message": "Indicador registrado exitosamente"}), 200
 
     except Exception as e:

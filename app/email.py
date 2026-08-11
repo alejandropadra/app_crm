@@ -114,12 +114,12 @@ def aprobacion_indicadores(user, nombre_dueño_indicador, apellido_dueño_indica
     thread = Thread(target=send_async_mail, args=[app, message])
     thread.start()
 
-def indicadores_cargados(user, supervisor):
+def indicadores_cargados(user, supervisor, url, año_fiscal):
     app = current_app._get_current_object()
     message = Message(f'Indicadores cargados por {user.nombre.title()} {user.apellido.title()}- Requiere su aprobación',
                     sender=app.config['MAIL_USERNAME'],
                     recipients=[supervisor.email])
-    message.html = render_template('email/indicadores_cargados.html', user=user)
+    message.html = render_template('email/indicadores_cargados.html', user=user, url=url, año_fiscal=año_fiscal)
     thread = Thread(target=send_async_mail, args=[app, message])
     thread.start()
 
