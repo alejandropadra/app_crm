@@ -1471,7 +1471,7 @@ def gestion_equipo(year_fiscal=None):
     )
 
 
-@page.route("/app_crm/gdd/gestion_equipo_detalles/<int:ficha_get>", methods=['GET'])
+@page.route("/app_crm/gdd/gestion_equipo_detalles/<int:ficha_get>", methods=['GET', 'POST'])
 @page.route("/app_crm/gdd/gestion_equipo_detalles/<int:ficha_get>/<year_fiscal>", methods=['GET'])
 @login_required
 def gestion_equipo_detalles(ficha_get, year_fiscal=None):
