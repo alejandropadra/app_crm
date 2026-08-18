@@ -782,6 +782,7 @@ def detalles_usuarios(ficha_get, af_seleccionado=None):
         # Alias para que el HTML copiado de detalles_gestion_equipo funcione sin cambios
         usuario_dueño_evaluacion=usuario_dueño_indicador,
         años_disponibles=años_disponibles,
+        año_fiscal= año_fiscal,
         año_fiscal_seleccionado=año_fiscal,
         viendo_af_historico=viendo_af_historico,
     )
@@ -3034,7 +3035,7 @@ def CorreoMasivo():
                     elif tipo == "inicio":
                         asyncio.run(inicio_gdd(lista_users, texto, año_fiscal))
                     elif tipo == 'avance':
-                        asyncio.run(inicio_avance(lista_users, texto))
+                        asyncio.run(inicio_avance(lista_users, texto, año_fiscal))
                     elif tipo == 'InicioEtapaDos':
                         usuarios = User.get_by_usuarios()
                         usuarios_notificar = []

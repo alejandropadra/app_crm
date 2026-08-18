@@ -204,12 +204,12 @@ async def inicio_CRE(users, texto):
     else:
         return await enviar_correo_masivo_async([users], 'resultados de los indicadores funcionales y el inicio del proceso de Evaluación de Competencia', "email/evaluacion_etapa2.html", tipo_correo='Inicio_estapa_dos')
 
-async def inicio_avance(users, texto):
+async def inicio_avance(users, texto, año_fiscal):
     """Notificación masiva de cierre de periodo"""
     if isinstance(users, list):
-        return await enviar_correo_masivo_async(users, 'Carga de Avances de Primer Semestre - GDD', "email/avances_primer_semestre.html", tipo_correo='avance_semestre', texto=texto )
+        return await enviar_correo_masivo_async(users, 'Carga de Avances de Primer Semestre - GDD', "email/avances_primer_semestre.html", tipo_correo='avance_semestre', texto=texto, año_fiscal=año_fiscal)
     else:
-        return await enviar_correo_masivo_async([users], 'Carga de Avances de Primer Semestre - GDD', "email/avances_primer_semestre.html", tipo_correo='avance_semestre', texto=texto )
+        return await enviar_correo_masivo_async([users], 'Carga de Avances de Primer Semestre - GDD', "email/avances_primer_semestre.html", tipo_correo='avance_semestre', texto=texto, año_fiscal=año_fiscal)
     
 # ↑↑EN ESTAS FUNCIONES SON LOS CORREOS MASIVOS↑↑
 

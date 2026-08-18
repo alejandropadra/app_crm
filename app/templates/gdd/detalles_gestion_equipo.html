@@ -27,7 +27,8 @@
 
 
 
-
+{% set numero_año = año_fiscal.replace('AF', '') | int %}
+{%set numero_año_anterior = numero_año -1%} 
 
 
 <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 mb-5">
@@ -82,13 +83,13 @@
                             Peso
                         </th>
                         <th scope="col" class="px-6 py-3  min-w-[120px] max-w-[280px] text-center" id="realafIndicador">
-                            Real AF25
+                            Real AF{{numero_año_anterior}}
                         </th>
                         <th scope="col" class="px-6 py-3 min-w-[160px] max-w-[280px] text-center" id="objetivoAFIndicador">
-                            PPTO U OBJETIVO AF26
+                            PPTO U OBJETIVO AF{{numero_año}}
                         </th>
                         <th scope="col" class="px-6 py-3 min-w-[160px] max-w-[280px] text-center" id="REAlAFAyuda">
-                            REAL AF26
+                            REAL AF{{numero_año}}
                         </th>
                         <th scope="col" class="px-6 py-3 min-w-[100px] max-w-[280px] text-center" id="cumplimientoIndicador">
                             Cumplimiento
