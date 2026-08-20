@@ -2278,6 +2278,76 @@ def participantes_gdd():
     
     return participantes
 
+def calendario_consulta():
+    args = {
+        'sap-client': '510',
+        'F_desde': '01/02/2026',
+        'f_hasta': '01/04/2026',
+        'id': 'Z4',
+    }
+
+    response = requests.get(
+        URL_CALENDARIO,
+        auth=HTTPBasicAuth(U_FUENTE, C_FUENTE),
+        params=args,
+        verify=True,
+        timeout=30,
+    )
+    response.raise_for_status()
+    nomina = response.json()
+
+    return [
+        p for p in nomina
+        
+    ]
+
+def maestro_consulta():
+    args = {
+        'sap-client': '510',
+        'ficha':'839'
+    }
+
+    response = requests.get(
+        URL_MAESTRO_VACACIONES,
+        auth=HTTPBasicAuth(U_FUENTE, C_FUENTE),
+        params=args,
+        verify=True,
+        timeout=30,
+    )
+    response.raise_for_status()
+    nomina = response.json()
+
+    return [
+        p for p in nomina
+    ]
+
+
+
+
+@page.route('/app_crm/consultar_usuarioV/', methods=['GET'])
+def consultar_usuarioV():
+    try:
+        usuario = maestro_consulta()
+        return jsonify({
+            "success": True,
+            "total": len(usuario),
+            "usuario": usuario,
+        }), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@page.route('/app_crm/consultar_calendario/', methods=['GET'])
+def consultar_calendario():
+    try:
+        calendario = calendario_consulta()
+        return jsonify({
+            "success": True,
+            "total": len(calendario),
+            "calendario": calendario,
+        }), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 @page.route('/app_crm/buscar_sap', methods=['POST'])
 def rutaSap():
     try:

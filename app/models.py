@@ -7,6 +7,18 @@ import json
 from .consts import ABREVIACIONES_FILIAL
 from . import db
 
+
+def años_fiscales_equivalentes(año_fiscal):
+
+    if not año_fiscal:
+        return []
+    equivalentes = [año_fiscal]
+    if año_fiscal.startswith("AF"):
+        n = int(año_fiscal[2:])
+        equivalentes.append(f"20{n-1}20{n:02d}")
+    else:
+        equivalentes.append(f"AF{año_fiscal[6:8]}")
+    return equivalentes
 #========Esta es la tabla para manejar los USUARIOS de la aplicacion =====================================
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -319,9 +331,12 @@ class Indicadores(db.Model):
         return cls.query.all()
     
     @classmethod
-    def obtener_indicador_usuario(cls, ficha_usuario):
-        """Obtiene un indicador específico por ficha de usuario"""
-        return Indicadores.query.filter_by(ficha_usuario=ficha_usuario).all()
+    def obtener_indicador_usuario(cls, ficha_usuario, año_fiscal=None):
+        """Obtiene los indicadores de una ficha, opcionalmente filtrados por AF"""
+        query = cls.query.filter_by(ficha_usuario=int(ficha_usuario))
+        if año_fiscal:
+            query = query.filter(cls.año_fiscal.in_(años_fiscales_equivalentes(año_fiscal)))
+        return query.all()
 
     @classmethod
     def obtener_nombre_indicador(cls,indicador_id):

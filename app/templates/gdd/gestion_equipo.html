@@ -186,7 +186,7 @@
             {% if participante['plstx'] |length >= 24 or participante['orgtx'] |length>= 24   %}
                 {%set resultado_autocompletar = consultar_cargo(participante['pernr'].lstrip('0'))%}
             {%endif%}
-                {% set indicadores = obtener_indicador_usuario(participante['pernr'].lstrip('0'))%}
+                {% set indicadores = obtener_indicador_usuario(participante['pernr'].lstrip('0'), año_fiscal_seleccionado) %}
                 <a href="{{ url_for('.gestion_equipo_detalles', ficha_get=(participante['pernr'].lstrip('0')), year_fiscal=año_fiscal_seleccionado) }}" class="opado flex flex-col col-span-3 2xl:col-span-2 p-2 bg-white shadow-custom rounded-2xl hover:bg-slate-200 relative cursor-pointer">
 
                     <div class=" p-3 gap-3 flex">
@@ -258,15 +258,20 @@
                                     </div>
                                 
                                 {% elif indicadores|length == 3 and ns.contador == 3 %}
-                                    <div class=" p-2 bg-green-200 text-green-600 rounded-xl  text-[10px] border border-green-600">
+                                    <div class="p-2 bg-green-200 text-green-600 rounded-xl text-[10px] border border-green-600">
                                         Indicadores aprobados
                                     </div>
 
-                                {%elif indicadores|length ==3 and ns.contador <3  %}
-                                    <div class=" p-2 bg-yellow-200 text-yellow-600 rounded-xl  text-[10px] border border-yellow-600">
+                                {% elif indicadores|length == 3 and ns.contador < 3 %}
+                                    <div class="p-2 bg-yellow-200 text-yellow-600 rounded-xl text-[10px] border border-yellow-600">
                                         Indicadores Cargados: En espera de Aprobación
                                     </div>
-                                {%endif%}
+
+                                {% else %}
+                                    <div class="p-2 bg-gray-200 text-gray-600 rounded-xl text-[10px] border border-gray-500">
+                                        Revisar: {{ indicadores|length }} indicadores en {{ año_fiscal_seleccionado }}
+                                    </div>
+                                {% endif %}
 
 
 
